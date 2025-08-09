@@ -15,7 +15,8 @@
               alt="Laravue"
               :src="logo"
             > -->
-            <p style="color:white;text-align: center;">Login to your EMR</p>
+            <p style="color:white;text-align: center;">Welcome to EMR</p>
+            <p style="color:white;text-align: center;">JOSEPH PETER T. LIM, MD</p>    
             <!-- <h3 class="title">
               {{ $t('login.title') }}
               <lang-select class="set-language" />
@@ -68,7 +69,7 @@
 import { validEmail } from '@/utils/validate';
 import { csrf } from '@/api/auth';
 import logo from '@/assets/login/logo.png';
-import loginBackground from '@/assets/login/login_background.png';
+import loginBackground from '@/assets/login/login_background.jpg';
 
 export default {
   name: 'Login',
@@ -106,7 +107,7 @@ export default {
       otherQuery: {},
       logo: '\public' + '\\' + logo,
       loginBackground: '\public\\' + loginBackground,
-      //loginBackground: loginBackground,
+      // loginBackground: loginBackground,
     };
   },
   watch: {
@@ -203,7 +204,7 @@ $bg:#2d3a4b;
 $dark_gray:#889aa4;
 $light_gray:rgb(7, 6, 6);
 // $bgColor: #054b5d;
-$bgColor:#fdfdfd;
+$bgColor:#e105056e;
 $brown: #B27C66;
 $textColor:#eee;
 
@@ -219,7 +220,7 @@ $textColor:#eee;
 
   .login-container {
     background: $bg;
-    width: 1120px;
+    width: auto;
     min-height: 590px;
     display: grid;
     grid-template-columns: auto 480px;
@@ -234,7 +235,6 @@ $textColor:#eee;
     }
 
     .login-image {
-      border: solid 1px black;
       display: flex;
       flex-direction: row;
       justify-content: flex-end;

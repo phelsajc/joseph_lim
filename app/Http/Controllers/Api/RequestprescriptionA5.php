@@ -21,45 +21,77 @@ class RequestprescriptionA5 extends Fpdf
     
     public function Header()
     {
-        $this->Image(public_path() . '/img/kp.png', 10, 1, 25, 25, 'PNG');
-        $this->Image(public_path() . '/img/cp.jpg', 27, 6, 12, 12, 'JPG');
+        $this->Image(public_path() . '/img/lim_fb.png', 130, 5, 16, 16, 'PNG');
+        $this->Image(public_path() . '/img/lim_rhuema.jpg', 114, 6, 15, 15, 'JPG');
+        $this->Image(public_path() . '/img/cp.jpg', 98, 6, 15, 15, 'JPG');
         $this->Ln(1);
-        $this->SetFont('Arial', 'B', 9);
-        $this->Cell(110, 3, strtoupper($this->data['profile']->name), 0, 0, 'R');
+        $this->SetFont('Arial', 'B', 12);
+        $this->Cell(82, 3, strtoupper($this->data['profile']->name), 0, 0, 'R');
+        $this->SetFont('Arial', '', 7);
+        $this->Ln(1);
+        $this->Cell(41, 8, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
+        $this->Ln(1);
+        $this->Cell(50.5, 11, 'Diplomate, Philippine Rheumatology Association', 0, 0, 'R');
+        $this->Ln(1);
+        $this->Cell(33.5, 14, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');     
+        $this->SetLineWidth(0.5);
+        $this->Line(5, 23, 145, 23);
         $this->SetFont('Arial', 'B', 7);
         $this->Ln(0.05);
         $this->Ln(5);
         $this->SetFont('Arial', 'B', 9);
         $this->Cell(1, -8, '', '', 0, '');
-        $this->Cell(116,2, strtoupper($this->data['profile']->specialization1), 0, 0, 'R');
+        $this->Cell(116, 2, strtoupper($this->data['profile']->specialization1), 0, 0, 'R');
         $this->Ln(9);
         $this->SetFont('Arial', '', 7);
         $this->Cell(115, -17, strtoupper($this->data['profile']->specialization2), 0, 0, 'C');
         $this->Ln(10);
         $this->SetFont('Arial', '', 7);
         $this->SetXY(7, 14);
-        $this->SetFont('Arial', 'B', 7);
-        $this->SetXY(15, 20);
-        $this->MultiCell(62, 3, "Hospital Affiliations:", 0, 'L');
-        $this->SetFont('Arial', '', 7);
-        $this->SetXY(15, 23); 
-        $this->MultiCell(62, 3, "Dr. Pablo O. Torre Memorial\nHospital\nMetro Bacolod Medical Center\nHospital\nBacolod Queen of Mercy\nHospital", 0, 'L');
-        $this->SetFont('Arial', 'B', 7);
-        $this->SetFont('Arial', 'B', 7);
-        $this->SetXY(55, 20);
-        $this->MultiCell(62, 3, "Clinic Schedule:", 0, 'L');
-        $this->SetFont('Arial', '', 7);
-        $this->SetXY(55, 23); 
-        $this->MultiCell(62, 3, "Metro Bacolod Hospital &\nMedical Center\nRoom 415\nMonday: 9AM - 12PM\nWednesday: 9AM-4PM\nFor appointment call or text\nsecretary: 09684187873", 0, 'L');
-        $this->SetXY(95, 23); 
-        $this->MultiCell(62, 3, "Fairr Diagnostic Center &\nAgustin Medical Clinic\nSilay City:\nEvery Saturday: 9AM-12PM\nFor appointments pls\nContact :09282598495", 0, 'L');
-        $this->SetFont('Arial', 'B', 7);
+        $this->SetFont('Arial', 'B', 4.5);
+        $this->SetXY(5, 24);
+        $this->MultiCell(62, 3, "Room 504. Riverside Medical", 0, 'L');
+        $this->SetXY(5, 26.5);
+        $this->MultiCell(62, 3, "Arts Building, BS Aquino Drive, Bacolod ", 0, 'L');
+        $this->SetXY(5, 29);
+        $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 1:00 PM - 5:00 PM ", 0, 'L');
+        $this->SetXY(5.2, 31.5);
+        $this->MultiCell(62, 3, "For appointment: 0962-484-5664 ", 0, 'L');
+
+        $this->SetXY(40, 24);
+        $this->MultiCell(62, 3, "Room 415. Metro Bacolod Hospital and Medical", 0, 'L');
+        $this->SetXY(40, 26.5);
+        $this->MultiCell(62, 3, "Center, Brgy. Estefania, Bacolod", 0, 'L');
+        $this->SetXY(40, 29);
+        $this->MultiCell(61.5, 3, "Schedule: Tue-Thu: 9:00 AM - 12:00 PM ", 0, 'L');
+        $this->SetXY(40.2, 31.5);
+        $this->MultiCell(62, 3, "For appointment: 0968-418-7873", 0, 'L');
+
+        
+        $this->SetXY(78, 24);
+        $this->MultiCell(62, 3, "VitalRx Pharmacy and Arthritis Clinic, JTL", 0, 'L');
+        $this->SetXY(78, 26.5);
+        $this->MultiCell(62, 3, "Building, BS Aquino Drive, Bacolod", 0, 'L');
+        $this->SetXY(78, 29);
+        $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 9:00 AM - 12:00 PM ", 0, 'L');
+        $this->SetXY(78.2, 31.5);
+        $this->MultiCell(62, 3, "For appointment.: 0966-073-6942", 0, 'L');
+        
+        $this->SetXY(113, 24);
+        $this->MultiCell(62, 3, "Agustin Medical Clinic ", 0, 'L');
+        $this->SetXY(113, 26.5);
+        $this->MultiCell(62, 3, "Sen Jose Locsin Street, Brgy. V, Silay ", 0, 'L');
+        $this->SetXY(113, 29);
+        $this->MultiCell(61.5, 3, "Schedule: Thursday 1:30 PM - 4:30 PM", 0, 'L');
+        $this->SetXY(113.2, 31.5);
+        $this->MultiCell(62, 3, "For appointment: 0928-259-8495", 0, 'L');
+
         $this->SetLineWidth(0.5);
-        $this->Line(5, 49, 145, 49);
-        $this->Ln(10);
-        $this->SetFont('Arial', '', 8);
+        $this->Line(5, 35, 145, 35);
+        $this->Ln(3);
+        $this->SetFont('Arial', '', 6);
         $this->AliasNbPages();
-        $this->cell(15, 3, '', '0', 0, 'R');
+        $this->cell(5, 3, '', '0', 0, 'R');
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
         $this->cell(75, 3, strtoupper($this->data['patient_detail']->patientname), 'B', 0, 'L');
         $this->SetFont('');
@@ -71,17 +103,38 @@ class RequestprescriptionA5 extends Fpdf
         $this->cell(8, 3, 'Age:', 0, 0);
         $this->cell(8, 3, date_diff(date_create($this->data['patient_detail']->birthdate), date_create('now'))->y, 'B', 0);
         $this->setFont('');
+
         $this->Ln(5);
-        $this->cell(2, 3, '', '0', 0, 'R');
+        $this->cell(-5, 3, '', '0', 0, 'R');
         $this->cell(5, 4, 'Address :', 0, 0);
         $this->cell(8, 3, '', '', 0, 0);
-        $this->SetFont('Arial', '', 6);
-        $this->cell(85, 4, substr($this->data['patient_detail']->address, 0, 50), 'B', 0, 0);
-        $this->cell(2, 3, '', 0, 0);
+        $x = $this->GetX();
+        $y = $this->GetY();
+        $w = 85;
+        $lineHeight = 4;
+
+        $address = $this->data['patient_detail']->address;
+        $this->MultiCell($w, $lineHeight, $address, 0, 'L');
+
+        $lines = ceil($this->GetStringWidth($address) / $w);
+        for ($i = 0; $i < $lines; $i++) {
+            $this->Line($x, $y + ($i + 1) * $lineHeight, $x + $w, $y + ($i + 1) * $lineHeight);
+        }
+
+        $this->SetXY($x + $w + 5, $y);
         $this->SetFont('Arial', '', 8);
-        $this->cell(8, 4, 'Date:', 0, 0);
-        $this->cell(15, 4, date("m/d/Y"), 'B', 0);       
-        $this->Image(public_path() . '/img/rx.png', 12, 63, 9, 9, 'PNG');
+        $this->Cell(8, 4, 'Date:', 0, 0);
+        $this->Cell(20, 4, date("m/d/Y"), 'B', 1);
+        $this->Image(public_path() . '/img/rx.png', 12, 50, 9, 9, 'PNG');
+
+
+        $this->Image(public_path() . '/img/lim_wm.png', 32, 70, 80, 0, 'PNG');
+        if ($this->PageNo() == 1) {
+            $this->Ln(15);
+        }else{
+            $this->Ln(16);
+           // $this->mealHeader();
+        }
     }
 
     public function meal1()

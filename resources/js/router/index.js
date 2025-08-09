@@ -146,7 +146,7 @@ export const constantRoutes = [
 export const asyncRoutes = [
   permissionRoutes,
   adminRoutes,
-  {
+  /* {
     path: '/forms',
     component: Layout,
     redirect: 'blankPrescription',
@@ -165,7 +165,7 @@ export const asyncRoutes = [
         meta: { title: 'Blank Prescription', icon: 'form',},
       },
     ],
-  },
+  }, */
   {
     path: '/user-profile',
     component: Layout,

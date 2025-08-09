@@ -12,7 +12,7 @@
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="update_diagnosis">Update Diagnosis</el-dropdown-item>
           <el-dropdown-item command="print_rx">Print Rx</el-dropdown-item>
-          <el-dropdown-item command="email_rx">Email Rx</el-dropdown-item>
+          <!-- <el-dropdown-item command="email_rx">Email Rx</el-dropdown-item> -->
           <el-dropdown-item command="print_labs">Print Diagnostics</el-dropdown-item>
           <el-dropdown-item command="print_referral">Print Referral</el-dropdown-item>
           <el-dropdown-item command="print_medcert">Print Med Cert</el-dropdown-item>
@@ -1753,11 +1753,7 @@ export default {
           console.error("Error adding suggestions:", err);
         });
     },
-    /* handleChange(file, fileList) {
-      this.uniqueArray = fileList;
-    }, */
     handleChange(file, fileList) {
-      // this.uniqueArray = fileList;
       this.form_att.files = fileList.map((fileItem) => fileItem.raw);
     },
     async submitUpload() {
