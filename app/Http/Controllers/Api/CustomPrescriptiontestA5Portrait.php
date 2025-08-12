@@ -27,8 +27,8 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Image(public_path() . '/img/lim_rhuema.jpg', 114, 6, 15, 15, 'JPG');
         $this->Image(public_path() . '/img/cp.jpg', 98, 6, 15, 15, 'JPG');
         $this->Ln(1);
-        $this->SetFont('Arial', 'B', 12);
-        $this->Cell(82, 3, strtoupper($this->data['profile']->name), 0, 0, 'R');
+        $this->SetFont('Arial', 'B', 10);
+        $this->Cell(68, 3, strtoupper($this->data['profile']->name), 0, 0, 'R');
         $this->SetFont('Arial', '', 7);
         $this->Ln(1);
         $this->Cell(41, 8, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
@@ -59,6 +59,9 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 1:00 PM - 5:00 PM ", 0, 'L');
         $this->SetXY(5.2, 31.5);
         $this->MultiCell(62, 3, "For appointment: 0962-484-5664 ", 0, 'L');
+        $this->SetXY(5.2, 34);
+        $this->MultiCell(150, 3, "Hospital Affiliations: Dr. Pablo O. Torre Memorial Hospital, Metro Bacolod Hospital and Medical Center, Bacolod Queen of Mercy Hospital, Adventist Medical Center-Bacolod", 0, 'L');
+
 
         $this->SetXY(40, 24);
         $this->MultiCell(62, 3, "Room 415. Metro Bacolod Hospital and Medical", 0, 'L');
@@ -89,14 +92,17 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->MultiCell(62, 3, "For appointment: 0928-259-8495", 0, 'L');
 
         $this->SetLineWidth(0.5);
-        $this->Line(5, 35, 145, 35);
-        $this->Ln(3);
-        $this->SetFont('Arial', '', 6);
+        $this->Line(5, 37, 145, 37);
+        $this->Ln(5);
+        $this->SetFont('Arial', '', 7);
         $this->AliasNbPages();
-        $this->cell(5, 3, '', '0', 0, 'R');
+        $this->cell(10, 3, '', '0', 0, 'R');
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
         $this->cell(75, 3, strtoupper($this->data['patient_detail']->patientname), 'B', 0, 'L');
         $this->SetFont('');
+
+
+        
         $this->cell(-13, 3, '', 0, 0);
         $this->cell(22, 3, 'Sex :', 0, 0, 'R');
         $this->cell(12, 3, strtoupper($this->data['patient_detail']->sex == 2 ? 'Female' : 'Male'), 'B', 0, 'R');
@@ -253,7 +259,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
             $this->Image($this->data['profile']->signature, 50, 180, 130, 20, 'png');
         }
         $this->Cell(35, 10, '', '', 0, '');
-        $this->cell(85, -3, strtoupper($this->data['profile']->name).' '.$PageNo, '', 0, 'R');
+        $this->cell(85, -3, strtoupper($this->data['profile']->name), '', 0, 'R');
         $this->Ln(1);
         $this->SetFont('Arial', '', 7);
         $this->cell(100, 3, "License No:", '', 0, 'R');

@@ -894,8 +894,8 @@ class PatientController extends BaseController
             $arr = array();
             $fileName = $value->filename;
             //$fileUrl = url('storage/app/public/uploads/' . $fileName);
-            //$fileUrl = url('public/storage/uploads/' . $fileName);
-            $fileUrl = url('/storage/uploads/' . $fileName);
+            $fileUrl = url('public/storage/uploads/' . $fileName);
+            //$fileUrl = url('/storage/uploads/' . $fileName);
             $arr['newfile'] = $fileUrl;//$value->isold_record==0?$value->file:null;
             $arr['oldfile'] = $fileUrl;//$value->isold_record==1?$value->file:null;
             $arr['type'] = $value->isold_record;

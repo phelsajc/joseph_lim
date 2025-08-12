@@ -137,8 +137,8 @@
             <el-input v-model="form.complaints" style="width: 150%;"/>
           </el-form-item> -->
           <el-form-item :label="'Date'" prop="apt_dt">
-            <!-- <el-date-picker v-model="form.apt_dt" type="date" :picker-options="pickerOptions" placeholder="Pick a day" style="width: 40%;"/> -->
-            <date-picker v-model="form.apt_dt" valueType="format" placeholder="Year-Month-Date"></date-picker>
+            <el-date-picker v-model="form.apt_dt" type="date" :picker-options="pickerOptions" placeholder="Pick a day" style="width: 40%;"/>
+            <!-- <date-picker v-model="form.apt_dt" valueType="format" placeholder="Year-Month-Date"></date-picker> -->
           </el-form-item>
           <el-form-item :label="'Systolic'" prop="vit_sys">
             <el-input v-model="form.vit_sys" style="width: 23%;"/>

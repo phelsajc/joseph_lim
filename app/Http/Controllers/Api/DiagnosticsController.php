@@ -70,10 +70,10 @@ class DiagnosticsController extends BaseController
         $data = Labs::where('id',$id)->first();
         return response()->json($data);
     }
-
+    
     public function getAllDiagnostics()
     {
-        $services = Labs::all();
+        $services = Labs::where(['isactive'=>1])->get();
         return response()->json($services);
     }
 }
