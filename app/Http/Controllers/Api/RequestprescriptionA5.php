@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api;
 use Codedge\Fpdf\Fpdf\Fpdf;
 use App\Model\Generics;
+use function PHPUnit\Framework\isEmpty;
 
 class RequestprescriptionA5 extends Fpdf
 {
@@ -23,30 +24,30 @@ class RequestprescriptionA5 extends Fpdf
 
     public function Header()
     {
-        $this->Image(public_path() . '/img/lim_fb.png', 130, 5, 16, 16, 'PNG');
-        $this->Image(public_path() . '/img/lim_rhuema.jpg', 114, 6, 15, 15, 'JPG');
-        $this->Image(public_path() . '/img/cp.jpg', 98, 6, 15, 15, 'JPG');
+        $this->Image(public_path() . '/img/lim_fb.png', 122.5, 6, 13, 13, 'PNG');
+        $this->Image(public_path() . '/img/lim_rhuema.jpg', 108, 6, 13, 13, 'JPG');
+        $this->Image(public_path() . '/img/cp.jpg', 94, 6, 13, 13, 'JPG');
         $this->Ln(1);
         $this->SetFont('Arial', 'B', 10);
-        $this->Cell(67, 3, strtoupper($this->data['profile']->name), 0, 0, 'R');
+        $this->Cell(42.5, 3, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
         $this->SetFont('Arial', '', 7);
         $this->Ln(1);
         $this->Cell(41, 8, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
         $this->Ln(1);
         $this->Cell(50.5, 11, 'Diplomate, Philippine Rheumatology Association', 0, 0, 'R');
         $this->Ln(1);
-        $this->Cell(33.5, 14, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');
+        $this->Cell(33.5, 14, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');     
         $this->SetLineWidth(0.5);
         $this->Line(5, 23, 145, 23);
         $this->SetFont('Arial', 'B', 7);
         $this->Ln(0.05);
         $this->Ln(5);
-        $this->SetFont('Arial', 'B', 9);
+        /* $this->SetFont('Arial', 'B', 9);
         $this->Cell(1, -8, '', '', 0, '');
         $this->Cell(116, 2, strtoupper($this->data['profile']->specialization1), 0, 0, 'R');
         $this->Ln(9);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(115, -17, strtoupper($this->data['profile']->specialization2), 0, 0, 'C');
+        $this->Cell(115, -17, strtoupper($this->data['profile']->specialization2), 0, 0, 'C'); */
         $this->Ln(10);
         $this->SetFont('Arial', '', 7);
         $this->SetXY(7, 14);
@@ -72,7 +73,7 @@ class RequestprescriptionA5 extends Fpdf
         $this->SetXY(40.2, 31.5);
         $this->MultiCell(62, 3, "For appointment: 0968-418-7873", 0, 'L');
 
-
+        
         $this->SetXY(78, 24);
         $this->MultiCell(62, 3, "VitalRx Pharmacy and Arthritis Clinic, JTL", 0, 'L');
         $this->SetXY(78, 26.5);
@@ -81,7 +82,7 @@ class RequestprescriptionA5 extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 9:00 AM - 12:00 PM ", 0, 'L');
         $this->SetXY(78.2, 31.5);
         $this->MultiCell(62, 3, "For appointment.: 0966-073-6942", 0, 'L');
-
+        
         $this->SetXY(113, 24);
         $this->MultiCell(62, 3, "Agustin Medical Clinic ", 0, 'L');
         $this->SetXY(113, 26.5);
@@ -100,6 +101,9 @@ class RequestprescriptionA5 extends Fpdf
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
         $this->cell(75, 3, strtoupper($this->data['patient_detail']->patientname), 'B', 0, 'L');
         $this->SetFont('');
+
+
+        
         $this->cell(-13, 3, '', 0, 0);
         $this->cell(22, 3, 'Sex :', 0, 0, 'R');
         $this->cell(12, 3, strtoupper($this->data['patient_detail']->sex == 2 ? 'Female' : 'Male'), 'B', 0, 'R');
@@ -130,10 +134,16 @@ class RequestprescriptionA5 extends Fpdf
         $this->SetFont('Arial', '', 8);
         $this->Cell(8, 4, 'Date:', 0, 0);
         $this->Cell(20, 4, date("m/d/Y"), 'B', 1);
-        //$this->Image(public_path() . '/img/rx.png', 12, 50, 9, 9, 'PNG');
+        $this->Image(public_path() . '/img/rx.png', 12, 50, 9, 9, 'PNG');
 
-        $this->Ln(10);
 
+        $this->Image(public_path() . '/img/lim_wm.png', 32, 70, 80, 0, 'PNG');
+        if ($this->PageNo() == 1) {
+            $this->Ln(11);
+        }else{
+            $this->Ln(12);
+           // $this->mealHeader();
+        }
     }
 
     public function meal()
@@ -141,20 +151,49 @@ class RequestprescriptionA5 extends Fpdf
         $this->SetFont('Arial', '', 8);
         $lineHeight = 4.5; // Adjust for good vertical spacing
         $usableWidth = 148 - 20; // A5 width - margins
-        foreach ($this->data['query_prescription'] as $key => $item) {
-            $fullText = ($key+1).'.'.$item['ancillary'];
-            $stringWidth = $this->GetStringWidth($fullText);
-            $lineCount = ceil($stringWidth / $usableWidth);
-            $this->cell(15, 1, '', '', 0,'R');
-            $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
-            if ($lineCount > 1) {
-             $this->Ln(1); // Add extra spacing only if wrapped
+        $rowCount = 0;
+        $cnt = 0; // manual counter for numbered items
+
+        foreach ($this->data['query_prescription'] as $item) {
+            if (($item['ancillary_id'] == 560 || $item['ancillary_id'] == 561 || $item['ancillary_id'] == 568) && isset($item['remarks'])) {
+                // ✅ with number
+                $cnt++;
+                $this->cell(15, 1, '', '', 0, 'R');
+                $fullText = $cnt . ').'. ' ' . $item['ancillary'].' '.$item['remarks'] ;
+                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+            } else if ($item['ancillary_id'] == 591 && isset($item['remarks'])) {
+                // ✅ with number
+                $cnt++;
+                $this->cell(15, 1, '', '', 0, 'R');
+                $fullText = $cnt . ').' . $item['remarks'] . ' ' . $item['ancillary'];
+                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+            } 
+            else {
+                // ✅ with number
+                $cnt++;
+                $fullText = $cnt . ').' . $item['ancillary'];
+                $this->cell(15, 1, '', '', 0, 'R');
+                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+            }
+
+            $rowCount++;
+            if ($rowCount % 25 == 0 && $rowCount != count($this->data['query_prescription'])) {
+                $this->AddPage();
             }
         }
+
     }
     public function Body()
     {       
         $this->meal();        
+        $this->Ln(1);
+        $this->Cell(40,3,"Remarks: ",'',0,'C');
+        $this->Cell(-13,3,'','',0,'');
+        $this->MultiCell(100, 3,$this->data['appointment_detail']->lab_remarks, 'B', 'L');
+        $this->Ln(1);
+        $this->Cell(41,3,"Diagnosis: ",'',0,'C');
+        $this->Cell(-13,3,'','',0,'');
+        $this->MultiCell(100, 3,$this->data['appointment_detail']->diagnosis, 'B', 'L');
     }
 
     public function Footer()
@@ -174,15 +213,44 @@ class RequestprescriptionA5 extends Fpdf
         $this->cell(110, 3, "PTR. No.", '', 0, 'R');
         $this->cell(20, 3, $this->data['profile']->ptr, 'B', 1, 'R');
 
-        /* $flwpdt = $this->data['appointment_detail']->followup ? date_format(date_create($this->data['appointment_detail']->followup), "F d, Y") : 'September 28, 2025';
-        $this->Cell(76, 3, '', '', 1, '');
-        $this->Cell(25, -9, "Next appointment: ", '', 0, 'C');
-        $this->Cell(3, 3, '', 0, '');
-        $this->Cell(55, -9, $flwpdt, '', 0, 'L'); */
+        $this->SetY(-30); // Footer position
+        $this->SetFont('Arial', '', 8);
+        $this->SetX(10);
 
-       /*  $this->Ln(1);
-        $this->Cell(25, -9, '', 0, '');
-        $this->Cell(40, -3, '', 'B', ''); */
+        $this->Cell(0, 5, 'Remarks:', 0, 1, 'L');
+        $getFastingMode = $this->data['appointment_detail']->fasting_mode;
+        // Draw boxes + text
+        $remarks = [
+            ['Fasting 8-10 hours', $getFastingMode==1?true:false], // true = checked
+            ['Fasting 10-12 hours', $getFastingMode==2?true:false],
+            ['Non-fasting', $getFastingMode==3?true:false],
+            ['*Kindly send x-ray images to email:', false],
+            ['jplimmd.clinic@gmail.com', false]
+        ];
+
+        foreach ($remarks as $i => [$text, $checked]) {
+            if ($i < 4) { // first 3 have checkboxes
+                $x = 10; 
+                $y = $this->GetY();
+        
+                // Draw square
+                $this->Rect($x, $y, 4, 4);
+        
+                // Add X if checked
+                if ($checked) {
+                    $this->SetXY($x, $y - 0.5); // slight up adjust
+                    $this->Cell(4, 5, 'X', 0, 0, 'C');
+                }
+        
+                // Text beside box
+                $this->SetXY($x + 6, $y);
+                $this->Cell(0, 4, $text, 0, 1, 'L');
+            } else {
+                // No box, just text
+                $this->SetX(10);
+                $this->Cell(0, 4, $text, 0, 1, 'L');
+            }
+        }
         $this->SetAutoPageBreak(true, 25);
     }
 

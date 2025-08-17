@@ -23,12 +23,12 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
     public function Header()
     {
-        $this->Image(public_path() . '/img/lim_fb.png', 130, 5, 16, 16, 'PNG');
-        $this->Image(public_path() . '/img/lim_rhuema.jpg', 114, 6, 15, 15, 'JPG');
-        $this->Image(public_path() . '/img/cp.jpg', 98, 6, 15, 15, 'JPG');
+        $this->Image(public_path() . '/img/lim_fb.png', 122.5, 6, 13, 13, 'PNG');
+        $this->Image(public_path() . '/img/lim_rhuema.jpg', 108, 6, 13, 13, 'JPG');
+        $this->Image(public_path() . '/img/cp.jpg', 94, 6, 13, 13, 'JPG');
         $this->Ln(1);
         $this->SetFont('Arial', 'B', 10);
-        $this->Cell(68, 3, strtoupper($this->data['profile']->name), 0, 0, 'R');
+        $this->Cell(42.5, 3, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
         $this->SetFont('Arial', '', 7);
         $this->Ln(1);
         $this->Cell(41, 8, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
@@ -41,12 +41,12 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->SetFont('Arial', 'B', 7);
         $this->Ln(0.05);
         $this->Ln(5);
-        $this->SetFont('Arial', 'B', 9);
+        /* $this->SetFont('Arial', 'B', 9);
         $this->Cell(1, -8, '', '', 0, '');
         $this->Cell(116, 2, strtoupper($this->data['profile']->specialization1), 0, 0, 'R');
         $this->Ln(9);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(115, -17, strtoupper($this->data['profile']->specialization2), 0, 0, 'C');
+        $this->Cell(115, -17, strtoupper($this->data['profile']->specialization2), 0, 0, 'C'); */
         $this->Ln(10);
         $this->SetFont('Arial', '', 7);
         $this->SetXY(7, 14);
@@ -94,7 +94,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->SetLineWidth(0.5);
         $this->Line(5, 37, 145, 37);
         $this->Ln(5);
-        $this->SetFont('Arial', '', 7);
+        $this->SetFont('Arial', '', 8);
         $this->AliasNbPages();
         $this->cell(10, 3, '', '0', 0, 'R');
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
@@ -133,7 +133,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->SetFont('Arial', '', 8);
         $this->Cell(8, 4, 'Date:', 0, 0);
         $this->Cell(20, 4, date("m/d/Y"), 'B', 1);
-        $this->Image(public_path() . '/img/rx.png', 12, 50, 9, 9, 'PNG');
+        $this->Image(public_path() . '/img/rx.png', 12, 53, 9, 9, 'PNG');
 
 
         $this->Image(public_path() . '/img/lim_wm.png', 32, 70, 80, 0, 'PNG');
@@ -147,10 +147,10 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
     public function mealHeader()
     {
-        $this->SetFont('Arial', '', 7);
+        $this->SetFont('Arial', '', 8);
         $this->cell(-3, 3, '', '0', 0, 'R');
 
-        $this->Cell(38, 5, "Medicine Name", 'LTR', 0, 'C');
+        $this->Cell(45, 5, "Medicine Name", 'LTR', 0, 'C');
         $this->Cell(8, 5, "QTY", "TR", 0, 'C');
 
         $this->Cell(12, 5, "Breakfast", 'T', 0, 'C');
@@ -162,13 +162,13 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Cell(9, 5, "Beds", "TR", 0, 'C');
 
 
-        $this->Cell(47, 5, "Remarks", "TR", 0, 'C');
+        $this->Cell(40, 5, "Remarks", "TR", 0, 'C');
 
         $this->Ln(5);
         $this->cell(-3, 3, '', '0', 0, 'R');
 
-        $this->SetFont('Arial', '', 5);
-        $this->Cell(38, 5, "", 'LBR', 0, 'C');
+        $this->SetFont('Arial', '', 9);
+        $this->Cell(45, 5, "", 'LBR', 0, 'C');
 
         $this->Cell(8, 5, "", "RB", 0, 'C');
 
@@ -186,12 +186,12 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Cell(9, 5, "", "RB", 0, 'C');
 
 
-        $this->Cell(47, 5, "", "RB", 0, 'C');
+        $this->Cell(40, 5, "", "RB", 0, 'C');
         $this->Ln(5);
 
         $this->SetWidths(
             array(
-                38,
+                45,
                 8,
                 6,
                 6,
@@ -200,7 +200,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
                 6,
                 6,
                 9,
-                47
+                40
             )
         );
     }
@@ -212,6 +212,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->mealHeader();
         $rowCount = 0;
 
+        $this->SetFont('Arial', '', 9);
         foreach ($this->data['query_prescription'] as $key => $item) {
             $checkGenericname = Generics::where(['id' => $item['generic_id']])->first();
             $this->cell(-3, 3, '', '0', 0, 'R');
@@ -232,9 +233,9 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
             $rowCount++;
 
             //if ($rowCount > 0 && $rowCount % 11 == 0) {
-            if ($rowCount % 11 == 0 && $rowCount != count($this->data['query_prescription'])) {
+            if ($rowCount % 5 == 0 && $rowCount != count($this->data['query_prescription'])) {
                 $this->AddPage();
-            // $this->mealHeader(); // Redraw headers on new page
+             $this->mealHeader(); // Redraw headers on new page
             }
         }
     }

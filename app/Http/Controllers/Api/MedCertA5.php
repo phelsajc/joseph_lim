@@ -30,7 +30,7 @@ class MedCertA5 extends Fpdf
         $this->Image(public_path() . '/img/cp.jpg', 98, 6, 15, 15, 'JPG');
         $this->Ln(1);
         $this->SetFont('Arial', 'B', 10);
-        $this->Cell(68, 3, strtoupper($this->data['profile']->name), 0, 0, 'R');
+        $this->Cell(42.5, 3, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
         $this->SetFont('Arial', '', 7);
         $this->Ln(1);
         $this->Cell(41, 8, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
@@ -111,7 +111,6 @@ class MedCertA5 extends Fpdf
         $address = $this->data['patient_detail']->address;
         $sex = $this->data['patient_detail']->sex == 1 ? 'Male' : 'Female';
         $assessment = $this->data['appointment_detail']->medcert_diagnosis;
-        $recommendation = $this->data['appointment_detail']->medcert_remarks;
         $remarks = $this->data['appointment_detail']->medcert_remarks;
 
         $this->SetFont('Arial', '', 8);
@@ -149,7 +148,7 @@ class MedCertA5 extends Fpdf
             ['text' => "has been seen and examined on "],
             ['text' => "$consultDate ", 'style' => 'BU'],
             ['text' => "with the diagnosis "],
-            ['text' => "$reason.", 'style' => 'BU'],
+            ['text' => "$assessment.", 'style' => 'BU'],
         ];
 
         $this->WriteStyledText($paragraph);

@@ -404,6 +404,7 @@ class PatientController extends BaseController
         //$data->pastmedicalrecord = $request->pastmedicalrecord;
         $data->pe = $request->pe;
         $data->diagnosis = $request->diagnosis;
+        $data->fasting_mode = $request->fasting_mode;
         //$data->plan = $request->plan;
 
         /* $data->clearance_undersigned = $request->clearance_undersigned!='Invalid date'?$clearance_undersigned:null;//$undersigned;
@@ -782,6 +783,8 @@ class PatientController extends BaseController
             $rx->ancillary_id = $value['procedure_id'];
             $rx->ancillary = $value['procedure'];
             $rx->remarks = $value['remarks'];
+            $rx->micro_remarks = $value['lab_micro_remarks'];
+            $rx->xray_remarks = $value['xray_remarks'];
             $rx->type = $value['type'];
             $rx->save();
         }
@@ -896,9 +899,10 @@ class PatientController extends BaseController
             //$fileUrl = url('storage/app/public/uploads/' . $fileName);
             $fileUrl = url('public/storage/uploads/' . $fileName);
             //$fileUrl = url('/storage/uploads/' . $fileName);
+            $fileExt = explode(".", $fileName);
             $arr['newfile'] = $fileUrl;//$value->isold_record==0?$value->file:null;
             $arr['oldfile'] = $fileUrl;//$value->isold_record==1?$value->file:null;
-            $arr['type'] = $value->isold_record;
+            $arr['extension'] = $fileExt[1];
             $arr['id'] = $value->AttachmentID;
             $arr['fname'] = $fileName;
             $array[] = $arr;

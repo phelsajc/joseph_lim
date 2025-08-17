@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="app-container loading-container"
-    v-loading="pageloading"
-    element-loading-text="Loading..."
-  >
+  <div class="app-container loading-container" v-loading="pageloading" element-loading-text="Loading...">
     <div class="mb-4">
       <el-dropdown @command="handleCommand">
         <el-button type="primary">
@@ -16,71 +12,39 @@
           <el-dropdown-item command="print_labs">Print Diagnostics</el-dropdown-item>
           <!-- <el-dropdown-item command="print_referral">Print Referral</el-dropdown-item> -->
           <el-dropdown-item command="print_medcert">Print Med Cert</el-dropdown-item>
-          <el-dropdown-item v-role="['secretary', 'admin']" command="done_consult"
-            >Done Consultation</el-dropdown-item
-          >
+          <el-dropdown-item v-role="['secretary', 'admin']" command="done_consult">Done Consultation</el-dropdown-item>
           <el-dropdown-item command="cancel_apt">Cancel Appointment</el-dropdown-item>
-          <el-dropdown-item v-role="['doctor', 'admin']" command="view_chart"
-            >View Chart</el-dropdown-item
-          >
+          <el-dropdown-item v-role="['doctor', 'admin']" command="view_chart">View Chart</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <el-popconfirm
-        v-model="popconfirmUpddateDiagnosis"
-        title="Are you done with this appointment?"
-        @confirm="onSubmit"
-      >
+      <el-popconfirm v-model="popconfirmUpddateDiagnosis" title="Are you done with this appointment?"
+        @confirm="onSubmit">
         <template #reference>
-          <el-button
-            v-if="!isMobile"
-            ref="updateDiagnosisBtn"
-            style="display: none"
-            type="primary"
-          >
+          <el-button v-if="!isMobile" ref="updateDiagnosisBtn" style="display: none" type="primary">
             Update Diagnosis
           </el-button>
         </template>
       </el-popconfirm>
     </div>
 
-    <el-dialog
-      :title="'Historical Records'"
-      class="compact-table"
-      width="100%"
-      :visible.sync="historyDiaglog"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-    >
-      <el-table
-        :data="old_records"
-        border
-        :default-sort="{ prop: 'date', order: 'descending' }"
-        @row-click="handleRowClick"
-      >
+    <el-dialog :title="'Historical Records'" class="compact-table" width="100%" :visible.sync="historyDiaglog"
+      :close-on-click-modal="false" :close-on-press-escape="false">
+      <el-table :data="old_records" border :default-sort="{ prop: 'date', order: 'descending' }"
+        @row-click="handleRowClick">
         <el-table-column prop="desc" label="Description" />
         <el-table-column prop="date" sortable label="Date" />
       </el-table>
     </el-dialog>
 
-    <el-dialog
-      :title="'HistorVitalsical Records'"
-      class="compact-table"
-      width="100%"
-      :visible.sync="vitalsDiaglog"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-    >
-      <el-table
-        :data="vitals_records"
-        border
-        :default-sort="{ prop: 'date', order: 'descending' }"
-      >
+    <el-dialog :title="'HistorVitalsical Records'" class="compact-table" width="100%" :visible.sync="vitalsDiaglog"
+      :close-on-click-modal="false" :close-on-press-escape="false">
+      <el-table :data="vitals_records" border :default-sort="{ prop: 'date', order: 'descending' }">
         <el-table-column prop="date" sortable label="Date" />
         <el-table-column prop="bp" label="BP" />
         <el-table-column prop="weight" label="Weight" />
       </el-table>
     </el-dialog>
-    
+
     <el-dialog title="Select Diagnostics" width="80%" :visible.sync="viewDiagnosticsTbl" :close-on-click-modal="false"
       :close-on-press-escape="false">
       <el-row :gutter="20">
@@ -92,8 +56,7 @@
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedChem" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
@@ -101,36 +64,34 @@
 
         <el-col :span="12">
           <strong>
-            <p>HEMATOLOGY and IMMUNOLOGY</p>
+            <p>HEMATOLOGY</p>
           </strong>
           <el-row>
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedHema" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
         </el-col>
-        
+
         <el-col :span="12">
           <strong>
-            <p>Others</p>
+            <p>CLINICAL MICROSCOPY</p>
           </strong>
           <el-row>
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in getAllDiagnosticsOfferedOthers" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                <el-checkbox v-for="item in getAllDiagnosticsOfferedMicroscopy" @change="addNewProcedure(item)"
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
         </el-col>
       </el-row>
       <el-divider />
-      <el-row :gutter="20">
+      <!-- <el-row :gutter="20">
         <el-col :span="12">
           <strong>
             <p>BLEEDING PARAMETERS</p>
@@ -138,9 +99,13 @@
           <el-row>
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in getAllDiagnosticsOfferedBleed" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                <el-checkbox
+                  v-for="item in getAllDiagnosticsOfferedBleed"
+                  @change="addNewProcedure(item)"
+                  :key="item.lab_test"
+                  :label="item.lab_test"
+                  >{{ item.lab_test.toUpperCase() }}</el-checkbox
+                >
               </el-checkbox-group>
             </el-col>
           </el-row>
@@ -153,15 +118,18 @@
           <el-row>
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in getAllDiagnosticsOfferedCardiac" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                <el-checkbox
+                  v-for="item in getAllDiagnosticsOfferedCardiac"
+                  @change="addNewProcedure(item)"
+                  :key="item.lab_test"
+                  :label="item.lab_test"
+                  >{{ item.lab_test.toUpperCase() }}</el-checkbox
+                >
               </el-checkbox-group>
             </el-col>
           </el-row>
         </el-col>
-      </el-row>
-      <el-divider />
+      </el-row> -->
       <el-row :gutter="20">
         <el-col :span="12">
           <strong>
@@ -170,31 +138,38 @@
           <el-row>
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in getAllDiagnosticsOfferedXray" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                <el-checkbox v-for="item in getAllDiagnosticsOfferedXray" :key="item.lab_test_id" :label="item.lab_test"
+                  @change="addNewProcedure(item)">
+                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.lab_test_id == 591"
+                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                    style="width: 400px" />
+                  {{ item.lab_test.toUpperCase() }}
+                </el-checkbox>
               </el-checkbox-group>
+
             </el-col>
           </el-row>
         </el-col>
 
-        <el-col :span="12">
+        <!-- <el-col :span="12">
           <strong>
             <p>CARDIAC</p>
           </strong>
           <el-row>
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in getAllDiagnosticsOfferCardiac" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                <el-checkbox
+                  v-for="item in getAllDiagnosticsOfferCardiac"
+                  @change="addNewProcedure(item)"
+                  :key="item.lab_test"
+                  :label="item.lab_test"
+                  >{{ item.lab_test.toUpperCase() }}</el-checkbox
+                >
               </el-checkbox-group>
             </el-col>
           </el-row>
-        </el-col>
+        </el-col> -->
 
-        
-      <el-row :gutter="20">
         <el-col :span="12">
           <strong>
             <p>ULTRASOUND</p>
@@ -203,8 +178,44 @@
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedUtz" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
+              </el-checkbox-group>
+            </el-col>
+          </el-row>
+        </el-col>
+
+        <!-- <el-col :span="12">
+            <strong>
+              <p>VASCULAR</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in getAllDiagnosticsOfferedVascular"
+                    @change="addNewProcedure(item)"
+                    :key="item.lab_test"
+                    :label="item.lab_test"
+                    >{{ item.lab_test.toUpperCase() }}</el-checkbox
+                  >
+                </el-checkbox-group>
+              </el-col>
+            </el-row>
+          </el-col> -->
+
+      </el-row>
+      <el-divider />
+
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <strong>
+            <p>IMMUNOLOGY</p>
+          </strong>
+          <el-row>
+            <el-col :span="24">
+              <el-checkbox-group v-model="diagnosticsRenderedModel">
+                <el-checkbox v-for="item in getAllDiagnosticsOfferedImmonulogy" @change="addNewProcedure(item)"
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
@@ -212,21 +223,26 @@
 
         <el-col :span="12">
           <strong>
-            <p>VASCULAR</p>
+            <p>MICROBIOLOGY</p>
           </strong>
           <el-row>
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in getAllDiagnosticsOfferedVascular" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                <el-checkbox v-for="item in getAllDiagnosticsOfferedMirco" @change="addNewProcedure(item)"
+                  :key="item.lab_test" :label="item.lab_test">
+                  {{ item.lab_test.toUpperCase() }}
+                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && (item.lab_test_id == 560 || item.lab_test_id == 561)"
+                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                    style="width: 400px" />
+                  </el-checkbox>
               </el-checkbox-group>
+              <!-- <el-input v-model="lab_micro_remarks" clearable placeholder="Remarks" /> -->
             </el-col>
           </el-row>
         </el-col>
       </el-row>
-      </el-row>
       <el-divider />
+
       <el-row :gutter="20">
         <el-col :span="12">
           <strong>
@@ -236,8 +252,7 @@
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedCt" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
@@ -251,8 +266,7 @@
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedMri" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
@@ -261,7 +275,7 @@
       <el-divider />
 
       <el-row :gutter="20">
-      <el-col :span="12">
+        <el-col :span="12">
           <strong>
             <p>Others</p>
           </strong>
@@ -269,14 +283,32 @@
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedOth" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{
-                    item.lab_test.toUpperCase() }}</el-checkbox>
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
+              </el-checkbox-group>
+              <el-input v-model="form.lab_others" clearable placeholder="Others" @change="addLabOthers" />
+            </el-col>
+          </el-row>
+        </el-col>
+
+
+        <el-col :span="12">
+          <strong>
+            <p>CRYSTAL ANALYSIS</p>
+          </strong>
+          <el-row>
+            <el-col :span="24">
+              <el-checkbox-group v-model="diagnosticsRenderedModel">
+                <el-checkbox v-for="item in getAllDiagnosticsOfferedCrystal" @change="addNewProcedure(item)"
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
+                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.lab_test_id == 568"
+                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                    style="width: 400px" /></el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
         </el-col>
       </el-row>
-      
+
       <el-divider />
       <el-button type="success" @click="addProcedure">Add</el-button>
     </el-dialog>
@@ -290,99 +322,23 @@
       <p><strong>Recommendations:</strong> {{ selectedOldRecords.recom }}</p>
     </el-dialog>
 
-    <el-dialog
-      :title="'Select Services'"
-      class="compact-table"
-      width="100%"
-      :visible.sync="viewServicesTbl"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-    >
-      <el-checkbox
-        v-for="e in getAllServicesOffered"
-        :key="e.description"
-        v-model="servicesRenderedModel"
-        :label="e.description"
-        :value="e.description"
-        @change="addNewServices(e)"
-      />
+    <el-dialog :title="'Select Services'" class="compact-table" width="100%" :visible.sync="viewServicesTbl"
+      :close-on-click-modal="false" :close-on-press-escape="false">
+      <el-checkbox v-for="e in getAllServicesOffered" :key="e.description" v-model="servicesRenderedModel"
+        :label="e.description" :value="e.description" @change="addNewServices(e)" />
       <el-divider />
       <el-button v-role="['doctor', 'admin']" type="success" @click="addServices()">
         Add
       </el-button>
     </el-dialog>
 
-    <!-- <el-dialog
-      :title="'Select Diagnostics'"
-      class="compact-table"
-      width="100%"
-      :visible.sync="viewDiagnosticsTbl"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-    >
-      <strong>
-        <p>Laboratory Tests</p>
-      </strong>
-      <el-checkbox
-        v-for="e in getAllDiagnosticsOfferedLab"
-        :key="e.lab_test"
-        v-model="diagnosticsRenderedModel"
-        :label="e.lab_test"
-        :value="e.lab_test"
-        @change="addNewProcedure(e)"
-      />
-      <el-input
-        v-model="form.lab_others"
-        clearable
-        placeholder="Others"
-        @change="addLabOthers"
-      />
-      <el-divider />
-      <strong>
-        <p>Imaging Tests</p>
-      </strong>
-      <el-checkbox
-        v-for="e in getAllDiagnosticsOfferedImg"
-        :key="e.lab_test"
-        v-model="diagnosticsRenderedModel"
-        :label="e.lab_test"
-        :value="e.lab_test"
-        @change="addNewProcedure(e)"
-      />
-      <el-input
-        v-model="form.anc_others"
-        clearable
-        placeholder="Others"
-        @change="addAncOthers"
-      />
-      <el-divider />
-      <el-button v-role="['doctor', 'admin']" type="success" @click="addProcedure()">
-        Add
-      </el-button>
-    </el-dialog>
-    <br /> -->
-
-    <el-dialog
-      :title="'Cancel Appointment'"
-      :visible.sync="dialogFormVisible"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-    >
+    <el-dialog :title="'Cancel Appointment'" :visible.sync="dialogFormVisible" :close-on-click-modal="false"
+      :close-on-press-escape="false">
       <div class="form-container">
-        <el-form
-          ref="appForm"
-          :model="form_cancel"
-          :rules="rules"
-          label-position="left"
-          label-width="150px"
-          style="max-width: 500px"
-        >
+        <el-form ref="appForm" :model="form_cancel" :rules="rules" label-position="left" label-width="150px"
+          style="max-width: 500px">
           <el-form-item :label="'Reason'" prop="cancel_reason">
-            <el-input
-              v-model="form_cancel.cancel_reason"
-              type="textarea"
-              maxlength="100"
-            />
+            <el-input v-model="form_cancel.cancel_reason" type="textarea" maxlength="100" />
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -403,12 +359,7 @@
       </div>
       <el-row class="profile-content">
         <el-col :span="6" class="profile-photo">
-          <el-image
-            style="width: 50%; height: auto"
-            :src="profile.photo"
-            alt="Profile Photo"
-            fit="cover"
-          />
+          <el-image style="width: 50%; height: auto" :src="profile.photo" alt="Profile Photo" fit="cover" />
         </el-col>
         <el-col :span="6">
           <div class="profile-item">
@@ -525,11 +476,7 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane
-        label="Family History"
-        name="family"
-        v-if="checkRole(['admin', 'doctor'])"
-      >
+      <el-tab-pane label="Family History" name="family" v-if="checkRole(['admin', 'doctor'])">
         <div class="block">
           <el-form :inline="true" label-position="top" class="demo-form-inline">
             <el-form-item label="History">
@@ -545,23 +492,13 @@
               </el-checkbox-group>
             </el-form-item>
             <el-form-item label="Others">
-              <el-input
-                v-model="profile.fam_others"
-                :autosize="{ minRows: 2, maxRows: 4 }"
-                style="width: 540px"
-                :rows="2"
-                type="textarea"
-                placeholder="Please input"
-              />
+              <el-input v-model="profile.fam_others" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please input" />
             </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
-      <el-tab-pane
-        label="Social / Environment History"
-        name="soc"
-        v-if="checkRole(['admin', 'doctor'])"
-      >
+      <el-tab-pane label="Social / Environment History" name="soc" v-if="checkRole(['admin', 'doctor'])">
         <div class="block">
           <el-form :inline="true" label-position="top" class="demo-form-inline">
             <el-form-item label="History">
@@ -573,24 +510,12 @@
               </el-checkbox-group>
             </el-form-item>
             <el-form-item label="Others">
-              <el-input
-                v-model="profile.soc_others"
-                :autosize="{ minRows: 2, maxRows: 4 }"
-                style="width: 540px"
-                :rows="2"
-                type="textarea"
-                placeholder="Please input"
-              />
+              <el-input v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please input" />
             </el-form-item>
             <el-form-item label="Vaccinations">
-              <el-input
-                v-model="profile.vaccination_sup"
-                :autosize="{ minRows: 2, maxRows: 4 }"
-                style="width: 540px"
-                :rows="2"
-                type="textarea"
-                placeholder="Please input"
-              />
+              <el-input v-model="profile.vaccination_sup" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please input" />
             </el-form-item>
           </el-form>
         </div>
@@ -607,13 +532,8 @@
             <el-input v-model="form.history" type="textarea" rows="5" />
           </el-form-item>
         </el-form>
-        <el-form
-          ref="form"
-          :model="form"
-          label-width="120px"
-          class="demo-form-inline"
-          v-if="checkRole(['admin', 'doctor'])"
-        >
+        <el-form ref="form" :model="form" label-width="120px" class="demo-form-inline"
+          v-if="checkRole(['admin', 'doctor'])">
           <el-form-item label="P.E.">
             <el-input v-model="form.pe" type="textarea" />
           </el-form-item>
@@ -632,9 +552,9 @@
             /> -->
             <date-picker v-model="form.followup" valueType="format"></date-picker>
           </el-form-item>
-          <el-form-item label="Email">
+          <!-- <el-form-item label="Email">
             <el-input v-model="form.email" autosize clearable />
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
       </el-tab-pane>
       <el-tab-pane label="Vitals" name="second">
@@ -671,28 +591,18 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="Medicines" name="fourth" v-if="checkRole(['admin', 'doctor'])">        
+      <el-tab-pane label="Medicines" name="fourth" v-if="checkRole(['admin', 'doctor'])">
         <el-card style="max-width: 100%">
           <el-row :gutter="24">
             <el-form :inline="true" label-position="top" class="demo-form-inline">
-              <el-checkbox
-                v-model="medsArr.custom_meds"
-                label="Not carried"
-                size="large"
-              />
+              <el-checkbox v-model="medsArr.custom_meds" label="Not carried" size="large" />
               <br />
               <el-form-item label="Quantity">
                 <el-input v-model="medsArr.qty" autosize clearable />
               </el-form-item>
               <el-form-item v-if="!medsArr.custom_meds" label="Search Medicine">
-                <el-autocomplete
-                  v-model="medsArr.meds"
-                  :fetch-suggestions="querySearch"
-                  popper-class="my-autocomplete"
-                  placeholder="Please input"
-                  style="width: 400%"
-                  @select="handleSelect"
-                >
+                <el-autocomplete v-model="medsArr.meds" :fetch-suggestions="querySearch" popper-class="my-autocomplete"
+                  placeholder="Please input" style="width: 400%" @select="handleSelect">
                   <template #default="{ item }">
                     <div class="value">{{ item.medicine }}</div>
                   </template>
@@ -738,11 +648,7 @@
             <el-form :inline="true" label-position="top" class="demo-form-inline">
               <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
                 <el-form-item label="Remarks">
-                  <el-input
-                    v-model="medsArr.remarks"
-                    type="textarea"
-                    style="width: 650px"
-                  />
+                  <el-input v-model="medsArr.remarks" type="textarea" style="width: 650px" />
                 </el-form-item>
               </el-col>
             </el-form>
@@ -750,7 +656,7 @@
           <el-row :gutter="20">
             <el-table :data="rx_list" style="width: 100%" class="compact-table">
               <el-table-column prop="medicine" label="Medicine" width="310" />
-              <el-table-column prop="qty" label="Qty" width="60" />
+              <el-table-column prop="qty" label="Qty" width="70" />
               <el-table-column label="Breakfast">
                 <el-table-column prop="bb" label="Before" width="80" />
                 <el-table-column prop="ab" label="After" width="80" />
@@ -764,15 +670,11 @@
                 <el-table-column prop="as" label="After" width="80" />
               </el-table-column>
               <el-table-column prop="bt" label="Bedtime" width="80" />
-              <el-table-column prop="remarks" label="Remarks" width="200" />
+              <el-table-column prop="remarks" label="Remarks" width="300" />
               <el-table-column align="center" label="Actions" width="150">
                 <template slot-scope="scope">
-                  <el-button
-                    v-role="['doctor', 'admin']"
-                    type="danger"
-                    @click="deleteMed(scope.row.id)"
-                    >Delete</el-button
-                  >
+                  <el-button v-role="['doctor', 'admin']" type="danger"
+                    @click="deleteMed(scope.row.id)">Delete</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -782,14 +684,29 @@
             <el-button v-role="['doctor', 'admin']" type="success" @click="addMeds()">
               Add
             </el-button>
-            <!-- <el-button v-role="['doctor', 'admin']" type="info" @click="importMedicine()">
+            <el-button v-role="['doctor', 'admin']" type="info" @click="importMedicine()">
               Import
-            </el-button> -->
+            </el-button>
           </el-row>
         </el-card>
-      </el-tab-pane>      
-      <el-tab-pane label="Diagnostics" name="fifth" v-if="checkRole(['admin','doctor'])">
+      </el-tab-pane>
+      <el-tab-pane label="Diagnostics" name="fifth" v-if="checkRole(['admin', 'doctor'])">
         <el-card style="max-width: 100%">
+          <el-radio-group v-model="form.fasting_mode">
+            <el-radio label="1">Fasting 8-10 hours </el-radio>
+            <el-radio label="2">Fasting 10-12 hours </el-radio>
+            <el-radio label="3">Non-fasting</el-radio>
+          </el-radio-group>
+          <el-row>
+            <el-form :inline="true" label-position="top" class="demo-form-inline">
+              <el-form-item label="Remarks">
+                <el-input v-model="form.lab_remarks" type="textarea" style="width: 650px" />
+              </el-form-item>
+            </el-form>
+          </el-row>
+          <br />
+          <br />
+          <br />
           <el-button type="primary" @click="viewDiagnosticsTbl = true">Click to Diagnostics</el-button>
           <el-row :gutter="20">
             <el-table :data="diagnostic_list" style="width: 100%">
@@ -808,11 +725,7 @@
           <el-divider />
         </el-card>
       </el-tab-pane>
-      <el-tab-pane
-        label="Medical Certificate"
-        name="medcert"
-        v-if="checkRole(['admin', 'doctor'])"
-      >
+      <el-tab-pane label="Medical Certificate" name="medcert" v-if="checkRole(['admin', 'doctor'])">
         <el-card style="max-width: 100%">
           <el-form label-position="top">
             <el-row :gutter="20">
@@ -824,10 +737,7 @@
                       :clearable="false"
                       placeholder="Pick a day"
                     />   -->
-                  <date-picker
-                    v-model="form.medcert_undersigned"
-                    valueType="format"
-                  ></date-picker>
+                  <date-picker v-model="form.medcert_undersigned" valueType="format"></date-picker>
                 </el-form-item>
               </el-col>
               <el-col :span="9">
@@ -840,22 +750,6 @@
                   <el-input v-model="form.medcert_remarks" type="textarea" rows="10" />
                 </el-form-item>
               </el-col>
-              <!-- <el-col :span="24">
-                <el-form-item label="Recommendations">
-                  <el-checkbox v-model="form.medcert_opt1" label="He/She needs medical attention/rest for dAys except if with complications" size="large" @change="medcert_opt1()"/>
-                  <el-checkbox v-model="form.medcert_opt2" label="He/She is fit-for-work" size="large" />
-                  <el-checkbox v-model="form.medcert_opt3" label="He/She is fit-for-school" size="large" />
-                  <el-checkbox v-model="form.medcert_opt4" label="He/She has been administered with" size="large" @change="medcert_opt4()"/>                  
-                </el-form-item>
-              </el-col>
-              <el-col :span="24">
-                <el-form-item label="Options">
-                  <el-input v-if="form.medcert_opt1" v-model="form.medcert_opt1_text1" style="width: 240px" placeholder="Please provide days of attention/rest"/>    
-                  <el-input v-if="form.medcert_opt4" v-model="form.medcert_opt4_text1" style="width: 240px" placeholder="Please provide detail 1"/>    
-                  <el-input v-if="form.medcert_opt4" v-model="form.medcert_opt4_text2" style="width: 240px" placeholder="Please provide detail 2"/>    
-                  <el-input v-if="form.medcert_opt4" v-model="form.medcert_opt4_text3" style="width: 240px" placeholder="Please provide detail 3"/>                  
-                </el-form-item>
-              </el-col> -->
             </el-row>
           </el-form>
         </el-card>
@@ -905,38 +799,17 @@
       </el-tab-pane> -->
       <el-tab-pane label="Attachments" name="attachments">
         <div class="mb-4">
-          <el-upload
-            ref="uploadRef"
-            action="#"
-            :auto-upload="false"
-            multiple
-            :on-change="handleChange"
-          >
+          <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange">
             <template #trigger>
-              <el-button
-                ref="uploadRef"
-                size="small"
-                type="info"
-                action="#"
-                :auto-upload="false"
-                multiple
-                :on-change="handleChange"
-                >Select attachments</el-button
-              >
+              <el-button ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
+                :on-change="handleChange">Select attachments</el-button>
             </template>
-            <el-button size="small" type="primary" @click="submitUpload"
-              >Submit</el-button
-            >
+            <el-button size="small" type="primary" @click="submitUpload">Submit</el-button>
           </el-upload>
         </div>
         <el-card style="max-width: 100%">
           <el-dialog :visible.sync="dialogVisible" width="50%">
-            <el-image
-              :src="selectedImage.file"
-              :alt="selectedImage.alt"
-              fit="contain"
-              class="popup-image"
-            />
+            <el-image :src="selectedImage.file" :alt="selectedImage.alt" fit="contain" class="popup-image" />
             <span slot="footer" class="dialog-footer">
               <el-button @click="dialogVisible = false">Close</el-button>
             </span>
@@ -955,44 +828,26 @@
                   ]" />
                 <iframe v-else :src="scope.row.newfile" width="100%" height="100%" frameborder="0"
                   allowfullscreen></iframe> -->
-                <el-button
-                  type="primary"
-                  icon="el-icon-files"
-                  @click="viewFile(scope.row.newfile)"
-                />
+                <el-button type="primary" icon="el-icon-files"
+                  @click="viewFile(scope.row.newfile, scope.row.extension)" />
                 {{ scope.row.fname }}
               </template>
             </el-table-column>
             <el-table-column label="Action" width="150">
               <template slot-scope="scope">
-                <el-button
-                  type="danger"
-                  icon="el-icon-delete"
-                  @click="deleteAtt(scope.row.id)"
-                />
+                <el-button type="danger" icon="el-icon-delete" @click="deleteAtt(scope.row.id)" />
               </template>
             </el-table-column>
           </el-table>
 
-          <el-dialog
-            :visible.sync="viewFileModel"
-            :fullscreen="false"
-            :close-on-click-modal="false"
-          >
+          <el-dialog :visible.sync="viewFileModel" :fullscreen="false" :close-on-click-modal="false">
             <template #default>
               <div class="iframe-wrapper">
-                <!-- <iframe :src="sourceFile" :style="transformStyle" frameborder="0" class="iframe-full"></iframe> -->
-                  <el-image
-                    style="width: 100px; height: 100px"
-                    :src="sourceFile"
-                    :zoom-rate="1.2"
-                    :max-scale="7"
-                    :min-scale="0.2"
-                    :preview-src-list="[sourceFile]"
-                    show-progress
-                    :initial-index="4"
-                    fit="cover"
-                  />
+                <iframe v-if="isPdf" :src="sourceFile" :style="transformStyle" frameborder="0"
+                  class="iframe-full"></iframe>
+                <el-image v-if="!isPdf" style="width: 100px; height: 100px" :src="sourceFile" :zoom-rate="1.2"
+                  :max-scale="7" :min-scale="0.2" :preview-src-list="[sourceFile]" show-progress :initial-index="4"
+                  fit="cover" />
               </div>
             </template>
           </el-dialog>
@@ -1033,8 +888,6 @@ import Diagnostics from "@/api/diagnostics";
 import moment from "moment-timezone";
 import debounce from "lodash/debounce";
 import checkRole from "@/utils/role"; // Role checking
-/* import Quill from 'quill';
-import 'quill/dist/quill.snow.css'; */
 import DatePicker from "vue2-datepicker";
 import heic2any from "heic2any";
 export default {
@@ -1042,6 +895,7 @@ export default {
   directives: { role },
   data() {
     return {
+      isPdf: false,
       rotation: 0,
       popconfirmUpddateDiagnosis: false,
       viewFileModel: false,
@@ -1068,6 +922,7 @@ export default {
       diagnostic_list: [],
       services_list: [],
       form: {
+        fasting_mode: "",
         email: "",
         prev_admission: "",
         prev_surgeries: "",
@@ -1271,6 +1126,12 @@ export default {
       getAllDiagnosticsOfferedUtz: [],
       getAllDiagnosticsOfferedOth: [],
       getAllDiagnosticsOfferedOthers: [],
+      getAllDiagnosticsOfferedImmonulogy: [],
+      getAllDiagnosticsOfferedMirco: [],
+      getAllDiagnosticsOfferedCrystal: [],
+      getAllDiagnosticsOfferedMicroscopy: [],
+      lab_micro_remarks: "",
+      xray_remarks: "",
     };
   },
   watch: {
@@ -1286,70 +1147,26 @@ export default {
   mounted() {
     this.checkIfMobile();
     window.addEventListener("resize", this.checkIfMobile);
-    /* const toolbarOptions = [
-      ["bold", "italic", "underline", "strike"], // toggled buttons
-      ["blockquote", "code-block"],
-      ["link", "image", "video", "formula"],
-      [{ header: 1 }, { header: 2 }], // custom button values
-      [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
-      [{ script: "sub" }, { script: "super" }], // superscript/subscript
-      [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
-      [{ direction: "rtl" }], // text direction
-
-      [{ size: ["small", false, "large", "huge"] }], // custom dropdown
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-
-      [{ color: [] }, { background: [] }], // dropdown with defaults from theme
-      [{ font: [] }],
-      [{ align: [] }],
-      ["clean"], // remove formatting button
-    ]; */
-
-    /* this.editor = new Quill(this.$refs.editor, {
-      modules: {
-        toolbar: toolbarOptions,
-      },
-      theme: 'snow',
-    }); */
-
-    /* this.editor.on("text-change", () => {
-      this.form.clearance_remarks = this.editor.root.innerHTML;
-    }); */
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.checkIfMobile);
   },
   created() {
+    this.getAllDiagnostics();
     this.appointments();
     this.getmeds();
     this.getdiagnostics();
     this.getservices();
     this.getAllServices();
-    this.getAllDiagnostics();
   },
   computed: {
-    /* imageStyle() {
-      return {
-        transform: `rotate(${this.rotation}deg)`,
-        transition: 'transform 0.3s ease'
-      };
-    },
-    
-    iframeStyle() {
-      return {
-        transform: `rotate(${this.rotation}deg)`,
-        'transform-origin': 'center center',
-        display: 'inline-block'
-      };
-    }, */
-    
     transformStyle() {
       return {
         transform: `rotate(${this.rotation}deg)`,
-        transformOrigin: 'center center',
-        display: 'inline-block'
+        transformOrigin: "center center",
+        display: "inline-block",
       };
-    }
+    },
   },
   methods: {
     checkRole,
@@ -1454,7 +1271,7 @@ export default {
         });
     },
     checkIfMobile() {
-      this.isMobile = window.innerWidth <= 768; // You can adjust the breakpoint as needed
+      this.isMobile = window.innerWidth <= 768;
       console.log(this.isMobile);
     },
     onCancel() {
@@ -1504,29 +1321,25 @@ export default {
             });
           }
 
-          /* if (this.form.cc === null){
+          if (this.form.cc === null) {
             this.form.cc = response.prev_data.cc;
           }
-          
-          if (this.form.history === null){
+
+          if (this.form.history === null) {
             this.form.history = response.prev_data.history;
           }
-          
-          if (this.form.pe === null){
+
+          if (this.form.pe === null) {
             this.form.pe = response.prev_data.pe;
           }
-          
-          if (this.form.diagnosis === null){
+
+          if (this.form.diagnosis === null) {
             this.form.diagnosis = response.prev_data.diagnosis;
           }
-          
-          if (this.form.remarks === null){
+
+          if (this.form.remarks === null) {
             this.form.remarks = response.prev_data.remarks;
           }
-
-          if (this.form.followup === null){
-            this.form.followup = response.prev_data.followup;
-          } */
         })
         .catch((error) => {
           console.log(error);
@@ -1557,7 +1370,7 @@ export default {
       this.medsArr.meds = ev.medicine;
       this.medsArr.med_id = ev.id;
     },
-    removeItem(id) {},
+    removeItem(id) { },
     async queryProcedure(queryString, cb) {
       if (queryString === "") {
         cb([]);
@@ -1581,7 +1394,6 @@ export default {
       this.procedure.procedure_id = ev.id;
     },
     removeProcedure(index) {
-      // this.form.procedures.splice(index, 1);
       this.$confirm("Are you sure you want to delete this item?", "Warning", {
         confirmButtonText: "OK",
         cancelButtonText: "Cancel",
@@ -1705,8 +1517,20 @@ export default {
           this.getAllDiagnosticsOfferedOth = response.filter(
             (e) => e.lab_category_id === 15
           );
-          this.getAllDiagnosticsOfferedOthers = response.filter(
+          /* this.getAllDiagnosticsOfferedOthers = response.filter(
             (e) => e.lab_category_id === 16
+          ); */
+          this.getAllDiagnosticsOfferedImmonulogy = response.filter(
+            (e) => e.lab_category_id === 17
+          );
+          this.getAllDiagnosticsOfferedMirco = response.filter(
+            (e) => e.lab_category_id === 18
+          );
+          this.getAllDiagnosticsOfferedCrystal = response.filter(
+            (e) => e.lab_category_id === 19
+          );
+          this.getAllDiagnosticsOfferedMicroscopy = response.filter(
+            (e) => e.lab_category_id === 20
           );
         })
         .catch((err) => {
@@ -1714,7 +1538,6 @@ export default {
         });
     },
     addServices() {
-      // return console.log(this.servicesRendered);
       if (this.servicesRendered.rendered.length > 0) {
         Services.add_service(this.servicesRendered)
           .then((response) => {
@@ -1769,9 +1592,7 @@ export default {
     addMeds() {
       if (
         (this.medsArr.meds !== "" && this.medsArr.qty !== "") ||
-        (this.medsArr.custom_generic !== "" &&
-          //this.medsArr.custom_brand !== "" &&
-          this.medsArr.custom_dosage !== "")
+        (this.medsArr.custom_generic !== "" && this.medsArr.custom_dosage !== "")
       ) {
         Medicine.add_rx(this.medsArr)
           .then((response) => {
@@ -1817,20 +1638,45 @@ export default {
         alert("Diagnostic are required.");
       }
     },
-    addNewProcedure(e) {
+    addNewProcedure2(e) {
+      console.log(e)
       if (this.diagnosticsRenderedModel.length > 0) {
         this.diagnosticsRendered.rendered.push({
           id: this.$route.params.id,
           procedure_id: e.lab_test_id,
           procedure: e.lab_test,
-          remarks: "",
+          ccccremarks: this.xray_remarks,
           type: e.lab_category_id,
+          ssssslab_micro_remarks: this.lab_micro_remarks,
+          ccccccxray_remarks: e.lab_test_id == 591 ? this.xray_remarks : '',
         });
-      } else {
-        // alert('Procedure is required.');
       }
     },
-    addLabOthers(v) {
+    addNewProcedure(e) {
+      if (this.diagnosticsRenderedModel.includes(e.lab_test)) {
+        // Add only if not already added
+        if (!this.diagnosticsRendered.rendered.find(p => p.procedure_id === e.lab_test_id)) {
+          this.diagnosticsRendered.rendered.push({
+            id: this.$route.params.id,
+            procedure_id: e.lab_test_id,
+            procedure: e.lab_test,
+            remarks: "",
+            type: e.lab_category_id,
+            lab_micro_remarks: this.lab_micro_remarks,
+            xray_remarks: ""
+          });
+        }
+      } else {
+        // Remove if unchecked
+        this.diagnosticsRendered.rendered = this.diagnosticsRendered.rendered.filter(
+          p => p.procedure_id !== e.lab_test_id
+        );
+      }
+    },
+    findProcedure(id) {
+      return this.diagnosticsRendered.rendered.find(p => p.procedure_id === id) || {};
+    },
+    addLabOthers2(v) {
       if (v !== null) {
         this.diagnosticsRendered.rendered.push({
           id: this.$route.params.id,
@@ -1888,7 +1734,7 @@ export default {
     printpdf2() {
       window.open("/api/printpdf2/" + this.form.id);
     },
-    emailpdf() {
+    /* emailpdf() {
       window.open("/api/email-prescription/" + this.form.id);
     },
     emailPrescription() {
@@ -1903,7 +1749,7 @@ export default {
         .catch((err) => {
           console.error("Error adding suggestions:", err);
         });
-    },
+    }, */
     printrequest(type) {
       window.open("/api/printrequest/" + this.form.id + "/" + type);
     },
@@ -2039,40 +1885,6 @@ export default {
         this.$message.error("Upload failed.");
       }
     },
-    handleSuccess() {
-      this.getBase64(this.$refs.uploadRef.uploadFiles[0].raw).then((base64) => {
-        this.form_att.file = base64;
-
-        Patients.addAttachments(this.form_att)
-          .then((response) => {
-            this.form_att.file = "";
-            this.get_attachments(this.form_att.patientid);
-            this.$refs.uploadRef.clearFiles();
-          })
-          .catch((err) => {
-            console.error("Error adding suggestions:", err);
-          });
-      });
-    },
-    getBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-      });
-    },
-    imgSrc(newfile, oldfile, isold) {
-      try {
-        if (isold === 0) {
-          return newfile;
-        } else {
-          return `public/${oldfile}`;
-        }
-      } catch (e) {
-        return `public/${oldfile}`;
-      }
-    },
     deleteAtt(id) {
       this.$confirm("Are you done with this file?", "Warning", {
         confirmButtonText: "OK",
@@ -2156,27 +1968,14 @@ export default {
         this.form.bmi = null; // Reset BMI if inputs are not valid
       }
     },
-    medcert_opt1() {
-      let opt_checked = this.form.medcert_opt1;
-      if (!opt_checked) {
-        this.form.medcert_opt1_text1 = "";
-      }
-    },
-    medcert_opt4() {
-      let opt_checked = this.form.medcert_opt4;
-      if (!opt_checked) {
-        this.form.medcert_opt4_text1 = "";
-        this.form.medcert_opt4_text2 = "";
-        this.form.medcert_opt4_text3 = "";
-      }
-    },
     checkExtn(a) {
       return a.split(".");
     },
     dateFormat(dt) {
       return moment(dt).format("MMMM D, YYYY");
     },
-    viewFile(s) {
+    viewFile(s, e) {
+      this.isPdf = e == "pdf" ? true : false;
       this.viewFileModel = true;
       this.sourceFile = s;
     },
@@ -2203,8 +2002,8 @@ export default {
         });
     },
     rotate() {
-      this.rotation = (this.rotation + 90);
-    }
+      this.rotation = this.rotation + 90;
+    },
   },
 };
 </script>
@@ -2260,7 +2059,7 @@ export default {
   display: inline-block;
   overflow: hidden;
 }
- 
+
 .iframe-full {
   width: 800px;
   height: 600px;
@@ -2275,15 +2074,22 @@ button {
   margin: 0 5px;
 }
 
-
 .demo-image__error .image-slot {
   font-size: 30px;
 }
+
 .demo-image__error .image-slot .el-icon {
   font-size: 30px;
 }
+
 .demo-image__error .el-image {
   width: 100%;
   height: 200px;
+}
+</style>
+<style>
+.input-with-label label {
+  margin-left: 8px;
+  /* space between input and label */
 }
 </style>
