@@ -601,7 +601,7 @@ class PatientController extends BaseController
     public function printpdf2($id)
     {
         $data = array();
-        $data['query_prescription'] = Rx::where(['appointment_id' => $id])->get();
+        $data['query_prescription'] = Rx::where(['appointment_id' => $id])->orderby('rx_id','asc')->get();
         $data['appointment_detail'] = Appointments::where(['id' => $id])->first();
         $data['profile'] = Profile::where(['id' => 1])->first();
         $data['patient_detail'] = Patients::where(['patientid' => $data['appointment_detail']->patientid])->first();
@@ -704,7 +704,7 @@ class PatientController extends BaseController
         /* $data['query_prescriptions'] = Rx::where(['appointment_id'=>$id])->get();
         $data['query_diagnostics'] = Ancillary::where(['appointment_id'=>$id])->get(); */
         $data['profile'] = Profile::where(['id' => 1])->first();
-        $data['getHistory'] = Appointments::where(['patientid' => $data['patient_detail']->patientid])->orderby('id','desc')->get();
+        $data['getHistory'] = Appointments::where(['patientid' => $data['patient_detail']->patientid,'isdone' => 1])->orderby('id','desc')->get();
         $myPdf = new ChartRecordPdf($data);
         $myPdf->Output('I', time() . "-.pdf", true);
         exit;

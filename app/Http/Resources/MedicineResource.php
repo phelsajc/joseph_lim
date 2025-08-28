@@ -17,10 +17,7 @@ class MedicineResource extends JsonResource
         return [
             'id' => $this->id,
             'medicine' => strtoupper($this->medicine_name),
-            'generic' => strtoupper($this->generic),
-            'desc' => strtoupper($this->desc),
-            'type' => $this->type,
-            'unit' => $this->unit,
+            'generic' => strtoupper($this->generic_name),
         ];
     }
 }

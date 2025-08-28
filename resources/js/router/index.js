@@ -76,7 +76,7 @@ export const constantRoutes = [
         path: 'patients',
         name: 'Patients',
         component: () => import('@/views/patients/index'),
-        meta: { title: 'Patients' },
+        meta: { title: 'Patients', icon: 'patients' },
       },
       /* {
         path: 'medicines',
@@ -116,7 +116,7 @@ export const constantRoutes = [
         path: 'appointments',
         component: () => import('@/views/appointments/index'),
         name: 'Appointments',
-        meta: { title: 'Appointments', icon: 'dashboard', noCache: false, affix: false,  },
+        meta: { title: 'Appointments', icon: 'appointments', noCache: false, affix: false,  },
       },
       {
         path: 'form/:id',
@@ -166,6 +166,19 @@ export const asyncRoutes = [
       },
     ],
   }, */
+  {
+    path: '/medicines',
+    component: Layout,
+    redirect: 'medicines',
+    children: [
+      {
+        path: 'medicines',
+        component: () => import('@/views/medicines/index'),
+        name: 'medicines',
+        meta: { title: 'Medicines', icon: 'capsule', noCache: false, roles: ['admin', 'doctor'], affix: true },
+      },
+    ],
+  },  
   {
     path: '/user-profile',
     component: Layout,

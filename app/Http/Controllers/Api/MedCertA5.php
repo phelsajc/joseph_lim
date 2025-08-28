@@ -14,16 +14,14 @@ class MedCertA5 extends Fpdf
     public function __construct($data)
     {
         $this->data = $data;
-        //parent::__construct('P', 'mm', array(220.95 ,287.02 ));
         parent::__construct('P', 'mm', 'A5');
         $this->SetTitle('My pdf title', true);
-        //$this->SetMargins(160, 8, 1); 
         $this->SetAuthor('TJGazel', true);
         $this->AddPage('P');
         $this->Body();
     }
 
-    public function Header()
+    public function Header1()
     {
         $this->Image(public_path() . '/img/lim_fb.png', 130, 5, 16, 16, 'PNG');
         $this->Image(public_path() . '/img/lim_rhuema.jpg', 114, 6, 15, 15, 'JPG');
@@ -42,13 +40,13 @@ class MedCertA5 extends Fpdf
         $this->Line(5, 23, 145, 23);
         $this->SetFont('Arial', 'B', 7);
         $this->Ln(0.05);
-        $this->Ln(5);
+        /* $this->Ln(5);
         $this->SetFont('Arial', 'B', 9);
         $this->Cell(1, -8, '', '', 0, '');
         $this->Cell(116, 2, strtoupper($this->data['profile']->specialization1), 0, 0, 'R');
         $this->Ln(9);
         $this->SetFont('Arial', '', 7);
-        $this->Cell(115, -17, strtoupper($this->data['profile']->specialization2), 0, 0, 'C');
+        $this->Cell(115, -17, strtoupper($this->data['profile']->specialization2), 0, 0, 'C'); */
         $this->Ln(10);
         $this->SetFont('Arial', '', 7);
         $this->SetXY(7, 14);
@@ -58,7 +56,7 @@ class MedCertA5 extends Fpdf
         $this->SetXY(5, 26.5);
         $this->MultiCell(62, 3, "Arts Building, BS Aquino Drive, Bacolod ", 0, 'L');
         $this->SetXY(5, 29);
-        $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 1:00 PM - 5:00 PM ", 0, 'L');
+        $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 2:00 PM - 5:00 PM ", 0, 'L');
         $this->SetXY(5.2, 31.5);
         $this->MultiCell(62, 3, "For appointment: 0962-484-5664 ", 0, 'L');
         $this->SetXY(5.2, 34);
@@ -97,7 +95,77 @@ class MedCertA5 extends Fpdf
         $this->Ln(10);
     }
 
+    public function Header()
+    {
+        $this->Image(public_path() . '/img/lim_fb.png', 132, 6, 11, 11, 'PNG');
+        $this->Image(public_path() . '/img/lim_rhuema.jpg', 120, 6, 11, 11, 'JPG');
+        $this->Image(public_path() . '/img/cp.jpg', 108, 6, 11, 11, 'JPG');
+        $this->Ln(1);
+        $this->SetFont('Arial', 'B', 12);
+        $this->Cell(52, 4, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
+        $this->SetFont('helvetica', 'B', 9);
+        $this->Ln(1);
+        $this->Cell(60, 10, strtoupper($this->data['profile']->specialization1.' - '.$this->data['profile']->specialization2), 0, 0, 'R');
+        $this->Ln(5);
+        $this->SetFont('Arial', '', 8);
+        $this->Cell(48, 11, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
+        $this->Ln(1);
+        $this->Cell(59, 15, 'Diplomate, Philippine Rheumatology Association', 0, 0, 'R');
+        $this->Ln(1);
+        $this->Cell(39.5, 19, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');     
+        $this->SetLineWidth(0.5);
+        $this->SetFont('Arial', 'B', 7);
+        $this->Ln(0.05);
+        $this->Ln(5);
+        $this->Ln(10);
+        $this->SetFont('Arial', '', 7);
+        $this->SetXY(7, 20);
+        $this->SetFont('Arial', 'B', 4.5);
+        $this->SetXY(75.5, 17);
+        $this->MultiCell(62, 3, "Room 504. Riverside Medical", 0, 'L');
+        $this->SetXY(75.5, 19);
+        $this->MultiCell(62, 3, "Arts Building, BS Aquino Drive, Bacolod ", 0, 'L');
+        $this->SetXY(75.5, 21);
+        $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 2:00 PM - 5:00 PM ", 0, 'L');
+        $this->SetXY(75.5, 23);
+        $this->MultiCell(62, 3, "For appointment: 0962-484-5664 ", 0, 'L');
+        $this->SetXY(1, 34);
+        $this->SetFont('Arial', 'B', 5);
+        $this->MultiCell(150, 5, "Hospital Affiliations: Dr. Pablo O. Torre Memorial Hospital, Metro Bacolod Hospital and Medical Center, Bacolod Queen of Mercy Hospital, Adventist Medical Center-Bacolod", 0, 'L');
 
+        $this->SetFont('Arial', 'B', 4.5);
+        $this->SetXY(110, 17);
+        $this->MultiCell(62, 3, "Room 415. Metro Bacolod Hospital and Medical", 0, 'L');
+        $this->SetXY(110, 19);
+        $this->MultiCell(62, 3, "Center, Brgy. Estefania, Bacolod", 0, 'L');
+        $this->SetXY(110, 21);
+        $this->MultiCell(61.5, 3, "Schedule: Tue-Thu: 9:00 AM - 12:00 PM ", 0, 'L');
+        $this->SetXY(110.2, 23);
+        $this->MultiCell(62, 3, "For appointment: 0968-418-7873", 0, 'L');
+        
+        $this->SetXY(75.5, 26);
+        $this->MultiCell(62, 3, "VitalRx Pharmacy and Arthritis Clinic, JTL", 0, 'L');
+        $this->SetXY(75.5, 28);
+        $this->MultiCell(62, 3, "Building, BS Aquino Drive, Bacolod", 0, 'L');
+        $this->SetXY(75.5, 30);
+        $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 9:00 AM - 12:00 PM ", 0, 'L');
+        $this->SetXY(75.5, 32);
+        $this->MultiCell(62, 3, "For appointment.: 0966-073-6942", 0, 'L');
+        
+        $this->SetXY(110, 26);
+        $this->MultiCell(62, 3, "Agustin Medical Clinic ", 0, 'L');
+        $this->SetXY(110, 28);
+        $this->MultiCell(62, 3, "Sen Jose Locsin Street, Brgy. V, Silay ", 0, 'L');
+        $this->SetXY(110, 30);
+        $this->MultiCell(61.5, 3, "Schedule: Thursday 1:30 PM - 4:30 PM", 0, 'L');
+        $this->SetXY(110.2, 32);
+        $this->MultiCell(62, 3, "For appointment: 0928-259-8495", 0, 'L');
+
+        $this->Ln(1);
+        $this->SetLineWidth(0.5);
+        $this->Line(2, 38, 146, 38);
+        $this->Ln(5);
+    }
 
     public function Body()
     {

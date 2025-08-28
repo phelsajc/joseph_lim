@@ -26,6 +26,15 @@
         </template>
       </el-popconfirm>
       <el-button type="warning" v-role="['doctor', 'admin']" @click="printChart()"> Print Chart </el-button>
+      <el-button
+        class="filter-item"
+        style="margin-left: 10px"
+        type="success"
+        icon="el-icon-plus"
+        @click="handleCreate"
+      >
+        Set Appointment
+      </el-button>
     </div>
     <el-tabs v-model="activeActivity" @tab-click="handleClick">
       <el-tab-pane v-loading="updating" label="Patient Profile" name="first">
@@ -312,6 +321,89 @@
         </el-card>
       </el-tab-pane>
     </el-tabs>
+
+    <el-dialog
+      :title="'Add Appointment'"
+      width="70%"
+      :visible.sync="dialogFormVisible"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <div class="form-container">
+        <el-form
+          ref="appForm"
+          :model="form_appointment"
+          :rules="rules"
+          label-position="left"
+          label-width="150px"
+          style="max-width: 500px"
+        >
+        </el-form>
+        <el-form label-position="right" class="demo-form-inline" :inline="true">
+          <el-form-item :label="'Date'" prop="apt_dt">
+            <el-date-picker
+              v-model="form_appointment.apt_dt"
+              type="date"
+              :picker-options="pickerOptions"
+              placeholder="Pick a day"
+            />
+          </el-form-item>
+          <el-form-item label="BP">
+            <el-input
+              v-model="form_appointment.bp"
+              clearable
+              placeholder="Blood Pressure"
+            />
+          </el-form-item>
+          <el-form-item label="HR">
+            <el-input v-model="form_appointment.hr" clearable placeholder="Heart Rate" />
+          </el-form-item>
+          <el-form-item label="RR">
+            <el-input
+              v-model="form_appointment.rr"
+              clearable
+              placeholder="Respiratory Rate"
+            />
+          </el-form-item>
+          <el-form-item :label="'Weight'" prop="weight">
+            <el-input v-model="form_appointment.weight" />
+          </el-form-item>
+          <el-form-item :label="'Height'" prop="height">
+            <el-input v-model="form_appointment.height" />
+          </el-form-item>
+          <el-form-item :label="'Temperature'" prop="vit_temp">
+            <el-input v-model="form_appointment.vit_temp" />
+          </el-form-item>
+        </el-form>
+
+        <el-form
+          label-position="right"
+          class="demo-form-inline"
+          :inline="true"
+          style="width: 100%"
+        >
+          <el-form-item :label="'Complaints'" prop="complaints" style="width: 100%">
+            <el-input
+              v-model="form_appointment.complaints"
+              :autosize="{ minRows: 3, maxRows: 5 }"
+              style="width: 800px"
+              :rows="2"
+              type="textarea"
+              placeholder="Please input"
+            />
+          </el-form-item>
+        </el-form>
+
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogFormVisible = false">
+            {{ $t("table.cancel") }}
+          </el-button>
+          <el-button type="primary" :loading="isProcessing" @click="addAppointment()">
+            {{ $t("table.confirm") }}
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -417,6 +509,24 @@ export default {
         social: "",
         social_age: "",
         pid: this.$route.params.id,
+      },
+      form_appointment: {
+        complaints: "",
+        cancel_reason: "",
+        pid: this.$route.params.pid,
+        apt_dt: null,
+        patient: "",
+        remakrs: null,
+        vit_sys: null,
+        vit_dia: null,
+        weight: null,
+        height: null,
+        bp: null,
+        hr: null,
+        rr: null,
+        vit_temp: null,
+        vit_cr: null,
+        vit_rr: null,
       },
       form: {
         hypertension: "",
@@ -650,15 +760,19 @@ export default {
         this.form.pmh_others = newValue.pmh_others
           ? newValue.pmh_others
           : this.form.pmh_others;
-        const fam = newValue.fam.split(",");
-        fam.forEach((element) => {
-          this.form.fam.push(element);
-        });
+        if(newValue.fam){
+          const fam = newValue.fam.split(",");
+          fam.forEach((element) => {
+            this.form.fam.push(element);
+          });
+        }
         this.form.fam_others = newValue.fam_others;
-        const soc = newValue.soc.split(",");
-        soc.forEach((element) => {
-          this.form.soc.push(element);
-        });
+        if(newValue.soc){
+          const soc = newValue.soc.split(",");
+          soc.forEach((element) => {
+            this.form.soc.push(element);
+          });
+        }
         this.form.soc_others = newValue.soc_others;
       },
       immediate: true, // Call handler immediately with the current value
@@ -1152,7 +1266,44 @@ export default {
     viewFile(s) {
       this.viewFileModel = true;
       this.sourceFile = s;
-    }
+    },
+    addAppointment() {
+      this.$refs["appForm"].validate((valid) => {
+        if (valid) {
+          this.isProcessing = true;
+          this.form_appointment.apt_dt = moment(this.form_appointment.apt_dt)
+            .tz("Asia/Manila")
+            .format("YYYY-MM-DD");
+          Patients.addAppointment(this.form_appointment)
+            .then((response) => {
+              this.form_appointment.complaints = "";
+              this.form_appointment.pid = null;
+              this.form_appointment.apt_dt = null;
+              this.form_appointment.patient = null;
+              this.form_appointment.remakrs = null;
+              this.dialogFormVisible = false;
+              this.$message({
+                message: "Appointment has been created successfully.",
+                type: "success",
+                duration: 5 * 1000,
+              });
+              this.pageloading = true;
+              this.past_consult();
+            })
+            .catch((err) => {
+              console.error("Error adding suggestions:", err);
+            })
+            .finally(() => {
+              // This will always run, regardless of the request outcome
+              this.isProcessing = false;
+            });
+          // }, 5000);
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
   },
 };
 </script>

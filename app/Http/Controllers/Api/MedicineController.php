@@ -36,7 +36,7 @@ class MedicineController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response|ResourceCollection
      */
-    public function index(Request $request)
+    public function index1(Request $request)
     {
         $searchParams = $request->all();
         $userQuery = Medicine::query();
@@ -49,6 +49,28 @@ class MedicineController extends BaseController
         return MedicineResource::collection($userQuery->paginate($limit));
     }
 
+    public function index(Request $request)
+    {
+        $searchParams = $request->all();
+        $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
+        $keyword = Arr::get($searchParams, 'keyword', '');
+
+        $userQuery = Medicine::query()
+            ->select('medicines.generic_name', 'medicines.medicine_name', 'medicines.unit', 'medicines.id')
+            ->where('isincluded', 1) // ✅ added filter
+            ->join(DB::raw("(SELECT MIN(id) as id 
+                            FROM medicines
+                            " . (!empty($keyword) 
+                                    ? "WHERE medicine_name LIKE '%".addslashes($keyword)."%' 
+                                        OR generic_name LIKE '%".addslashes($keyword)."%'" 
+                                    : "") . "
+                            GROUP BY medicine_name) as filtered"), 
+                    'medicines.id', '=', 'filtered.id');
+
+        return MedicineResource::collection($userQuery->paginate($limit));
+    }
+
+
     public function findMedicine($kw)
     {
         $q = DB::connection('mysql')->select("SELECT m.generic_name, m.medicine_name, m.unit, m.id
@@ -56,11 +78,12 @@ class MedicineController extends BaseController
         JOIN (
             SELECT MIN(id) AS id
             FROM medicines
-            WHERE medicine_name LIKE '%$kw%' OR generic_name LIKE '%$kw%'
+            WHERE (medicine_name LIKE '%$kw%' OR generic_name LIKE '%$kw%')
+              AND isincluded = 1
             GROUP BY medicine_name
         ) AS filtered
         ON m.id = filtered.id
-        LIMIT 10");
+        LIMIT 10;");
         $data = array();
         foreach ($q as $key => $value) {
             $arr =  array();
@@ -70,26 +93,32 @@ class MedicineController extends BaseController
         }
         return response()->json(['suggestions' => $data]);
     }
+    
     public function store(Request $request) {
         $field = new Medicine();
-        $field->medicine_name = $request->medicine;
-        $field->desc = $request->desc;
-        $field->unit = $request->unit;
+        $field->medicine_name = $request->medicine_name	;
+        $field->generic_name = $request->generic_name;
+        $field->isincluded = 1;
         $field->save();
         return response()->json(true);
     }
+
     public function update(Request $request) {
         $field = Medicine::find($request->id);
-        $field->medicine_name = $request->medicine;
-        $field->desc = $request->desc;
-        $field->unit = $request->unit;
+        $field->medicine_name = $request->medicine_name	;
+        $field->generic_name = $request->generic_name;
+        $field->isincluded = 1;
         $field->save();
         return response()->json(true);
     }
+
     function delete($id) {
-        Medicine::where('id',$id)->delete();
-        return response()->json(true);
+        $field = Medicine::find($id);
+        $field->isincluded = 0;
+        $field->save();
+        return response()->json( $field);
     }
+    
     function edit($id) {
         $data = Medicine::where('id',$id)->first();
         return response()->json($data);

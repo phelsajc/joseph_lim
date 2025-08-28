@@ -12,7 +12,7 @@
           <el-dropdown-item command="print_labs">Print Diagnostics</el-dropdown-item>
           <!-- <el-dropdown-item command="print_referral">Print Referral</el-dropdown-item> -->
           <el-dropdown-item command="print_medcert">Print Med Cert</el-dropdown-item>
-          <el-dropdown-item v-role="['secretary', 'admin']" command="done_consult">Done Consultation</el-dropdown-item>
+          <el-dropdown-item v-role="['secretary', 'admin', 'doctor']" command="done_consult">Done Consultation</el-dropdown-item>
           <el-dropdown-item command="cancel_apt">Cancel Appointment</el-dropdown-item>
           <el-dropdown-item v-role="['doctor', 'admin']" command="view_chart">View Chart</el-dropdown-item>
         </el-dropdown-menu>
@@ -61,7 +61,6 @@
             </el-col>
           </el-row>
         </el-col>
-
         <el-col :span="12">
           <strong>
             <p>HEMATOLOGY</p>
@@ -75,7 +74,6 @@
             </el-col>
           </el-row>
         </el-col>
-
         <el-col :span="12">
           <strong>
             <p>CLINICAL MICROSCOPY</p>
@@ -91,45 +89,6 @@
         </el-col>
       </el-row>
       <el-divider />
-      <!-- <el-row :gutter="20">
-        <el-col :span="12">
-          <strong>
-            <p>BLEEDING PARAMETERS</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox
-                  v-for="item in getAllDiagnosticsOfferedBleed"
-                  @change="addNewProcedure(item)"
-                  :key="item.lab_test"
-                  :label="item.lab_test"
-                  >{{ item.lab_test.toUpperCase() }}</el-checkbox
-                >
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-
-        <el-col :span="12">
-          <strong>
-            <p>CARDIAC FUNCTION</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox
-                  v-for="item in getAllDiagnosticsOfferedCardiac"
-                  @change="addNewProcedure(item)"
-                  :key="item.lab_test"
-                  :label="item.lab_test"
-                  >{{ item.lab_test.toUpperCase() }}</el-checkbox
-                >
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-      </el-row> -->
       <el-row :gutter="20">
         <el-col :span="12">
           <strong>
@@ -146,30 +105,9 @@
                   {{ item.lab_test.toUpperCase() }}
                 </el-checkbox>
               </el-checkbox-group>
-
             </el-col>
           </el-row>
         </el-col>
-
-        <!-- <el-col :span="12">
-          <strong>
-            <p>CARDIAC</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox
-                  v-for="item in getAllDiagnosticsOfferCardiac"
-                  @change="addNewProcedure(item)"
-                  :key="item.lab_test"
-                  :label="item.lab_test"
-                  >{{ item.lab_test.toUpperCase() }}</el-checkbox
-                >
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col> -->
-
         <el-col :span="12">
           <strong>
             <p>ULTRASOUND</p>
@@ -183,29 +121,8 @@
             </el-col>
           </el-row>
         </el-col>
-
-        <!-- <el-col :span="12">
-            <strong>
-              <p>VASCULAR</p>
-            </strong>
-            <el-row>
-              <el-col :span="24">
-                <el-checkbox-group v-model="diagnosticsRenderedModel">
-                  <el-checkbox
-                    v-for="item in getAllDiagnosticsOfferedVascular"
-                    @change="addNewProcedure(item)"
-                    :key="item.lab_test"
-                    :label="item.lab_test"
-                    >{{ item.lab_test.toUpperCase() }}</el-checkbox
-                  >
-                </el-checkbox-group>
-              </el-col>
-            </el-row>
-          </el-col> -->
-
       </el-row>
       <el-divider />
-
       <el-row :gutter="20">
         <el-col :span="12">
           <strong>
@@ -526,7 +443,7 @@
             <el-input v-model="form.nurse_remarks" type="textarea" />
           </el-form-item>
           <el-form-item label="CC" v-if="checkRole(['admin', 'doctor'])">
-            <el-input v-model="form.chiefcomplaints" type="textarea" rows="5" />
+            <el-input v-model="form.chiefcomplaints" type="textarea" rows="2" />
           </el-form-item>
           <el-form-item label="History" v-if="checkRole(['admin', 'doctor'])">
             <el-input v-model="form.history" type="textarea" rows="5" />
@@ -535,13 +452,13 @@
         <el-form ref="form" :model="form" label-width="120px" class="demo-form-inline"
           v-if="checkRole(['admin', 'doctor'])">
           <el-form-item label="P.E.">
-            <el-input v-model="form.pe" type="textarea" />
+            <el-input v-model="form.pe" type="textarea" ref="peInput" rows="10"  @input="autoResize"/>
           </el-form-item>
           <el-form-item label="Diagnosis">
             <el-input v-model="form.diagnosis" type="textarea" />
           </el-form-item>
-          <el-form-item label="Remarks">
-            <el-input v-model="form.remarks" type="textarea" />
+          <el-form-item label="Plans">
+            <el-input v-model="form.remarks" type="textarea" ref="plansInput" rows="10"  @input="autoResize"/>
           </el-form-item>
           <el-form-item label="Follow Up Date">
             <!-- <el-date-picker
@@ -696,6 +613,7 @@
             <el-radio label="1">Fasting 8-10 hours </el-radio>
             <el-radio label="2">Fasting 10-12 hours </el-radio>
             <el-radio label="3">Non-fasting</el-radio>
+            <el-radio label="4">Send X-ray images</el-radio>
           </el-radio-group>
           <el-row>
             <el-form :inline="true" label-position="top" class="demo-form-inline">
@@ -707,7 +625,7 @@
           <br />
           <br />
           <br />
-          <el-button type="primary" @click="viewDiagnosticsTbl = true">Click to Diagnostics</el-button>
+          <el-button type="primary" @click="viewDiagnosticsTbl = true">View Diagnostics</el-button>
           <el-row :gutter="20">
             <el-table :data="diagnostic_list" style="width: 100%">
               <el-table-column prop="diagnostic" label="Procedure" />
@@ -1157,7 +1075,6 @@ export default {
     this.getmeds();
     this.getdiagnostics();
     this.getservices();
-    this.getAllServices();
   },
   computed: {
     transformStyle() {
@@ -1215,6 +1132,20 @@ export default {
       } else {
         console.log(command);
       }
+    },
+    autoResize() {
+      this.$nextTick(() => {
+        const textarea = this.$refs.peInput.$el.querySelector('textarea')
+        const textarea2 = this.$refs.plansInput.$el.querySelector('textarea')
+        if (textarea) {
+          textarea.style.height = 'auto'               // reset height
+          textarea.style.height = textarea.scrollHeight + 'px' // set new height
+        }
+        if (textarea2) {
+          textarea2.style.height = 'auto'               // reset height
+          textarea2.style.height = textarea2.scrollHeight + 'px' // set new height
+        }
+      })
     },
     onSubmit() {
       this.form.followup = moment
@@ -1286,6 +1217,7 @@ export default {
     appointments() {
       Patients.getAppointment(this.form.id)
         .then((response) => {
+    this.autoResize();
           this.pageloading = false;
           this.appointment_dt = response.data.appointment_dt;
           this.vitals_records = response.vitals_data;
@@ -1630,6 +1562,7 @@ export default {
             this.diagnosticsRenderedModel = [];
             this.form.lab_others = null;
             this.form.anc_others = null;
+            this.viewDiagnosticsTbl = false;
           })
           .catch((err) => {
             console.error("Error adding suggestions:", err);
@@ -1676,7 +1609,7 @@ export default {
     findProcedure(id) {
       return this.diagnosticsRendered.rendered.find(p => p.procedure_id === id) || {};
     },
-    addLabOthers2(v) {
+    addLabOthers(v) {
       if (v !== null) {
         this.diagnosticsRendered.rendered.push({
           id: this.$route.params.id,
@@ -1684,6 +1617,8 @@ export default {
           procedure: v,
           remarks: "",
           type: 1,
+          lab_micro_remarks: this.lab_micro_remarks,
+          xray_remarks: ""
         });
       }
     },
@@ -1882,7 +1817,7 @@ export default {
         this.$refs.uploadRef.clearFiles();
       } catch (err) {
         console.error("Error uploading files:", err);
-        this.$message.error("Upload failed.");
+        this.$message.error("Upload failed. "+err);
       }
     },
     deleteAtt(id) {
@@ -2092,4 +2027,8 @@ button {
   margin-left: 8px;
   /* space between input and label */
 }
+.el-textarea__inner {
+  resize: none !important;
+}
+
 </style>
