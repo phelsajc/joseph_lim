@@ -10,7 +10,7 @@
           <el-dropdown-item command="print_rx">Print Rx</el-dropdown-item>
           <!-- <el-dropdown-item command="email_rx">Email Rx</el-dropdown-item> -->
           <el-dropdown-item command="print_labs">Print Diagnostics</el-dropdown-item>
-          <!-- <el-dropdown-item command="print_referral">Print Referral</el-dropdown-item> -->
+          <el-dropdown-item command="print_referral">Print Referral</el-dropdown-item>
           <el-dropdown-item command="print_medcert">Print Med Cert</el-dropdown-item>
           <el-dropdown-item v-role="['secretary', 'admin', 'doctor']" command="done_consult">Done Consultation</el-dropdown-item>
           <el-dropdown-item command="cancel_apt">Cancel Appointment</el-dropdown-item>
@@ -613,8 +613,8 @@
             <el-radio label="1">Fasting 8-10 hours </el-radio>
             <el-radio label="2">Fasting 10-12 hours </el-radio>
             <el-radio label="3">Non-fasting</el-radio>
-            <el-radio label="4">Send X-ray images</el-radio>
           </el-radio-group>
+          <el-checkbox v-model="form.sendXrayToEmail" label="Send X-ray images" size="large" />
           <el-row>
             <el-form :inline="true" label-position="top" class="demo-form-inline">
               <el-form-item label="Remarks">
@@ -672,7 +672,7 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <!-- <el-tab-pane label="Referral" name="referral" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane label="Referral" name="referral" v-if="checkRole(['admin', 'doctor'])">
         <el-card style="max-width: 100%">
           <el-form label-position="top">
             <el-row :gutter="20">
@@ -714,7 +714,7 @@
             </el-row>
           </el-form>
         </el-card>
-      </el-tab-pane> -->
+      </el-tab-pane>
       <el-tab-pane label="Attachments" name="attachments">
         <div class="mb-4">
           <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange">
@@ -841,6 +841,7 @@ export default {
       services_list: [],
       form: {
         fasting_mode: "",
+        sendXrayToEmail: false,
         email: "",
         prev_admission: "",
         prev_surgeries: "",
@@ -1786,16 +1787,16 @@ export default {
 
         if (extension === "heic" || extension === "heif") {
           try {
-            const jpgBlob = await heic2any({
+            const bmpBlob = await heic2any({
               blob: file,
-              toType: "image/jpeg",
+              toType: "image/bmp",
               quality: 0.9,
             });
 
             const convertedFile = new File(
-              [jpgBlob],
+              [bmpBlob],
               file.name.replace(/\.(heic|heif)$/i, ".jpg"),
-              { type: "image/jpeg" }
+              { type: "image/bmp" }
             );
 
             formData.append(`files[${i}]`, convertedFile);

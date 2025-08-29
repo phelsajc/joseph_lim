@@ -16,16 +16,16 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Brand">
+      <el-table-column align="center" label="Medicine">
         <template slot-scope="scope">
           <span>{{ scope.row.medicine }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Generic">
+      <!-- <el-table-column align="center" label="Generic">
         <template slot-scope="scope">
           <span>{{ scope.row.generic }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column align="center" label="Actions">
         <template #default="scope">
           <el-button type="primary" @click="editMedicine(scope.$index, scope.row)">
@@ -51,9 +51,9 @@
           <el-form-item :label="'Brand'" prop="medicine_name">
             <el-input v-model="form.medicine_name" />
           </el-form-item>
-          <el-form-item :label="'Generic'" prop="generic_name">
+          <!-- <el-form-item :label="'Generic'" prop="generic_name">
             <el-input v-model="form.generic_name" />
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">
@@ -92,7 +92,7 @@ export default {
       },
       form: {
         medicine_name: null,
-        generic_name: null,
+        //generic_name: null,
         id: null,
       },
       item_list: null,
@@ -151,7 +151,7 @@ export default {
               this.getMedicines();
               this.dialogFormVisible = false;
               this.$message({
-                message: 'Appointment has been created successfully.',
+                message: 'Medicine has been created successfully.',
                 type: 'success',
                 duration: 5 * 1000,
               });

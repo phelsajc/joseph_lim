@@ -213,7 +213,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
             $this->cell(-3, 3, '', '0', 0, 'R');
             $this->Row(
                 array(
-                    $item['medicine'].$item['generic_name'],
+                    $item['medicine_id']!=0?$item['medicine']:$item['generic_name'].' ('.$item['medicine'].')',
                     $item['qty'],
                     $item['breakfastbefore'] ?? '',
                     $item['breakfastafter'] ?? '',
@@ -250,7 +250,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->SetFont('Arial', 'B', 7);
         $PageNo = intval($this->PageNo());
         if ($this->data['profile']->signature) {
-            $this->Image($this->data['profile']->signature, 50, 180, 130, 20, 'png');
+            $this->Image($this->data['profile']->signature, 80, 174, 110, 20, 'png');
         }
         $this->Cell(35, 10, '', '', 0, '');
         $this->cell(85, -3, strtoupper($this->data['profile']->name), '', 0, 'R');

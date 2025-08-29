@@ -196,7 +196,7 @@ class RequestprescriptionA5 extends Fpdf
         $this->SetY(-17);
         $this->SetFont('Arial', 'B', 8);
         if ($this->data['profile']->signature) {
-            $this->Image($this->data['profile']->signature, 50, 180, 130, 20, 'png');
+            $this->Image($this->data['profile']->signature, 88, 183, 110, 20, 'png');
         }
 
         $this->Cell(45, 10, '', '', 0, '');
@@ -219,7 +219,7 @@ class RequestprescriptionA5 extends Fpdf
             ['Fasting 8-10 hours', $getFastingMode==1?true:false], // true = checked
             ['Fasting 10-12 hours', $getFastingMode==2?true:false],
             ['Non-fasting', $getFastingMode==3?true:false],
-            ['*Kindly send x-ray images to email:', false],
+            ['*Kindly send x-ray images to email:', $this->data['appointment_detail']->send_xray_email],
             ['jplimmd.clinic@gmail.com', false]
         ];
 

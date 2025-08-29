@@ -21,80 +21,6 @@ class MedCertA5 extends Fpdf
         $this->Body();
     }
 
-    public function Header1()
-    {
-        $this->Image(public_path() . '/img/lim_fb.png', 130, 5, 16, 16, 'PNG');
-        $this->Image(public_path() . '/img/lim_rhuema.jpg', 114, 6, 15, 15, 'JPG');
-        $this->Image(public_path() . '/img/cp.jpg', 98, 6, 15, 15, 'JPG');
-        $this->Ln(1);
-        $this->SetFont('Arial', 'B', 10);
-        $this->Cell(42.5, 3, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
-        $this->SetFont('Arial', '', 7);
-        $this->Ln(1);
-        $this->Cell(41, 8, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
-        $this->Ln(1);
-        $this->Cell(50.5, 11, 'Diplomate, Philippine Rheumatology Association', 0, 0, 'R');
-        $this->Ln(1);
-        $this->Cell(33.5, 14, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');
-        $this->SetLineWidth(0.5);
-        $this->Line(5, 23, 145, 23);
-        $this->SetFont('Arial', 'B', 7);
-        $this->Ln(0.05);
-        /* $this->Ln(5);
-        $this->SetFont('Arial', 'B', 9);
-        $this->Cell(1, -8, '', '', 0, '');
-        $this->Cell(116, 2, strtoupper($this->data['profile']->specialization1), 0, 0, 'R');
-        $this->Ln(9);
-        $this->SetFont('Arial', '', 7);
-        $this->Cell(115, -17, strtoupper($this->data['profile']->specialization2), 0, 0, 'C'); */
-        $this->Ln(10);
-        $this->SetFont('Arial', '', 7);
-        $this->SetXY(7, 14);
-        $this->SetFont('Arial', 'B', 4.5);
-        $this->SetXY(5, 24);
-        $this->MultiCell(62, 3, "Room 504. Riverside Medical", 0, 'L');
-        $this->SetXY(5, 26.5);
-        $this->MultiCell(62, 3, "Arts Building, BS Aquino Drive, Bacolod ", 0, 'L');
-        $this->SetXY(5, 29);
-        $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 2:00 PM - 5:00 PM ", 0, 'L');
-        $this->SetXY(5.2, 31.5);
-        $this->MultiCell(62, 3, "For appointment: 0962-484-5664 ", 0, 'L');
-        $this->SetXY(5.2, 34);
-        $this->MultiCell(150, 3, "Hospital Affiliations: Dr. Pablo O. Torre Memorial Hospital, Metro Bacolod Hospital and Medical Center, Bacolod Queen of Mercy Hospital, Adventist Medical Center-Bacolod", 0, 'L');
-
-        $this->SetXY(40, 24);
-        $this->MultiCell(62, 3, "Room 415. Metro Bacolod Hospital and Medical", 0, 'L');
-        $this->SetXY(40, 26.5);
-        $this->MultiCell(62, 3, "Center, Brgy. Estefania, Bacolod", 0, 'L');
-        $this->SetXY(40, 29);
-        $this->MultiCell(61.5, 3, "Schedule: Tue-Thu: 9:00 AM - 12:00 PM ", 0, 'L');
-        $this->SetXY(40.2, 31.5);
-        $this->MultiCell(62, 3, "For appointment: 0968-418-7873", 0, 'L');
-
-
-        $this->SetXY(78, 24);
-        $this->MultiCell(62, 3, "VitalRx Pharmacy and Arthritis Clinic, JTL", 0, 'L');
-        $this->SetXY(78, 26.5);
-        $this->MultiCell(62, 3, "Building, BS Aquino Drive, Bacolod", 0, 'L');
-        $this->SetXY(78, 29);
-        $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 9:00 AM - 12:00 PM ", 0, 'L');
-        $this->SetXY(78.2, 31.5);
-        $this->MultiCell(62, 3, "For appointment.: 0966-073-6942", 0, 'L');
-
-        $this->SetXY(113, 24);
-        $this->MultiCell(62, 3, "Agustin Medical Clinic ", 0, 'L');
-        $this->SetXY(113, 26.5);
-        $this->MultiCell(62, 3, "Sen Jose Locsin Street, Brgy. V, Silay ", 0, 'L');
-        $this->SetXY(113, 29);
-        $this->MultiCell(61.5, 3, "Schedule: Thursday 1:30 PM - 4:30 PM", 0, 'L');
-        $this->SetXY(113.2, 31.5);
-        $this->MultiCell(62, 3, "For appointment: 0928-259-8495", 0, 'L');
-
-        $this->SetLineWidth(0.5);
-        $this->Line(5, 37, 145, 37);
-        $this->Ln(10);
-    }
-
     public function Header()
     {
         $this->Image(public_path() . '/img/lim_fb.png', 132, 6, 11, 11, 'PNG');
@@ -166,7 +92,6 @@ class MedCertA5 extends Fpdf
         $this->Line(2, 38, 146, 38);
         $this->Ln(5);
     }
-
     public function Body()
     {
         $age = date_diff(date_create($this->data['patient_detail']->birthdate), date_create('now'))->y;
@@ -338,7 +263,7 @@ class MedCertA5 extends Fpdf
         $this->SetFont('Arial', 'B', 7);
         $PageNo = intval($this->PageNo());
         if ($this->data['profile']->signature) {
-            $this->Image($this->data['profile']->signature, 50, 180, 130, 20, 'png');
+            $this->Image($this->data['profile']->signature, 80, 174, 110, 20, 'png');
         }
         $this->Cell(35, 10, '', '', 0, '');
         $this->cell(85, -3, strtoupper($this->data['profile']->name), '', 0, 'R');

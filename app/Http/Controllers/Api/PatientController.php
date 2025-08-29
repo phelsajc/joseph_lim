@@ -405,6 +405,7 @@ class PatientController extends BaseController
         $data->pe = $request->pe;
         $data->diagnosis = $request->diagnosis;
         $data->fasting_mode = $request->fasting_mode;
+        $data->send_xray_email = $request->sendXrayToEmail ?? 0;
         //$data->plan = $request->plan;
 
         /* $data->clearance_undersigned = $request->clearance_undersigned!='Invalid date'?$clearance_undersigned:null;//$undersigned;
@@ -896,7 +897,6 @@ class PatientController extends BaseController
         foreach ($data as $key => $value) {
             $arr = array();
             $fileName = $value->filename;
-            //$fileUrl = url('storage/app/public/uploads/' . $fileName);
             $fileUrl = url('public/storage/uploads/' . $fileName);
             //$fileUrl = url('/storage/uploads/' . $fileName);
             $fileExt = explode(".", $fileName);

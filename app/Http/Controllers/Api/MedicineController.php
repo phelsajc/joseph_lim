@@ -87,7 +87,8 @@ class MedicineController extends BaseController
         $data = array();
         foreach ($q as $key => $value) {
             $arr =  array();
-            $arr['medicine'] = $value->generic_name.' ('.$value->medicine_name.') '.$value->unit;
+            //$arr['medicine'] = $value->generic_name.' ('.$value->medicine_name.') '.$value->unit;
+            $arr['medicine'] = $value->medicine_name;
             $arr['id'] = $value->id;
             $data[] = $arr;
         }
@@ -97,7 +98,7 @@ class MedicineController extends BaseController
     public function store(Request $request) {
         $field = new Medicine();
         $field->medicine_name = $request->medicine_name	;
-        $field->generic_name = $request->generic_name;
+        //$field->generic_name = $request->generic_name;
         $field->isincluded = 1;
         $field->save();
         return response()->json(true);
@@ -106,7 +107,7 @@ class MedicineController extends BaseController
     public function update(Request $request) {
         $field = Medicine::find($request->id);
         $field->medicine_name = $request->medicine_name	;
-        $field->generic_name = $request->generic_name;
+        //$field->generic_name = $request->generic_name;
         $field->isincluded = 1;
         $field->save();
         return response()->json(true);
