@@ -531,9 +531,9 @@
               <el-form-item v-if="medsArr.custom_meds" label="Brand Name">
                 <el-input v-model="medsArr.custom_brand" autosize clearable />
               </el-form-item>
-              <el-form-item v-if="medsArr.custom_meds" label="Dosage">
+              <!-- <el-form-item v-if="medsArr.custom_meds" label="Dosage">
                 <el-input v-model="medsArr.custom_dosage" autosize clearable />
-              </el-form-item>
+              </el-form-item> -->
             </el-form>
           </el-row>
           <el-row :gutter="20">
@@ -588,9 +588,11 @@
               </el-table-column>
               <el-table-column prop="bt" label="Bedtime" width="80" />
               <el-table-column prop="remarks" label="Remarks" width="300" />
-              <el-table-column align="center" label="Actions" width="150">
+              <el-table-column align="center" label="Actions" width="200">
                 <template slot-scope="scope">
-                  <el-button v-role="['doctor', 'admin']" type="danger"
+                  <el-button v-role="['doctor', 'admin']" type="primary" size="mini"
+                    @click="editMed(scope.row)">Edit</el-button>
+                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini"
                     @click="deleteMed(scope.row.id)">Delete</el-button>
                 </template>
               </el-table-column>
@@ -599,7 +601,13 @@
           <el-divider />
           <el-row :gutter="20">
             <el-button v-role="['doctor', 'admin']" type="success" @click="addMeds()">
-              Add
+              {{ isEditMode ? 'Update' : 'Add' }}
+            </el-button>
+            <el-button v-if="isEditMode" v-role="['doctor', 'admin']" type="warning" @click="cancelEdit()">
+              Cancel
+            </el-button>
+            <el-button v-if="!isEditMode" v-role="['doctor', 'admin']" type="primary" @click="newMedicine()">
+              New Medicine
             </el-button>
             <el-button v-role="['doctor', 'admin']" type="info" @click="importMedicine()">
               Import
@@ -980,6 +988,8 @@ export default {
         custom_brand: "",
         custom_dosage: "",
       },
+      isEditMode: false,
+      editingMedId: null,
       procedure: {
         procedure: "",
         procedure_id: 0,
@@ -1500,6 +1510,34 @@ export default {
         alert("Procedure is required.");
       }
     },
+    editMed(row) {
+      this.isEditMode = true;
+      this.editingMedId = row.id;
+      
+      // Populate the form with the medicine data
+      this.medsArr.qty = row.qty || "";
+      this.medsArr.bf_b = row.bb || "";
+      this.medsArr.bf_a = row.ab || "";
+      this.medsArr.l_b = row.bl || "";
+      this.medsArr.l_a = row.al || "";
+      this.medsArr.s_b = row.bs || "";
+      this.medsArr.s_a = row.as || "";
+      this.medsArr.bt = row.bt || "";
+      this.medsArr.remarks = row.remarks || "";
+      
+      // Handle medicine selection
+      if (row.medicineId!=0) {
+        this.medsArr.meds = row.medicine;
+        this.medsArr.med_id = row.med_id || row.id;
+        this.medsArr.custom_meds = false;
+      } else {
+        // Custom medicine - check if it's a custom medicine entry
+        this.medsArr.custom_meds = true;
+        this.medsArr.custom_generic = row.generic;
+        this.medsArr.custom_brand = row.brand;
+        //this.medsArr.custom_dosage = row.dosage || "";
+      }
+    },
     deleteMed(row) {
       this.$confirm("Are you sure you want to delete this item?", "Warning", {
         confirmButtonText: "OK",
@@ -1522,31 +1560,71 @@ export default {
           });
         });
     },
+    cancelEdit() {
+      this.isEditMode = false;
+      this.editingMedId = null;
+      this.clearMedsForm();
+    },
+    clearMedsForm() {
+      this.medsArr.qty = "";
+      this.medsArr.bf_b = "";
+      this.medsArr.bf_a = "";
+      this.medsArr.l_a = "";
+      this.medsArr.l_b = "";
+      this.medsArr.s_b = "";
+      this.medsArr.s_a = "";
+      this.medsArr.bt = "";
+      this.medsArr.meds = "";
+      this.medsArr.remarks = "";
+      this.medsArr.custom_generic = "";
+      this.medsArr.custom_brand = "";
+      this.medsArr.custom_dosage = "";
+      this.medsArr.custom_meds = false;
+      this.medsArr.med_id = 0;
+      this.isEditMode = false;
+      this.editingMedId = null;
+    },
+    newMedicine() {
+      this.clearMedsForm();
+    },
     addMeds() {
       if (
         (this.medsArr.meds !== "" && this.medsArr.qty !== "") ||
         (this.medsArr.custom_generic !== "" && this.medsArr.custom_dosage !== "")
       ) {
-        Medicine.add_rx(this.medsArr)
-          .then((response) => {
-            this.getmeds();
-            this.medsArr.qty = "";
-            this.medsArr.bf_b = "";
-            this.medsArr.bf_a = "";
-            this.medsArr.l_a = "";
-            this.medsArr.l_b = "";
-            this.medsArr.s_b = "";
-            this.medsArr.s_a = "";
-            this.medsArr.bt = "";
-            this.medsArr.meds = "";
-            this.medsArr.remarks = "";
-            this.medsArr.custom_generic = "";
-            this.medsArr.custom_brand = "";
-            this.medsArr.custom_dosage = "";
-          })
-          .catch((err) => {
-            console.error("Error adding suggestions:", err);
-          });
+        if (this.isEditMode) {
+          // Update existing medicine
+          Medicine.update_rx(this.editingMedId, this.medsArr)
+            .then((response) => {
+              this.getmeds();
+              this.isEditMode = false;
+              this.editingMedId = null;
+              this.clearMedsForm();
+              this.$message({
+                type: "success",
+                message: "Medicine updated successfully.",
+              });
+            })
+            .catch((err) => {
+              console.error("Error updating medicine:", err);
+              this.$message.error("Failed to update medicine.");
+            });
+        } else {
+          // Add new medicine
+          Medicine.add_rx(this.medsArr)
+            .then((response) => {
+              this.getmeds();
+              this.clearMedsForm();
+              this.$message({
+                type: "success",
+                message: "Medicine added successfully.",
+              });
+            })
+            .catch((err) => {
+              console.error("Error adding medicine:", err);
+              this.$message.error("Failed to add medicine.");
+            });
+        }
       } else {
         alert("Medicine details are required.");
       }

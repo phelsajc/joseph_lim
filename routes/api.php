@@ -74,6 +74,7 @@ Route::
                 Route::get('get-patient-past-consult/{id}', 'PatientController@getpastConsultationList');
                 Route::delete('remove-meds/{id}', 'PatientController@deleteMed');
                 Route::post('add-meds', 'PatientController@addMed');
+                Route::patch('update-meds/{id}', 'PatientController@updateMed');
                 Route::delete('remove-diagnostic/{id}', 'PatientController@deleteDiagnostic');
                 Route::post('add-diagnostic', 'PatientController@addDiagnostic');
                 Route::delete('remove-service/{id}', 'PatientController@deleteService');

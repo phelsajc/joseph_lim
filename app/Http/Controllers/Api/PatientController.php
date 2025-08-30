@@ -770,6 +770,36 @@ class PatientController extends BaseController
         return response()->json($medicineDetail);
     }
 
+    public function updateMed(Request $request, $id)
+    {
+        $rx = RX::find($id);
+        if (!$rx) {
+            return response()->json(['error' => 'Medicine not found'], 404);
+        }
+
+        $medicineDetail = null;
+        if (!$request->custom_meds) {
+            $medicineDetail = Helpers::medicineDetail($request->med_id);
+        }
+
+        $rx->medicine_id = $request->custom_meds ? 0 : $request->med_id;
+        $rx->breakfastbefore = $request->bf_b;
+        $rx->breakfastafter = $request->bf_a;
+        $rx->lunchbefore = $request->l_b;
+        $rx->lunchafter = $request->l_a;
+        $rx->supperbefore = $request->s_b;
+        $rx->supperafter = $request->s_a;
+        $rx->bedtime = $request->bt;
+        $rx->qty = $request->qty;
+        $rx->remarks = $request->remarks;
+        $rx->medicine = $request->custom_meds ? $request->custom_brand : $request->meds;
+        $rx->generic_id = $request->custom_meds ? 0 : ($medicineDetail ? $medicineDetail->generic_id : 0);
+        $rx->generic_name = $request->custom_meds ? $request->custom_generic . ' ' . $request->custom_dosage : ($medicineDetail ? $medicineDetail->generic_name . ' ' . $medicineDetail->unit : '');
+        $rx->save();
+        
+        return response()->json(['success' => true, 'message' => 'Medicine updated successfully']);
+    }
+
     function deleteDiagnostic($id)
     {
         Ancillary::where('id', $id)->delete();
@@ -839,7 +869,10 @@ class PatientController extends BaseController
         $array = array();
         foreach ($data as $key => $value) {
             $arr = array();
-            $arr['medicine'] = $value->generic_name . ' (' . $value->medicine . ')';
+            $arr['medicine'] = $value->generic_name . $value->medicine ;
+            $arr['generic'] = $value->generic_name;
+            $arr['brand'] = $value->medicine;
+            $arr['dosage'] = $value->medicine;
             $arr['qty'] = $value->qty;
             $arr['bb'] = $value->breakfastbefore;
             $arr['ab'] = $value->breakfastafter;
@@ -849,6 +882,7 @@ class PatientController extends BaseController
             $arr['as'] = $value->supperafter;
             $arr['bt'] = $value->bedtime;
             $arr['remarks'] = $value->remarks;
+            $arr['medicineId'] = $value->medicine_id;
             $arr['id'] = $value->rx_id;
             $array[] = $arr;
         }

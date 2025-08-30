@@ -22,6 +22,9 @@ export default {
   add_rx(data) {
     return request.post('add-meds', data);
   },
+  update_rx(id, data) {
+    return request.patch('update-meds/' + id, data);
+  },
   findmedicine(params) {
     return request.get('find-medicine/' + params);
   },

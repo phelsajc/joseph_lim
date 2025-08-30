@@ -13,7 +13,7 @@ class Rx extends Model
      */
 
     protected $table = "rx";
-    protected $primaryKey = "lab_test_id";
+    protected $primaryKey = "rx_id";
     public $timestamps = false;
 
 }
