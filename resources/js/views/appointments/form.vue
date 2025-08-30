@@ -588,10 +588,12 @@
               </el-table-column>
               <el-table-column prop="bt" label="Bedtime" width="80" />
               <el-table-column prop="remarks" label="Remarks" width="300" />
-              <el-table-column align="center" label="Actions" width="200">
+              <el-table-column align="center" label="Actions" width="300">
                 <template slot-scope="scope">
                   <el-button v-role="['doctor', 'admin']" type="primary" size="mini"
                     @click="editMed(scope.row)">Edit</el-button>
+                  <el-button v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']" type="warning" size="mini"
+                    @click="cancelEdit()">Cancel</el-button>
                   <el-button v-role="['doctor', 'admin']" type="danger" size="mini"
                     @click="deleteMed(scope.row.id)">Delete</el-button>
                 </template>
@@ -602,12 +604,6 @@
           <el-row :gutter="20">
             <el-button v-role="['doctor', 'admin']" type="success" @click="addMeds()">
               {{ isEditMode ? 'Update' : 'Add' }}
-            </el-button>
-            <el-button v-if="isEditMode" v-role="['doctor', 'admin']" type="warning" @click="cancelEdit()">
-              Cancel
-            </el-button>
-            <el-button v-if="!isEditMode" v-role="['doctor', 'admin']" type="primary" @click="newMedicine()">
-              New Medicine
             </el-button>
             <el-button v-role="['doctor', 'admin']" type="info" @click="importMedicine()">
               Import
@@ -1594,7 +1590,7 @@ export default {
       ) {
         if (this.isEditMode) {
           // Update existing medicine
-          Medicine.update_rx(this.editingMedId, this.medsArr)
+          Medicine.update_rx(this.editingMedId, this.medsArr) 
             .then((response) => {
               this.getmeds();
               this.isEditMode = false;
