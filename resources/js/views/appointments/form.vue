@@ -1629,11 +1629,12 @@ export default {
       this.medsArr.s_a = row.as || "";
       this.medsArr.bt = row.bt || "";
       this.medsArr.remarks = row.remarks || "";
-
+      this.medsArr.med_id = row.medicineId;
+      
       // Handle medicine selection
       if (row.medicineId != 0) {
         this.medsArr.meds = row.medicine;
-        this.medsArr.med_id = row.med_id || row.id;
+        //this.medsArr.med_id = row.med_id || row.id;
         this.medsArr.custom_meds = false;
       } else {
         // Custom medicine - check if it's a custom medicine entry

@@ -113,9 +113,11 @@ class Referral extends Fpdf
         $this->SetFont('Arial', 'B', 10);
         $this->SetY(65);
         $this->MultiCell(115, 5,$this->data['appointment_detail']->referral_doctor, '', 'L');
-        $this->MultiCell(115, 5,$this->data['appointment_detail']->referral_addr1, '', 'L');
+        $this->Ln(h: 1);
+        $this->MultiCell(115,5,$this->data['appointment_detail']->referral_addr1, '', 'L');
+        $this->Ln(1);
         $this->MultiCell(115, 5,$this->data['appointment_detail']->referral_addr2, '', 'L');
-        $this->SetY(85);
+        $this->SetY(90);
         $this->Cell(0.1,5,'','',0,'');
         $this->MultiCell(115, 3,"Dear ".$this->data['appointment_detail']->referral_doctor	.",", '', 'L');
         $this->Ln(4);
@@ -124,7 +126,7 @@ class Referral extends Fpdf
         $this->SetFont('Arial', '', 10);
         $px = $this->data['patient_detail']->patientname;
         $x = 10;
-        $y = 88;
+        $y = 94;
 
         // Add styled text
         $parts = [
@@ -139,12 +141,12 @@ class Referral extends Fpdf
         ];
         $this->TextWithStyles($x, $y, $parts);
         $this->Ln(12);
-        $this->SetFont('Arial', '', 9);
+        $this->SetFont('Arial', '', 10);
         $this->Cell(5,3,'','',0,'');
-        $this->Cell(19,3,"Thank you very much. ",'',0,'C');
+        $this->Cell(29,3,"Thank you very much. ",'',0,'C');
         $this->Ln(12);
         $this->Cell(5,3,'','',0,'');
-        $this->Cell(17,3,"Respectfully yours, ",'',0,'C');
+        $this->Cell(25,3,"Respectfully yours, ",'',0,'C');
     }
     
     public function Footer()
@@ -242,7 +244,7 @@ class Referral extends Fpdf
         foreach ($parts as $part) {
             $text = $part['text'];
             $style = isset($part['style']) ? $part['style'] : '';
-            $this->SetFont('Arial', $style, 9);
+            $this->SetFont('Arial', $style, 10);
             $textiArr[]=$part;
             // Split the text into paragraphs
             

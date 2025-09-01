@@ -869,7 +869,7 @@ class PatientController extends BaseController
         $array = array();
         foreach ($data as $key => $value) {
             $arr = array();
-            $arr['medicine'] = $value->generic_name . $value->medicine ;
+            $arr['medicine'] = $value->generic_name.' '. $value->medicine ;
             $arr['generic'] = $value->generic_name;
             $arr['brand'] = $value->medicine;
             $arr['dosage'] = $value->medicine;
