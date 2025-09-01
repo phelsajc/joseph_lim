@@ -200,6 +200,23 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         );
     }
 
+    private function formatMedicineName($genericName, $medicine, $medicineId)
+    {
+        // If medicine_id is not 0, show generic_name + medicine with space
+        /* if ($medicineId != 0) {
+            return $genericName . ' ' . $medicine . ' ';
+        } */
+        
+        // If medicine_id is 0, check if generic_name already contains parentheses
+        if (strpos($medicine, '(') !== false) {
+            // Generic name already has parentheses, just add space
+            return $genericName . ' ' . $medicine . ' ';
+        } else {
+            // Generic name has no parentheses, add parentheses around medicine
+            return $genericName . ' (' . $medicine . ') ';
+        }
+    }
+
     public function meal()
     {
         $this->Ln(1);
@@ -213,7 +230,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
             $this->cell(-3, 3, '', '0', 0, 'R');
             $this->Row(
                 array(
-                    $item['medicine_id']!=0?$item['generic_name'].' '.$item['medicine'].' ':$item['generic_name'].' ('.$item['medicine'].')',
+                    $this->formatMedicineName($item['generic_name'], $item['medicine'], $item['medicine_id']),
                     $item['qty'],
                     $item['breakfastbefore'] ?? '',
                     $item['breakfastafter'] ?? '',
