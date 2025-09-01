@@ -257,11 +257,15 @@ class ChartRecordPdf extends Fpdf
     $this->MultiCell(190, 3, $data->recommendations, '', 'L', 0); */
 
     //Rx
-    $getPrescriptions = Rx::where(['appointment_id' => $data->id])->get();
+    $getPrescriptions = Rx::where(['appointment_id' => $data->id])->orderby('rx_id','asc')->get();
     $prescriptions = '';
     $ar = array();
     foreach ($getPrescriptions as $key => $value) {
-      $prescriptions .= ($key + 1) . '.) ' . strtoupper($value->generic_name).' '. strtoupper($value->medicine) . "\r\n";
+      if($value->medicine_id==0){
+        $prescriptions .= ($key + 1) . '.) ' . strtoupper($value->generic_name).' ('. strtoupper($value->medicine) . ")\r\n";
+      }else{
+        $prescriptions .= ($key + 1) . '.) ' . strtoupper($value->medicine) . "\r\n";
+      }
       $ar[] = ($key + 1) . '.) ' . strtoupper($value->medicine) .  ",";
     }
 

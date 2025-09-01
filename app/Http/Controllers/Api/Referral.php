@@ -112,9 +112,10 @@ class Referral extends Fpdf
         $this->Ln(35);
         $this->SetFont('Arial', 'B', 10);
         $this->SetY(65);
+        $this->MultiCell(115, 5,$this->data['appointment_detail']->referral_doctor, '', 'L');
         $this->MultiCell(115, 5,$this->data['appointment_detail']->referral_addr1, '', 'L');
         $this->MultiCell(115, 5,$this->data['appointment_detail']->referral_addr2, '', 'L');
-        $this->SetY(80);
+        $this->SetY(85);
         $this->Cell(0.1,5,'','',0,'');
         $this->MultiCell(115, 3,"Dear ".$this->data['appointment_detail']->referral_doctor	.",", '', 'L');
         $this->Ln(4);
@@ -123,7 +124,7 @@ class Referral extends Fpdf
         $this->SetFont('Arial', '', 10);
         $px = $this->data['patient_detail']->patientname;
         $x = 10;
-        $y = 85;
+        $y = 88;
 
         // Add styled text
         $parts = [

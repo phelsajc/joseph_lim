@@ -93,7 +93,7 @@ class PatientController extends BaseController
         //$input = Request::all();
         $data = new Patients();
         $lastinserted = Patients::latest()->value('id') + 1;//DB::connection('mysql')->getPdo()->lastInsertId();
-        $data->patientname = ucfirst($request->firstname) . ' ' . ucfirst(mb_substr($request->middlename, 0, 1)) . '. ' . ucfirst($request->lastname);
+        $data->patientname = ucfirst($request->firstname) . ' ' . ($request->middlename ? ucfirst(mb_substr($request->middlename, 0, 1)) . '. ' : '') . ucfirst($request->lastname);
         $data->firstname = $request->firstname;
         $data->middlename = $request->middlename;
         $data->lastname = $request->lastname;
@@ -148,7 +148,7 @@ class PatientController extends BaseController
     {
         date_default_timezone_set('Asia/Manila');
         $data = Patients::find($request->id);
-        $data->patientname = ucfirst($request->firstname) . ' ' . ucfirst(mb_substr($request->middlename, 0, 1)) . '. ' . ucfirst($request->lastname);
+        $data->patientname = ucfirst($request->firstname) . ' ' . ($request->middlename ? ucfirst(mb_substr($request->middlename, 0, 1)) . '. ' : '') . ucfirst($request->lastname);
         $data->firstname = $request->firstname;
         $data->middlename = $request->middlename;
         $data->lastname = $request->lastname;
@@ -765,7 +765,7 @@ class PatientController extends BaseController
         $rx->created_dt = date("Y-m-d H:i:s");
         $rx->medicine = $request->custom_meds ? $request->custom_brand : $request->meds;
         $rx->generic_id = $request->custom_meds ? 0 : $medicineDetail->generic_id;
-        $rx->generic_name = $request->custom_meds ? $request->custom_generic . ' ' . $request->custom_dosage : $medicineDetail->generic_name . ' ' . $medicineDetail->unit;
+        $rx->generic_name = $request->custom_meds ? $request->custom_generic: $medicineDetail->generic_name;
         $rx->save();
         return response()->json($medicineDetail);
     }
@@ -939,6 +939,8 @@ class PatientController extends BaseController
             $arr['extension'] = $fileExt[1];
             $arr['id'] = $value->AttachmentID;
             $arr['fname'] = $fileName;
+            $arr['description'] = $value->description;
+            $arr['created_dt'] = date_format(date_create($value->created_dt), "F d, Y");
             $array[] = $arr;
         }
         return response()->json(['data' => $array]);

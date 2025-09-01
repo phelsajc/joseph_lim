@@ -75,6 +75,16 @@ Route::
                 Route::delete('remove-meds/{id}', 'PatientController@deleteMed');
                 Route::post('add-meds', 'PatientController@addMed');
                 Route::patch('update-meds/{id}', 'PatientController@updateMed');
+
+// PE Templates Routes
+Route::middleware('auth:api')->group(function () {
+    Route::get('pe-templates', 'PeTemplateController@index');
+    Route::get('pe-templates/type/{type}', 'PeTemplateController@getByType');
+    Route::post('pe-templates', 'PeTemplateController@store');
+    Route::put('pe-templates/{id}', 'PeTemplateController@update');
+    Route::delete('pe-templates/{id}', 'PeTemplateController@destroy');
+    Route::patch('pe-templates/{id}/toggle-status', 'PeTemplateController@toggleStatus');
+});
                 Route::delete('remove-diagnostic/{id}', 'PatientController@deleteDiagnostic');
                 Route::post('add-diagnostic', 'PatientController@addDiagnostic');
                 Route::delete('remove-service/{id}', 'PatientController@deleteService');

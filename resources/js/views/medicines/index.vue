@@ -48,7 +48,7 @@
       <div class="form-container">
         <el-form ref="appForm" :model="form" :rules="rules" label-position="left" label-width="150px"
           style="max-width: 500px">
-          <el-form-item :label="'Brand'" prop="medicine_name">
+          <el-form-item :label="'Medicine Name'" prop="medicine_name">
             <el-input v-model="form.medicine_name" />
           </el-form-item>
           <!-- <el-form-item :label="'Generic'" prop="generic_name">

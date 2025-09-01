@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $admin = User::create([
+        /* $admin = User::create([
             'name' => 'Admin',
             'email' => 'admin@laravue.dev',
             'password' => Hash::make('laravue'),
@@ -50,6 +50,7 @@ class DatabaseSeeder extends Seeder
         $editor->syncRoles($editorRole);
         $user->syncRoles($userRole);
         $visitor->syncRoles($visitorRole);
-        $this->call(UsersTableSeeder::class);
+        $this->call(UsersTableSeeder::class); */
+        $this->call(PeTemplatesSeeder::class);
     }
 }

@@ -213,7 +213,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
             $this->cell(-3, 3, '', '0', 0, 'R');
             $this->Row(
                 array(
-                    $item['medicine_id']!=0?$item['medicine']:$item['generic_name'].' ('.$item['medicine'].')',
+                    $item['medicine_id']!=0?$item['generic_name'].' '.$item['medicine'].' ':$item['generic_name'].' ('.$item['medicine'].')',
                     $item['qty'],
                     $item['breakfastbefore'] ?? '',
                     $item['breakfastafter'] ?? '',
@@ -241,7 +241,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Ln(3);
         $this->Cell(41,3,"Diagnosis: ",'',0,'C');
         $this->Cell(-13,3,'','',0,'');
-        $this->MultiCell(100, 3,$this->data['appointment_detail']->diagnosis, 'B', 'L');
+        $this->MultiCell(100, 3,$this->data['appointment_detail']->diagnosis, 'B', 'L');    
     }
 
     public function Footer()

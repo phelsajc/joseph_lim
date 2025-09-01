@@ -12,7 +12,8 @@
           <el-dropdown-item command="print_labs">Print Diagnostics</el-dropdown-item>
           <el-dropdown-item command="print_referral">Print Referral</el-dropdown-item>
           <el-dropdown-item command="print_medcert">Print Med Cert</el-dropdown-item>
-          <el-dropdown-item v-role="['secretary', 'admin', 'doctor']" command="done_consult">Done Consultation</el-dropdown-item>
+          <el-dropdown-item v-role="['secretary', 'admin', 'doctor']" command="done_consult">Done
+            Consultation</el-dropdown-item>
           <el-dropdown-item command="cancel_apt">Cancel Appointment</el-dropdown-item>
           <el-dropdown-item v-role="['doctor', 'admin']" command="view_chart">View Chart</el-dropdown-item>
         </el-dropdown-menu>
@@ -148,10 +149,11 @@
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedMirco" @change="addNewProcedure(item)"
                   :key="item.lab_test" :label="item.lab_test">
                   {{ item.lab_test.toUpperCase() }}
-                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && (item.lab_test_id == 560 || item.lab_test_id == 561)"
+                  <el-input
+                    v-if="diagnosticsRenderedModel.includes(item.lab_test) && (item.lab_test_id == 560 || item.lab_test_id == 561)"
                     v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
                     style="width: 400px" />
-                  </el-checkbox>
+                </el-checkbox>
               </el-checkbox-group>
               <!-- <el-input v-model="lab_micro_remarks" clearable placeholder="Remarks" /> -->
             </el-col>
@@ -313,7 +315,7 @@
             <span class="profile-label">Gender:</span>
             <span class="profile-value">{{
               profile.sex == "2" ? "Female" : "Male"
-            }}</span>
+              }}</span>
           </div>
           <div class="profile-item">
             <span class="profile-label">Blood Type:</span>
@@ -452,13 +454,51 @@
         <el-form ref="form" :model="form" label-width="120px" class="demo-form-inline"
           v-if="checkRole(['admin', 'doctor'])">
           <el-form-item label="P.E.">
-            <el-input v-model="form.pe" type="textarea" ref="peInput" rows="10"  @input="autoResize"/>
+            <div class="pe-template-section">
+              <el-row :gutter="20" style="margin-bottom: 15px;">
+                <el-col :span="24">
+                  <div class="template-buttons">
+                    <el-button v-for="template in peTemplates" :key="template.id" size="small"
+                      :type="template.type === 'default' ? 'primary' : 'success'" plain
+                      @click="insertPETemplate(template.content)" class="template-btn">
+                      {{ template.name }}
+                      <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                        circle @click.stop="deleteTemplate(template.id)" class="delete-template-btn"></el-button>
+                    </el-button>
+                  </div>
+                  <el-button size="small" type="success" @click="showCustomTemplateDialog = true"
+                    style="margin-left: 10px;">
+                    Custom Template
+                  </el-button>
+                </el-col>
+              </el-row>
+              <el-input v-model="form.pe" type="textarea" ref="peInput" rows="10" @input="autoResize" />
+            </div>
           </el-form-item>
+
+          <!-- Custom Template Dialog -->
+          <el-dialog title="Custom Physical Examination Template" :visible.sync="showCustomTemplateDialog" width="60%"
+            :close-on-click-modal="false">
+            <el-form :model="customTemplateForm" label-width="120px">
+              <el-form-item label="Template Name">
+                <el-input v-model="customTemplateForm.name" placeholder="Enter template name" />
+              </el-form-item>
+              <el-form-item label="Template Content">
+                <el-input v-model="customTemplateForm.content" type="textarea" :rows="8"
+                  placeholder="Enter your custom P.E. template content..." />
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="showCustomTemplateDialog = false">Cancel</el-button>
+              <el-button type="primary" @click="saveCustomTemplate">Save Template</el-button>
+            </div>
+          </el-dialog>
+
           <el-form-item label="Diagnosis">
             <el-input v-model="form.diagnosis" type="textarea" />
           </el-form-item>
           <el-form-item label="Plans">
-            <el-input v-model="form.remarks" type="textarea" ref="plansInput" rows="10"  @input="autoResize"/>
+            <el-input v-model="form.remarks" type="textarea" ref="plansInput" rows="10" @input="autoResize" />
           </el-form-item>
           <el-form-item label="Follow Up Date">
             <!-- <el-date-picker
@@ -592,8 +632,8 @@
                 <template slot-scope="scope">
                   <el-button v-role="['doctor', 'admin']" type="primary" size="mini"
                     @click="editMed(scope.row)">Edit</el-button>
-                  <el-button v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']" type="warning" size="mini"
-                    @click="cancelEdit()">Cancel</el-button>
+                  <el-button v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
+                    type="warning" size="mini" @click="cancelEdit()">Cancel</el-button>
                   <el-button v-role="['doctor', 'admin']" type="danger" size="mini"
                     @click="deleteMed(scope.row.id)">Delete</el-button>
                 </template>
@@ -681,26 +721,20 @@
           <el-form label-position="top">
             <el-row :gutter="20">
               <el-col :span="4">
-                <el-form-item label="Doctor"
-                  ><el-input v-model="form.referral_doctor" />
+                <el-form-item label="Doctor"><el-input v-model="form.referral_doctor" />
                 </el-form-item>
               </el-col>
               <el-col :span="4">
-                <el-form-item label="Address 1"
-                  ><el-input v-model="form.referral_addr1" />
+                <el-form-item label="Address 1"><el-input v-model="form.referral_addr1" />
                 </el-form-item>
               </el-col>
               <el-col :span="4">
-                <el-form-item label="Address 2"
-                  ><el-input v-model="form.referral_addr2" />
+                <el-form-item label="Address 2"><el-input v-model="form.referral_addr2" />
                 </el-form-item>
               </el-col>
               <el-col :span="4">
                 <el-form-item label="Undersigned Date">
-                  <date-picker
-                    v-model="form.referral_undersigned"
-                    valueType="format"
-                  ></date-picker>
+                  <date-picker v-model="form.referral_undersigned" valueType="format"></date-picker>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -740,21 +774,13 @@
           <el-table :data="attachments" style="width: 100%">
             <el-table-column label="Image">
               <template slot-scope="scope">
-                <!-- <el-image :src="imgSrc(scope.row.newfile, scope.row.oldfile, scope.row.type)" fit="cover" class="image"
-                  :preview-src-list="[
-                    imgSrc(scope.row.newfile, scope.row.oldfile, scope.row.type),
-                  ]" /> -->
-                <!-- <el-image v-if="checkExtn(scope.row.fname)!='pdf'" :src="imgSrc(scope.row.newfile, scope.row.oldfile, scope.row.type)" fit="cover" class="image"
-                  :preview-src-list="[
-                    imgSrc(scope.row.newfile, scope.row.oldfile, scope.row.type),
-                  ]" />
-                <iframe v-else :src="scope.row.newfile" width="100%" height="100%" frameborder="0"
-                  allowfullscreen></iframe> -->
                 <el-button type="primary" icon="el-icon-files"
                   @click="viewFile(scope.row.newfile, scope.row.extension)" />
                 {{ scope.row.fname }}
               </template>
             </el-table-column>
+            <el-table-column label="Name" prop="description" />
+            <el-table-column label="Date" prop="created_dt" />
             <el-table-column label="Action" width="150">
               <template slot-scope="scope">
                 <el-button type="danger" icon="el-icon-delete" @click="deleteAtt(scope.row.id)" />
@@ -773,28 +799,6 @@
               </div>
             </template>
           </el-dialog>
-          <!-- <el-dialog
-            :visible.sync="viewFileModel"
-            width="80%"
-            :fullscreen="false"
-            :close-on-click-modal="false"
-          >
-            <div class="iframe-wrapper">
-              <div class="iframe-transform-container" :style="iframeStyle">
-                <iframe
-                  :src="sourceFile"
-                  frameborder="0"
-                  class="iframe-full"
-                ></iframe>
-              </div>
-
-              <div class="controls">
-                <button @click="zoomIn">Zoom In</button>
-                <button @click="zoomOut">Zoom Out</button>
-                <button @click="rotate">Rotate</button>
-              </div>
-            </div>
-          </el-dialog> -->
         </el-card>
       </el-tab-pane>
     </el-tabs>
@@ -807,6 +811,7 @@ import Medicine from "@/api/medicine";
 import Procedure from "@/api/procedure";
 import Services from "@/api/services";
 import Diagnostics from "@/api/diagnostics";
+import { getPeTemplates, createPeTemplate, updatePeTemplate, deletePeTemplate } from "@/api/peTemplates";
 import moment from "moment-timezone";
 import debounce from "lodash/debounce";
 import checkRole from "@/utils/role"; // Role checking
@@ -1057,6 +1062,14 @@ export default {
       getAllDiagnosticsOfferedMicroscopy: [],
       lab_micro_remarks: "",
       xray_remarks: "",
+
+      // Physical Examination Templates
+      showCustomTemplateDialog: false,
+      peTemplates: [],
+      customTemplateForm: {
+        name: "",
+        content: ""
+      },
     };
   },
   watch: {
@@ -1082,6 +1095,7 @@ export default {
     this.getmeds();
     this.getdiagnostics();
     this.getservices();
+    this.loadTemplatesFromDatabase();
   },
   computed: {
     transformStyle() {
@@ -1094,6 +1108,101 @@ export default {
   },
   methods: {
     checkRole,
+
+    // Physical Examination Template Methods
+    insertPETemplate(content) {
+      if (this.form.pe) {
+        // If there's existing content, add a newline before the template
+        this.form.pe += '\n\n' + content;
+      } else {
+        // If no existing content, just set the template
+        this.form.pe = content;
+      }
+      // Trigger auto-resize
+      this.$nextTick(() => {
+        this.autoResize();
+      });
+    },
+
+    async saveCustomTemplate() {
+      if (!this.customTemplateForm.name || !this.customTemplateForm.content) {
+        this.$message.error('Please fill in both template name and content');
+        return;
+      }
+
+      // Check if template name already exists
+      const existingTemplate = this.peTemplates.find(t => t.name === this.customTemplateForm.name);
+      if (existingTemplate) {
+        this.$message.error('A template with this name already exists');
+        return;
+      }
+
+      try {
+        const response = await createPeTemplate({
+          name: this.customTemplateForm.name,
+          content: this.customTemplateForm.content
+        });
+
+        if (response.success) {
+          // Refresh templates from database
+          await this.loadTemplatesFromDatabase();
+
+          // Clear the form
+          this.customTemplateForm.name = '';
+          this.customTemplateForm.content = '';
+
+          // Close the dialog
+          this.showCustomTemplateDialog = false;
+
+          this.$message.success('Custom template saved successfully!');
+        } else {
+          this.$message.error(response.message || 'Failed to save template');
+        }
+      } catch (error) {
+        console.error('Error saving template:', error);
+        this.$message.error('Failed to save template. Please try again.');
+      }
+    },
+
+    async loadTemplatesFromDatabase() {
+      try {
+        const response = await getPeTemplates();
+        if (response.success) {
+          this.peTemplates = response.data;
+        } else {
+          console.error('Failed to load templates:', response.message);
+        }
+      } catch (error) {
+        console.error('Failed to load templates from database:', error);
+        // Fallback to empty array
+        this.peTemplates = [];
+      }
+    },
+
+    async deleteTemplate(templateId) {
+      this.$confirm('Are you sure you want to delete this template?', 'Confirm Delete', {
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        type: 'warning'
+      }).then(async () => {
+        try {
+          const response = await deletePeTemplate(templateId);
+
+          if (response.success) {
+            // Refresh templates from database
+            await this.loadTemplatesFromDatabase();
+            this.$message.success('Template deleted successfully');
+          } else {
+            this.$message.error(response.message || 'Failed to delete template');
+          }
+        } catch (error) {
+          console.error('Error deleting template:', error);
+          this.$message.error('Failed to delete template. Please try again.');
+        }
+      }).catch(() => {
+        // User cancelled deletion
+      });
+    },
     handleCommand(command) {
       if (command === "update_diagnosis") {
         this.popconfirmUpddateDiagnosis = true;
@@ -1224,7 +1333,7 @@ export default {
     appointments() {
       Patients.getAppointment(this.form.id)
         .then((response) => {
-    this.autoResize();
+          this.autoResize();
           this.pageloading = false;
           this.appointment_dt = response.data.appointment_dt;
           this.vitals_records = response.vitals_data;
@@ -1509,7 +1618,7 @@ export default {
     editMed(row) {
       this.isEditMode = true;
       this.editingMedId = row.id;
-      
+
       // Populate the form with the medicine data
       this.medsArr.qty = row.qty || "";
       this.medsArr.bf_b = row.bb || "";
@@ -1520,9 +1629,9 @@ export default {
       this.medsArr.s_a = row.as || "";
       this.medsArr.bt = row.bt || "";
       this.medsArr.remarks = row.remarks || "";
-      
+
       // Handle medicine selection
-      if (row.medicineId!=0) {
+      if (row.medicineId != 0) {
         this.medsArr.meds = row.medicine;
         this.medsArr.med_id = row.med_id || row.id;
         this.medsArr.custom_meds = false;
@@ -1586,11 +1695,13 @@ export default {
     addMeds() {
       if (
         (this.medsArr.meds !== "" && this.medsArr.qty !== "") ||
-        (this.medsArr.custom_generic !== "" && this.medsArr.custom_dosage !== "")
+        (this.medsArr.custom_generic !== "" && this.medsArr.custom_brand !== ""
+          
+        )
       ) {
         if (this.isEditMode) {
           // Update existing medicine
-          Medicine.update_rx(this.editingMedId, this.medsArr) 
+          Medicine.update_rx(this.editingMedId, this.medsArr)
             .then((response) => {
               this.getmeds();
               this.isEditMode = false;
@@ -1892,7 +2003,7 @@ export default {
         this.$refs.uploadRef.clearFiles();
       } catch (err) {
         console.error("Error uploading files:", err);
-        this.$message.error("Upload failed. "+err);
+        this.$message.error("Upload failed. " + err);
       }
     },
     deleteAtt(id) {
@@ -2096,14 +2207,67 @@ button {
   width: 100%;
   height: 200px;
 }
+
+/* Physical Examination Template Styles */
+.pe-template-section {
+  margin-bottom: 20px;
+}
+
+.template-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.template-btn {
+  position: relative;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  padding: 8px 15px;
+  min-width: 120px;
+}
+
+.delete-template-btn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  padding: 0;
+}
+
+.pe-template-section .el-button[type="success"] {
+  margin-left: 10px;
+}
+
+/* Template button hover effects */
+.template-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+/* Custom template button styling */
+.template-btn[type="success"] {
+  border-color: #67c23a;
+  color: #67c23a;
+}
+
+.template-btn[type="success"]:hover {
+  background-color: #67c23a;
+  color: white;
+}
 </style>
 <style>
 .input-with-label label {
   margin-left: 8px;
   /* space between input and label */
 }
+
 .el-textarea__inner {
   resize: none !important;
 }
-
 </style>
