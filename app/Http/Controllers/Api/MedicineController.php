@@ -57,13 +57,13 @@ class MedicineController extends BaseController
 
         $userQuery = Medicine::query()
             ->select('medicines.generic_name', 'medicines.medicine_name', 'medicines.unit', 'medicines.id')
-            ->where('isincluded', 1) // ✅ added filter
             ->join(DB::raw("(SELECT MIN(id) as id 
                             FROM medicines
-                            " . (!empty($keyword) 
-                                    ? "WHERE medicine_name LIKE '%".addslashes($keyword)."%' 
-                                        OR generic_name LIKE '%".addslashes($keyword)."%'" 
-                                    : "") . "
+                            WHERE isincluded = 1" . 
+                            (!empty($keyword) 
+                                ? " AND (medicine_name LIKE '%".addslashes($keyword)."%' 
+                                    OR generic_name LIKE '%".addslashes($keyword)."%')" 
+                                : "") . "
                             GROUP BY medicine_name) as filtered"), 
                     'medicines.id', '=', 'filtered.id');
 

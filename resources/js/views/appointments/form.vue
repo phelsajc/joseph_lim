@@ -326,7 +326,26 @@
     </el-card>
     <br />
 
-    <el-tabs v-model="tab" type="card" class="demo-tabs">
+    <!-- Mobile Tab Navigation -->
+    <div v-if="isMobile" class="mobile-tab-navigation">
+      <el-select v-model="tab" placeholder="Select Section" style="width: 100%; margin-bottom: 20px;" size="large">
+        <el-option 
+          v-for="tabOption in availableTabs" 
+          :key="tabOption.name" 
+          :label="tabOption.label" 
+          :value="tabOption.name"
+          :disabled="!tabOption.available"
+        >
+          <span style="float: left">{{ tabOption.label }}</span>
+          <span v-if="tabOption.hasContent" style="float: right; color: #67c23a; font-size: 12px;">
+            <i class="el-icon-check"></i>
+          </span>
+        </el-option>
+      </el-select>
+    </div>
+
+    <!-- Desktop Tab Navigation -->
+    <el-tabs v-model="tab" type="card" class="demo-tabs" v-if="!isMobile">
       <el-tab-pane label="Histories" name="history" v-if="checkRole(['admin', 'doctor'])">
         <el-card style="max-width: 100%">
           <el-form label-position="top">
@@ -802,6 +821,491 @@
         </el-card>
       </el-tab-pane>
     </el-tabs>
+
+    <!-- Mobile Content Sections -->
+    <div v-if="isMobile" class="mobile-content">
+      <!-- Histories Section -->
+      <div v-if="tab === 'history'" class="mobile-section">
+        <h3>Histories</h3>
+        <el-card style="max-width: 100%">
+          <el-form label-position="top">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="Previous Admission">
+                  <el-input v-model="profile.prev_admission" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Previous Surgeries">
+                  <el-input v-model="profile.prev_surgeries" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Allergies">
+                  <el-input v-model="profile.allergies" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Asthma/Allergic Rhinitis/Atopic Dermatitis">
+                  <el-input v-model="profile.asthma" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Hypertension">
+                  <el-input v-model="profile.hypertension" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="TB">
+                  <el-input v-model="profile.tb" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Seizure">
+                  <el-input v-model="profile.seizure" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Diabetes">
+                  <el-input v-model="profile.diabetes" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="COPD">
+                  <el-input v-model="profile.copd" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Others">
+                  <el-input v-model="profile.pmh_others" type="textarea" rows="5" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-card>
+      </div>
+
+      <!-- Family History Section -->
+      <div v-if="tab === 'family'" class="mobile-section">
+        <h3>Family History</h3>
+        <div class="block">
+          <el-form label-position="top" class="demo-form-inline">
+            <el-form-item label="History">
+              <el-checkbox-group v-model="fam" size="large">
+                <el-checkbox-button label="Hypertension">Hypertension</el-checkbox-button>
+                <el-checkbox-button label="Diabetes Mellitus">Diabetes Mellitus</el-checkbox-button>
+                <el-checkbox-button label="Stroke">Stroke</el-checkbox-button>
+                <el-checkbox-button label="CAD">CAD</el-checkbox-button>
+              </el-checkbox-group>
+            </el-form-item>
+            <el-form-item label="Others">
+              <el-input v-model="profile.fam_others" :autosize="{ minRows: 2, maxRows: 4 }" 
+                type="textarea" placeholder="Please input" />
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+
+      <!-- Social/Environment History Section -->
+      <div v-if="tab === 'soc'" class="mobile-section">
+        <h3>Social / Environment History</h3>
+        <div class="block">
+          <el-form label-position="top" class="demo-form-inline">
+            <el-form-item label="History">
+              <el-checkbox-group v-model="soc" size="large">
+                <el-checkbox-button label="Smoking">Smoking</el-checkbox-button>
+                <el-checkbox-button label="Alcoholic Beverage Drinking">Alcoholic Beverage Drinking</el-checkbox-button>
+              </el-checkbox-group>
+            </el-form-item>
+            <el-form-item label="Others">
+              <el-input v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }" 
+                type="textarea" placeholder="Please input" />
+            </el-form-item>
+            <el-form-item label="Vaccinations">
+              <el-input v-model="profile.vaccination_sup" :autosize="{ minRows: 2, maxRows: 4 }" 
+                type="textarea" placeholder="Please input" />
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+
+      <!-- Diagnosis Section -->
+      <div v-if="tab === 'first'" class="mobile-section">
+        <h3>Diagnosis</h3>
+        <el-form ref="form" label-width="120px" class="demo-form-inline">
+          <el-form-item label="Secretary's Remarks">
+            <el-input v-model="form.nurse_remarks" type="textarea" />
+          </el-form-item>
+          <el-form-item label="CC" v-if="checkRole(['admin', 'doctor'])">
+            <el-input v-model="form.chiefcomplaints" type="textarea" rows="2" />
+          </el-form-item>
+          <el-form-item label="History" v-if="checkRole(['admin', 'doctor'])">
+            <el-input v-model="form.history" type="textarea" rows="5" />
+          </el-form-item>
+          <el-form-item label="P.E." v-if="checkRole(['admin', 'doctor'])">
+            <div class="pe-template-section">
+              <el-row :gutter="20" style="margin-bottom: 15px;">
+                <el-col :span="24">
+                  <div class="template-buttons">
+                    <el-button v-for="template in peTemplates" :key="template.id" size="small"
+                      :type="template.type === 'default' ? 'primary' : 'success'" plain
+                      @click="insertPETemplate(template.content)" class="template-btn">
+                      {{ template.name }}
+                      <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                        circle @click.stop="deleteTemplate(template.id)" class="delete-template-btn"></el-button>
+                    </el-button>
+                  </div>
+                  <el-button size="small" type="success" @click="showCustomTemplateDialog = true"
+                    style="margin-left: 10px;">
+                    Custom Template
+                  </el-button>
+                </el-col>
+              </el-row>
+              <el-input v-model="form.pe" type="textarea" ref="peInput" rows="10" @input="autoResize" />
+            </div>
+          </el-form-item>
+          <el-form-item label="Diagnosis" v-if="checkRole(['admin', 'doctor'])">
+            <el-input v-model="form.diagnosis" type="textarea" />
+          </el-form-item>
+          <el-form-item label="Plans" v-if="checkRole(['admin', 'doctor'])">
+            <el-input v-model="form.remarks" type="textarea" ref="plansInput" rows="10" @input="autoResize" />
+          </el-form-item>
+          <el-form-item label="Follow Up Date" v-if="checkRole(['admin', 'doctor'])">
+            <date-picker v-model="form.followup" valueType="format"></date-picker>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <!-- Vitals Section -->
+      <div v-if="tab === 'second'" class="mobile-section">
+        <h3>Vitals</h3>
+        <el-card style="max-width: 100%">
+          <el-form label-position="top" class="demo-form-inline">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="Systolic">
+                  <el-input v-model="form.vit_sys" autosize clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Diastolic">
+                  <el-input v-model="form.vit_dia" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Weight">
+                  <el-input v-model="form.weight" clearable placeholder="kilograms" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Height">
+                  <el-input v-model="form.height" clearable placeholder="centimeters" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="BMI">
+                  <el-input v-model="form.bmi" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Temperature">
+                  <el-input v-model="form.vit_temp" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Cardiac Rate">
+                  <el-input v-model="form.vit_cr" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Respiratory Rate">
+                  <el-input v-model="form.vit_rr" clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item v-role="['secretary', 'admin']" label="">
+                  <el-button type="primary" @click="upDateBP()">Update</el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-card>
+      </div>
+
+      <!-- Medicines Section -->
+      <div v-if="tab === 'fourth'" class="mobile-section">
+        <h3>Medicines</h3>
+        <el-card style="max-width: 100%">
+          <el-row :gutter="24">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-checkbox v-model="medsArr.custom_meds" label="Not carried" size="large" />
+              <br />
+              <el-form-item label="Quantity">
+                <el-input v-model="medsArr.qty" autosize clearable />
+              </el-form-item>
+              <el-form-item v-if="!medsArr.custom_meds" label="Search Medicine">
+                <el-autocomplete v-model="medsArr.meds" :fetch-suggestions="querySearch" popper-class="my-autocomplete"
+                  placeholder="Please input" style="width: 100%" @select="handleSelect">
+                  <template #default="{ item }">
+                    <div class="value">{{ item.medicine }}</div>
+                  </template>
+                </el-autocomplete>
+              </el-form-item>
+              <el-form-item v-if="medsArr.custom_meds" label="Generic Name">
+                <el-input v-model="medsArr.custom_generic" autosize clearable />
+              </el-form-item>
+              <el-form-item v-if="medsArr.custom_meds" label="Brand Name">
+                <el-input v-model="medsArr.custom_brand" autosize clearable />
+              </el-form-item>
+            </el-form>
+          </el-row>
+          <el-row :gutter="20">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-col :span="12">
+                <el-form-item label="Before Breakfast">
+                  <el-input v-model="medsArr.bf_b" autosize clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="After Breakfast">
+                  <el-input v-model="medsArr.bf_a" autosize clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Before Lunch">
+                  <el-input v-model="medsArr.l_b" autosize clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="After Lunch">
+                  <el-input v-model="medsArr.l_a" autosize clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Before Dinner">
+                  <el-input v-model="medsArr.s_b" autosize clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="After Dinner">
+                  <el-input v-model="medsArr.s_a" autosize clearable />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Bedtime">
+                  <el-input v-model="medsArr.bt" autosize clearable />
+                </el-form-item>
+              </el-col>
+            </el-form>
+          </el-row>
+          <el-row :gutter="20">
+            <el-form label-position="top" class="demo-form-inline">
+              <el-col :span="24">
+                <el-form-item label="Remarks">
+                  <el-input v-model="medsArr.remarks" type="textarea" />
+                </el-form-item>
+              </el-col>
+            </el-form>
+          </el-row>
+          <el-row :gutter="20">
+            <el-table :data="rx_list" style="width: 100%" class="compact-table">
+              <el-table-column prop="medicine" label="Medicine" width="200" />
+              <el-table-column prop="qty" label="Qty" width="60" />
+              <el-table-column label="Breakfast">
+                <el-table-column prop="bb" label="Before" width="70" />
+                <el-table-column prop="ab" label="After" width="70" />
+              </el-table-column>
+              <el-table-column label="Lunch">
+                <el-table-column prop="bl" label="Before" width="70" />
+                <el-table-column prop="al" label="After" width="70" />
+              </el-table-column>
+              <el-table-column label="Dinner">
+                <el-table-column prop="bs" label="Before" width="70" />
+                <el-table-column prop="as" label="After" width="70" />
+              </el-table-column>
+              <el-table-column prop="bt" label="Bedtime" width="70" />
+              <el-table-column prop="remarks" label="Remarks" width="200" />
+              <el-table-column align="center" label="Actions" width="200">
+                <template slot-scope="scope">
+                  <el-button v-role="['doctor', 'admin']" type="primary" size="mini"
+                    @click="editMed(scope.row)">Edit</el-button>
+                  <el-button v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
+                    type="warning" size="mini" @click="cancelEdit()">Cancel</el-button>
+                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini"
+                    @click="deleteMed(scope.row.id)">Delete</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-row>
+          <el-divider />
+          <el-row :gutter="20">
+            <el-button v-role="['doctor', 'admin']" type="success" @click="addMeds()">
+              {{ isEditMode ? 'Update' : 'Add' }}
+            </el-button>
+            <el-button v-role="['doctor', 'admin']" type="info" @click="importMedicine()">
+              Import
+            </el-button>
+          </el-row>
+        </el-card>
+      </div>
+
+      <!-- Diagnostics Section -->
+      <div v-if="tab === 'fifth'" class="mobile-section">
+        <h3>Diagnostics</h3>
+        <el-card style="max-width: 100%">
+          <el-radio-group v-model="form.fasting_mode">
+            <el-radio label="1">Fasting 8-10 hours </el-radio>
+            <el-radio label="2">Fasting 10-12 hours </el-radio>
+            <el-radio label="3">Non-fasting</el-radio>
+          </el-radio-group>
+          <el-checkbox v-model="form.sendXrayToEmail" label="Send X-ray images" size="large" />
+          <el-row>
+            <el-form label-position="top" class="demo-form-inline">
+              <el-form-item label="Remarks">
+                <el-input v-model="form.lab_remarks" type="textarea" />
+              </el-form-item>
+            </el-form>
+          </el-row>
+          <br />
+          <el-button type="primary" @click="viewDiagnosticsTbl = true">View Diagnostics</el-button>
+          <el-row :gutter="20">
+            <el-table :data="diagnostic_list" style="width: 100%">
+              <el-table-column prop="diagnostic" label="Procedure" />
+              <el-table-column prop="remarks" label="Remarks" />
+              <el-table-column align="center" label="Actions" width="200">
+                <template slot-scope="scope">
+                  <el-button v-role="['doctor', 'admin']" type="danger" size="small" icon="el-icon-delete"
+                    @click="removeProcedure(scope.row.id)">
+                    Delete
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-row>
+          <el-divider />
+        </el-card>
+      </div>
+
+      <!-- Medical Certificate Section -->
+      <div v-if="tab === 'medcert'" class="mobile-section">
+        <h3>Medical Certificate</h3>
+        <el-card style="max-width: 100%">
+          <el-form label-position="top">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="Undersigned Date">
+                  <date-picker v-model="form.medcert_undersigned" valueType="format"></date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Diagnosis">
+                  <el-input v-model="form.medcert_diagnosis" type="textarea" rows="8" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Remarks">
+                  <el-input v-model="form.medcert_remarks" type="textarea" rows="8" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-card>
+      </div>
+
+      <!-- Referral Section -->
+      <div v-if="tab === 'referral'" class="mobile-section">
+        <h3>Referral</h3>
+        <el-card style="max-width: 100%">
+          <el-form label-position="top">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="Doctor">
+                  <el-input v-model="form.referral_doctor" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Address 1">
+                  <el-input v-model="form.referral_addr1" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Address 2">
+                  <el-input v-model="form.referral_addr2" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Undersigned Date">
+                  <date-picker v-model="form.referral_undersigned" valueType="format"></date-picker>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="Diagnosis">
+                  <el-input v-model="form.referral_diagnosis" type="textarea" rows="8" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Remarks">
+                  <el-input v-model="form.referral_remarks" type="textarea" rows="8" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-card>
+      </div>
+
+      <!-- Attachments Section -->
+      <div v-if="tab === 'attachments'" class="mobile-section">
+        <h3>Attachments</h3>
+        <div class="mb-4">
+          <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange">
+            <template #trigger>
+              <el-button ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
+                :on-change="handleChange">Select attachments</el-button>
+            </template>
+            <el-button size="small" type="primary" @click="submitUpload">Submit</el-button>
+          </el-upload>
+        </div>
+        <el-card style="max-width: 100%">
+          <el-dialog :visible.sync="dialogVisible" width="50%">
+            <el-image :src="selectedImage.file" :alt="selectedImage.alt" fit="contain" class="popup-image" />
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="dialogVisible = false">Close</el-button>
+            </span>
+          </el-dialog>
+
+          <el-table :data="attachments" style="width: 100%">
+            <el-table-column label="Image">
+              <template slot-scope="scope">
+                <el-button type="primary" icon="el-icon-files"
+                  @click="viewFile(scope.row.newfile, scope.row.extension)" />
+                {{ scope.row.fname }}
+              </template>
+            </el-table-column>
+            <el-table-column label="Name" prop="description" />
+            <el-table-column label="Date" prop="created_dt" />
+            <el-table-column label="Action" width="100">
+              <template slot-scope="scope">
+                <el-button type="danger" icon="el-icon-delete" @click="deleteAtt(scope.row.id)" />
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <el-dialog :visible.sync="viewFileModel" :fullscreen="false" :close-on-click-modal="false">
+            <template #default>
+              <div class="iframe-wrapper">
+                <iframe v-if="isPdf" :src="sourceFile" :style="transformStyle" frameborder="0"
+                  class="iframe-full"></iframe>
+                <el-image v-if="!isPdf" style="width: 100px; height: 100px" :src="sourceFile" :zoom-rate="1.2"
+                  :max-scale="7" :min-scale="0.2" :preview-src-list="[sourceFile]" show-progress :initial-index="4"
+                  fit="cover" />
+              </div>
+            </template>
+          </el-dialog>
+        </el-card>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -1105,9 +1609,107 @@ export default {
         display: "inline-block",
       };
     },
+    availableTabs() {
+      const tabs = [
+        {
+          name: 'history',
+          label: 'Histories',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasHistoryContent()
+        },
+        {
+          name: 'family',
+          label: 'Family History',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasFamilyContent()
+        },
+        {
+          name: 'soc',
+          label: 'Social/Environment History',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasSocialContent()
+        },
+        {
+          name: 'first',
+          label: 'Diagnosis',
+          available: true,
+          hasContent: this.hasDiagnosisContent()
+        },
+        {
+          name: 'second',
+          label: 'Vitals',
+          available: true,
+          hasContent: this.hasVitalsContent()
+        },
+        {
+          name: 'fourth',
+          label: 'Medicines',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.rx_list && this.rx_list.length > 0
+        },
+        {
+          name: 'fifth',
+          label: 'Diagnostics',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.diagnostic_list && this.diagnostic_list.length > 0
+        },
+        {
+          name: 'medcert',
+          label: 'Medical Certificate',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasMedCertContent()
+        },
+        {
+          name: 'referral',
+          label: 'Referral',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasReferralContent()
+        },
+        {
+          name: 'attachments',
+          label: 'Attachments',
+          available: true,
+          hasContent: this.attachments && this.attachments.length > 0
+        }
+      ];
+      return tabs.filter(tab => tab.available);
+    }
   },
   methods: {
     checkRole,
+
+    // Content checking methods for tab indicators
+    hasHistoryContent() {
+      return !!(this.profile.prev_admission || this.profile.prev_surgeries || 
+                this.profile.allergies || this.profile.asthma || 
+                this.profile.hypertension || this.profile.tb || 
+                this.profile.seizure || this.profile.diabetes || 
+                this.profile.copd || this.profile.pmh_others);
+    },
+    hasFamilyContent() {
+      return !!(this.fam && this.fam.length > 0) || !!this.profile.fam_others;
+    },
+    hasSocialContent() {
+      return !!(this.soc && this.soc.length > 0) || !!this.profile.soc_others || !!this.profile.vaccination_sup;
+    },
+    hasDiagnosisContent() {
+      return !!(this.form.nurse_remarks || this.form.chiefcomplaints || 
+                this.form.history || this.form.pe || 
+                this.form.diagnosis || this.form.remarks);
+    },
+    hasVitalsContent() {
+      return !!(this.form.vit_sys || this.form.vit_dia || 
+                this.form.weight || this.form.height || 
+                this.form.vit_temp || this.form.vit_cr || this.form.vit_rr);
+    },
+    hasMedCertContent() {
+      return !!(this.form.medcert_diagnosis || this.form.medcert_remarks || this.form.medcert_undersigned);
+    },
+    hasReferralContent() {
+      return !!(this.form.referral_doctor || this.form.referral_addr1 || 
+                this.form.referral_addr2 || this.form.referral_diagnosis || 
+                this.form.referral_remarks || this.form.referral_undersigned);
+    },
 
     // Physical Examination Template Methods
     insertPETemplate(content) {
@@ -2270,5 +2872,53 @@ button {
 
 .el-textarea__inner {
   resize: none !important;
+}
+
+/* Mobile Tab Navigation Styles */
+.mobile-tab-navigation {
+  margin-bottom: 20px;
+}
+
+.mobile-content {
+  margin-top: 20px;
+}
+
+.mobile-section h3 {
+  color: #409EFF;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #409EFF;
+}
+
+.mobile-section .el-form-item {
+  margin-bottom: 15px;
+}
+
+.mobile-section .el-input,
+.mobile-section .el-textarea {
+  width: 100%;
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 768px) {
+  .mobile-section .el-col {
+    margin-bottom: 10px;
+  }
+  
+  .mobile-section .el-form-item__label {
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  
+  .template-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .template-btn {
+    width: 100%;
+    margin-bottom: 8px;
+    margin-right: 0;
+  }
 }
 </style>

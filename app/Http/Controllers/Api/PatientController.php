@@ -865,7 +865,7 @@ class PatientController extends BaseController
 
     function getAppointmentMedicine($id)
     {
-        $data = RX::where(['appointment_id' => $id])->get();
+        $data = RX::where(['appointment_id' => $id])->orderby('rx_id','desc')->get();
         $array = array();
         foreach ($data as $key => $value) {
             $arr = array();
