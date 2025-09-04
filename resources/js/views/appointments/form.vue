@@ -434,6 +434,20 @@
                 :rows="2" type="textarea" placeholder="Please input" />
             </el-form-item>
           </el-form>
+          <el-form label-position="top" style="margin-top: 20px;">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="Mother Details">
+                  <el-input v-model="form.mother_details" type="textarea" rows="6" placeholder="Enter mother's medical history, age, health conditions, etc." />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="Father Details">
+                  <el-input v-model="form.father_details" type="textarea" rows="6" placeholder="Enter father's medical history, age, health conditions, etc." />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
         </div>
       </el-tab-pane>
       <el-tab-pane label="Social / Environment History" name="soc" v-if="checkRole(['admin', 'doctor'])">
@@ -631,7 +645,7 @@
           </el-row>
           <el-row :gutter="20">
             <el-table :data="rx_list" style="width: 100%" class="compact-table">
-              <el-table-column prop="medicine" label="Medicine" width="310" />
+              <el-table-column prop="medicine" label="Medicine" width="290" />
               <el-table-column prop="qty" label="Qty" width="70" />
               <el-table-column label="Breakfast">
                 <el-table-column prop="bb" label="Before" width="80" />
@@ -646,7 +660,7 @@
                 <el-table-column prop="as" label="After" width="80" />
               </el-table-column>
               <el-table-column prop="bt" label="Bedtime" width="80" />
-              <el-table-column prop="remarks" label="Remarks" width="300" />
+              <el-table-column prop="remarks" label="Remarks" width="260" />
               <el-table-column align="center" label="Actions" width="300">
                 <template slot-scope="scope">
                   <el-button v-role="['doctor', 'admin']" type="primary" size="mini"
@@ -766,6 +780,41 @@
               <el-col :span="12">
                 <el-form-item label="Remarks">
                   <el-input v-model="form.referral_remarks" type="textarea" rows="10" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-card>
+      </el-tab-pane>
+      <el-tab-pane label="Obstetric and Gynecologic History" name="obgyn" v-if="checkRole(['admin', 'doctor'])">
+        <el-card style="max-width: 100%">
+          <el-form label-position="top">
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="Pregnancy">
+                  <el-input v-model="form.pregnancy" type="textarea" rows="4" placeholder="Enter pregnancy history" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="LMP (Last Menstrual Period)">
+                  <el-date-picker
+                    v-model="form.lmp"
+                    type="date"
+                    placeholder="Select LMP date"
+                    format="yyyy-MM-dd"
+                    value-format="yyyy-MM-dd"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="Contraceptive Use">
+                  <el-input v-model="form.contraceptive_use" type="textarea" rows="4" placeholder="Enter contraceptive use history" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="Menopause">
+                  <el-input v-model="form.menopause" type="textarea" rows="4" placeholder="Enter menopause information" />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -902,6 +951,20 @@
               <el-input v-model="profile.fam_others" :autosize="{ minRows: 2, maxRows: 4 }" 
                 type="textarea" placeholder="Please input" />
             </el-form-item>
+          </el-form>
+          <el-form label-position="top" style="margin-top: 20px;">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="Mother Details">
+                  <el-input v-model="form.mother_details" type="textarea" rows="6" placeholder="Enter mother's medical history, age, health conditions, etc." />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Father Details">
+                  <el-input v-model="form.father_details" type="textarea" rows="6" placeholder="Enter father's medical history, age, health conditions, etc." />
+                </el-form-item>
+              </el-col>
+            </el-row>
           </el-form>
         </div>
       </div>
@@ -1255,6 +1318,44 @@
         </el-card>
       </div>
 
+      <!-- Obstetric and Gynecologic History Section -->
+      <div v-if="tab === 'obgyn'" class="mobile-section">
+        <h3>Obstetric and Gynecologic History</h3>
+        <el-card style="max-width: 100%">
+          <el-form label-position="top">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="Pregnancy">
+                  <el-input v-model="form.pregnancy" type="textarea" rows="4" placeholder="Enter pregnancy history" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="LMP (Last Menstrual Period)">
+                  <el-date-picker
+                    v-model="form.lmp"
+                    type="date"
+                    placeholder="Select LMP date"
+                    format="yyyy-MM-dd"
+                    value-format="yyyy-MM-dd"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Contraceptive Use">
+                  <el-input v-model="form.contraceptive_use" type="textarea" rows="4" placeholder="Enter contraceptive use history" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="Menopause">
+                  <el-input v-model="form.menopause" type="textarea" rows="4" placeholder="Enter menopause information" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-card>
+      </div>
+
       <!-- Attachments Section -->
       <div v-if="tab === 'attachments'" class="mobile-section">
         <h3>Attachments</h3>
@@ -1474,6 +1575,12 @@ export default {
         pe_adnexa: "",
         pe_dish: "",
         withs2: false,
+        pregnancy: "",
+        lmp: "",
+        contraceptive_use: "",
+        menopause: "",
+        mother_details: "",
+        father_details: "",
       },
       medsArr: {
         custom_meds: false,
@@ -1666,6 +1773,12 @@ export default {
           hasContent: this.hasReferralContent()
         },
         {
+          name: 'obgyn',
+          label: 'Obstetric and Gynecologic History',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasObgynContent()
+        },
+        {
           name: 'attachments',
           label: 'Attachments',
           available: true,
@@ -1687,7 +1800,8 @@ export default {
                 this.profile.copd || this.profile.pmh_others);
     },
     hasFamilyContent() {
-      return !!(this.fam && this.fam.length > 0) || !!this.profile.fam_others;
+      return !!(this.fam && this.fam.length > 0) || !!this.profile.fam_others || 
+             !!this.form.mother_details || !!this.form.father_details;
     },
     hasSocialContent() {
       return !!(this.soc && this.soc.length > 0) || !!this.profile.soc_others || !!this.profile.vaccination_sup;
@@ -1709,6 +1823,10 @@ export default {
       return !!(this.form.referral_doctor || this.form.referral_addr1 || 
                 this.form.referral_addr2 || this.form.referral_diagnosis || 
                 this.form.referral_remarks || this.form.referral_undersigned);
+    },
+    hasObgynContent() {
+      return !!(this.form.pregnancy || this.form.lmp || 
+                this.form.contraceptive_use || this.form.menopause);
     },
 
     // Physical Examination Template Methods
@@ -1990,6 +2108,13 @@ export default {
           if (this.form.remarks === null) {
             this.form.remarks = response.prev_data.remarks;
           }
+          this.form.pregnancy = response.px_profile.pregnancy;
+          this.form.lmp = response.px_profile.lmp;
+          this.form.contraceptive_use = response.px_profile.contraceptive_use;
+          this.form.menopause = response.px_profile.menopause;
+          this.form.mother_details = response.px_profile.mother_details;
+          this.form.father_details = response.px_profile.father_details;
+          
         })
         .catch((error) => {
           console.log(error);

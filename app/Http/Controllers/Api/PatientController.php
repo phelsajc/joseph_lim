@@ -351,10 +351,18 @@ class PatientController extends BaseController
         $data->medcert_undersigned = $request->medcert_undersigned != 'Invalid date' ? $undersigned : null;//$undersigned;
         $data->medcert_diagnosis = $request->medcert_diagnosis;
         $data->medcert_remarks = $request->medcert_remarks;
-        $data->medcert_remarks = $request->medcert_remarks;
+        //$data->medcert_remarks = $request->medcert_remarks;
 
         $data->email = $request->email;
 
+        /* $data->pregnancy = $request->pregnancy;
+        $data->lmp = $request->lmp;
+        $data->contraceptive_use = $request->contraceptive_use;
+        $data->menopause = $request->menopause;
+        $data->mother_details = $request->mother_details;
+        $data->father_details = $request->father_details; */
+        
+        
         $data->referral_doctor = $request->referral_doctor;
         $data->referral_addr1 = $request->referral_addr1;
         $data->referral_addr2 = $request->referral_addr2;
@@ -460,7 +468,12 @@ class PatientController extends BaseController
         $dataPatient->copd = $request->copd;
         $dataPatient->pmh_others = $request->pmh_others;
 
-        
+        $dataPatient->pregnancy = $request->pregnancy;
+        $dataPatient->lmp = $request->lmp;
+        $dataPatient->contraceptive_use = $request->contraceptive_use;
+        $dataPatient->menopause = $request->menopause;
+        $dataPatient->mother_details = $request->mother_details;
+        $dataPatient->father_details = $request->father_details;
         $fam = '';
         $getFam = explode(",", $request->fam);
         if ($request->fam) {
@@ -470,6 +483,7 @@ class PatientController extends BaseController
             $dataPatient->fam = substr($fam, 0, -1);
         }
         $dataPatient->fam_others = $request->fam_others;
+        
 
         
         $soc = '';
@@ -931,8 +945,8 @@ class PatientController extends BaseController
         foreach ($data as $key => $value) {
             $arr = array();
             $fileName = $value->filename;
-            $fileUrl = url('public/storage/uploads/' . $fileName);
-            //$fileUrl = url('/storage/uploads/' . $fileName);
+            //$fileUrl = url('public/storage/uploads/' . $fileName);
+            $fileUrl = url('/storage/uploads/' . $fileName);
             $fileExt = explode(".", $fileName);
             $arr['newfile'] = $fileUrl;//$value->isold_record==0?$value->file:null;
             $arr['oldfile'] = $fileUrl;//$value->isold_record==1?$value->file:null;

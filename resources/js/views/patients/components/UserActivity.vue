@@ -270,6 +270,47 @@
           </el-table>
         </el-card>
       </el-tab-pane>
+      <!-- <el-tab-pane label="Attachments" name="attachments">
+        <div class="mb-4">
+          <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange">
+            <template #trigger>
+              <el-button ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
+                :on-change="handleChange">Select attachments</el-button>
+            </template>
+            <el-button size="small" type="primary" @click="submitUpload">Submit</el-button>
+          </el-upload>
+        </div>
+        <el-card style="max-width: 100%">
+          <el-dialog :visible.sync="dialogVisible" width="50%">
+            <el-image :src="selectedImage.file" :alt="selectedImage.alt" fit="contain" class="popup-image" />
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="dialogVisible = false">Close</el-button>
+            </span>
+          </el-dialog>
+
+          <el-table :data="attachments" style="width: 100%">
+            <el-table-column label="Image">
+              <template slot-scope="scope">
+                <el-button type="primary" icon="el-icon-files" @click="viewFile(scope.row.newfile)" /> {{ scope.row.fname }}
+              </template>
+            </el-table-column>
+            <el-table-column label="Action" width="150">
+              <template slot-scope="scope">
+                <el-button type="danger" icon="el-icon-delete" @click="deleteAtt(scope.row.id)" />
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-dialog :visible.sync="viewFileModel"  width="80%" :fullscreen="false" :close-on-click-modal="false">
+            <template #default>
+              <div class="iframe-wrapper">
+                <iframe :src="sourceFile" frameborder="0" class="iframe-full"></iframe>
+              </div>
+            </template>
+          </el-dialog>
+        </el-card>
+      </el-tab-pane> -->
+
+      
       <el-tab-pane label="Attachments" name="attachments">
         <div class="mb-4">
           <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange">
@@ -291,19 +332,13 @@
           <el-table :data="attachments" style="width: 100%">
             <el-table-column label="Image">
               <template slot-scope="scope">
-                <!-- <el-image :src="imgSrc(scope.row.newfile, scope.row.oldfile, scope.row.type)" fit="cover" class="image"
-                  :preview-src-list="[
-                    imgSrc(scope.row.newfile, scope.row.oldfile, scope.row.type),
-                  ]" /> -->
-                <!-- <el-image v-if="checkExtn(scope.row.fname)!='pdf'" :src="imgSrc(scope.row.newfile, scope.row.oldfile, scope.row.type)" fit="cover" class="image"
-                  :preview-src-list="[
-                    imgSrc(scope.row.newfile, scope.row.oldfile, scope.row.type),
-                  ]" />
-                <iframe v-else :src="scope.row.newfile" width="100%" height="100%" frameborder="0"
-                  allowfullscreen></iframe> -->
-                <el-button type="primary" icon="el-icon-files" @click="viewFile(scope.row.newfile)" /> {{ scope.row.fname }}
+                <el-button type="primary" icon="el-icon-files"
+                  @click="viewFile(scope.row.newfile, scope.row.extension)" />
+                {{ scope.row.fname }}
               </template>
             </el-table-column>
+            <el-table-column label="Name" prop="description" />
+            <el-table-column label="Date" prop="created_dt" />
             <el-table-column label="Action" width="150">
               <template slot-scope="scope">
                 <el-button type="danger" icon="el-icon-delete" @click="deleteAtt(scope.row.id)" />
@@ -311,10 +346,14 @@
             </el-table-column>
           </el-table>
 
-          <el-dialog :visible.sync="viewFileModel"  width="80%" :fullscreen="false" :close-on-click-modal="false">
+          <el-dialog :visible.sync="viewFileModel" :fullscreen="false" :close-on-click-modal="false">
             <template #default>
               <div class="iframe-wrapper">
-                <iframe :src="sourceFile" frameborder="0" class="iframe-full"></iframe>
+                <iframe v-if="isPdf" :src="sourceFile" :style="transformStyle" frameborder="0"
+                  class="iframe-full"></iframe>
+                <el-image v-if="!isPdf" style="width: 100px; height: 100px" :src="sourceFile" :zoom-rate="1.2"
+                  :max-scale="7" :min-scale="0.2" :preview-src-list="[sourceFile]" show-progress :initial-index="4"
+                  fit="cover" />
               </div>
             </template>
           </el-dialog>
@@ -447,6 +486,7 @@ export default {
   },
   data() {
     return {
+      isPdf: false,
       viewFileModel: false,
       sourceFile: null,
       pageloading: true,
@@ -1263,7 +1303,8 @@ export default {
       let b = a.split(".");
       return b[1];
     },
-    viewFile(s) {
+    viewFile(s, e) {
+      this.isPdf = e == "pdf" ? true : false;
       this.viewFileModel = true;
       this.sourceFile = s;
     },
@@ -1403,13 +1444,19 @@ export default {
 
 <style scoped>
 .iframe-wrapper {
-  height: 80vh; /* You can also use 100% if you set el-dialog body height */
-  width: 100%;
+  text-align: center;
+  padding: 10px;
+}
+
+.iframe-transform-container {
+  display: inline-block;
+  overflow: hidden;
 }
 
 .iframe-full {
-  width: 100%;
-  height: 100%;
+  width: 800px;
+  height: 600px;
   border: none;
 }
+
 </style>
