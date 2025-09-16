@@ -945,8 +945,8 @@ class PatientController extends BaseController
         foreach ($data as $key => $value) {
             $arr = array();
             $fileName = $value->filename;
-            //$fileUrl = url('public/storage/uploads/' . $fileName);
-            $fileUrl = url('/storage/uploads/' . $fileName);
+            $fileUrl = url('public/storage/uploads/' . $fileName);
+            //$fileUrl = url('/storage/uploads/' . $fileName);
             $fileExt = explode(".", $fileName);
             $arr['newfile'] = $fileUrl;//$value->isold_record==0?$value->file:null;
             $arr['oldfile'] = $fileUrl;//$value->isold_record==1?$value->file:null;
@@ -963,25 +963,66 @@ class PatientController extends BaseController
 
     public function addpatientAttachments(Request $request)
     {
-        date_default_timezone_set('Asia/Manila');
-        if ($request->hasFile('files')) {
+        try {
+            date_default_timezone_set('Asia/Manila');
+            
+            if (!$request->hasFile('files')) {
+                return response()->json(['error' => 'No files uploaded'], 400);
+            }
+            
+            // Validate file size (10MB limit)
+            $maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
+            
             $uploadedFiles = [];
             foreach ($request->file('files') as $file) {
+                // Check file size
+                if ($file->getSize() > $maxFileSize) {
+                    return response()->json(['error' => 'File too large. Maximum size is 10MB.'], 413);
+                }
+                
+                // Check if file is valid
+                if (!$file->isValid()) {
+                    return response()->json(['error' => 'Invalid file: ' . $file->getErrorMessage()], 400);
+                }
+                
                 $att = new Attachments();
                 $getidno = explode("-0", $request->patientid);
-                //$filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $filename = $file->getClientOriginalName();
+                
+                // Use unique filename to prevent conflicts
+                $originalName = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $filename = time() . '_' . uniqid() . '.' . $extension;
+                
+                // Store file with unique name
                 $file->storeAs('uploads', $filename, 'public');
+                
                 $att->patientid = sizeof($getidno) > 1 ? $getidno[1] : $request->patientid;
                 $att->filename = $filename;
                 $att->created_dt = date("Y-m-d H:i:s");
                 $att->isold_record = false;
                 $att->save();
-                $uploadedFiles[] = $filename;
+                
+                $uploadedFiles[] = [
+                    'filename' => $filename,
+                    'original_name' => $originalName,
+                    'size' => $file->getSize()
+                ];
             }
-        }
 
-        return response()->json($uploadedFiles);
+            return response()->json([
+                'success' => true,
+                'files' => $uploadedFiles,
+                'message' => 'Files uploaded successfully'
+            ]);
+        } catch (\Illuminate\Http\Exceptions\PostTooLargeException $e) {
+            return response()->json(['error' => 'File too large. Please reduce file size and try again.'], 413);
+        } catch (\Exception $e) {
+            \Log::error('Upload error: ' . $e->getMessage(), [
+                'patient_id' => $request->patientid,
+                'files_count' => $request->hasFile('files') ? count($request->file('files')) : 0
+            ]);
+            return response()->json(['error' => 'Upload failed: ' . $e->getMessage()], 500);
+        }
     }
 
     function deleteAttachment($id)
@@ -1569,6 +1610,13 @@ class PatientController extends BaseController
             $rx->medicine = $value->medicine;
             $rx->generic_id = $value->generic_id;
             $rx->generic_name = $value->generic_name;
+            $rx->breakfastbefore = $value->breakfastbefore;
+            $rx->breakfastafter = $value->breakfastafter;
+            $rx->lunchbefore = $value->lunchbefore;
+            $rx->lunchafter = $value->lunchafter;
+            $rx->supperbefore = $value->supperbefore;
+            $rx->supperafter = $value->supperafter;
+            $rx->bedtime = $value->bedtime;
             $rx->save();
         }
         return response()->json(['prescriptions' => $prescriptions,'appointments' => $appointment]);

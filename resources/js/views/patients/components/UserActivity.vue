@@ -318,8 +318,14 @@
               <el-button ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
                 :on-change="handleChange">Select attachments</el-button>
             </template>
-            <el-button size="small" type="primary" @click="submitUpload">Submit</el-button>
+            <el-button size="small" type="primary" :loading="isUploading" @click="submitUpload">Submit</el-button>
           </el-upload>
+          
+          <!-- Upload Progress -->
+          <div v-if="isUploading" class="mt-3">
+            <el-progress :percentage="uploadProgress" :status="uploadProgress === 100 ? 'success' : ''"></el-progress>
+            <p class="text-sm text-gray-600 mt-2">{{ uploadStatus }}</p>
+          </div>
         </div>
         <el-card style="max-width: 100%">
           <el-dialog :visible.sync="dialogVisible" width="50%">
@@ -493,6 +499,10 @@ export default {
       isProcessing: false,
       isProcessingAdolecents: false,
       isProcessingVax: false,
+      isUploading: false,
+      // Upload progress tracking
+      uploadProgress: 0,
+      uploadStatus: '',
       popconfirmDeleteProblem: false,
       additionalIdForDelete: 0,
       selectedOldRecords: {},
@@ -940,48 +950,139 @@ export default {
     handleChange(file, fileList) {
       this.form_att.files = fileList.map((fileItem) => fileItem.raw);
     },
+    // Image compression utility
+    compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+          // Calculate new dimensions
+          let { width, height } = img;
+          
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width *= ratio;
+            height *= ratio;
+          }
+          
+          // Set canvas dimensions
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw and compress
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob(
+            (blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+              });
+              resolve(compressedFile);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        
+        img.src = URL.createObjectURL(file);
+      });
+    },
     async submitUpload() {
+      // Initialize upload progress
+      this.uploadProgress = 0;
+      this.isUploading = true;
+      this.uploadStatus = 'Preparing files...';
+      
       const formData = new FormData();
       formData.append("patientid", this.form_att.patientid);
+
+      const totalFiles = this.form_att.files.length;
+      let processedFiles = 0;
 
       for (let i = 0; i < this.form_att.files.length; i++) {
         const file = this.form_att.files[i];
         const extension = file.name.split(".").pop().toLowerCase();
+        
+        // Update progress
+        this.uploadStatus = `Processing file ${i + 1} of ${totalFiles}: ${file.name}`;
+        this.uploadProgress = (processedFiles / totalFiles) * 30; // 30% for processing
+        
+        let processedFile = file;
 
+        // Handle HEIC/HEIF conversion
         if (extension === "heic" || extension === "heif") {
           try {
-            const jpgBlob = await heic2any({
+            this.uploadStatus = `Converting HEIC file: ${file.name}`;
+            const bmpBlob = await heic2any({
               blob: file,
-              toType: "image/jpeg",
+              toType: "image/bmp",
               quality: 0.9,
             });
 
-            const convertedFile = new File(
-              [jpgBlob],
+            processedFile = new File(
+              [bmpBlob],
               file.name.replace(/\.(heic|heif)$/i, ".jpg"),
-              { type: "image/jpeg" }
+              { type: "image/bmp" }
             );
-
-            formData.append(`files[${i}]`, convertedFile);
           } catch (error) {
             console.error("HEIC conversion failed:", error);
             this.$message.error("HEIC conversion failed.");
+            this.isUploading = false;
+            this.uploadProgress = 0;
+            this.uploadStatus = '';
             return;
           }
-        } else {
-          formData.append(`files[${i}]`, file);
         }
+        
+        // Compress images (JPEG, PNG, BMP, WebP)
+        const imageTypes = ['jpg', 'jpeg', 'png', 'bmp', 'webp'];
+        if (imageTypes.includes(extension.toLowerCase())) {
+          try {
+            this.uploadStatus = `Compressing image: ${file.name}`;
+            processedFile = await this.compressImage(processedFile, 0.8, 1920, 1080);
+            console.log(`Compressed ${file.name}: ${file.size} -> ${processedFile.size} bytes`);
+          } catch (error) {
+            console.error("Image compression failed:", error);
+            // Continue with original file if compression fails
+          }
+        }
+
+        formData.append(`files[${i}]`, processedFile);
+        processedFiles++;
+        this.uploadProgress = (processedFiles / totalFiles) * 30; // 30% for processing
       }
 
       try {
+        this.uploadStatus = 'Uploading files...';
+        this.uploadProgress = 30; // Start upload at 30%
+        
         const response = await Patients.addAttachments(formData);
+        
+        // Upload successful
+        this.uploadProgress = 100;
+        this.uploadStatus = 'Upload completed!';
+        
         this.form_att.file = "";
         this.get_attachments(this.form_att.patientid);
         this.$message.success("File uploaded successfully!");
         this.$refs.uploadRef.clearFiles();
+        
+        // Reset upload state
+        this.isUploading = false;
+        this.uploadProgress = 0;
+        this.uploadStatus = '';
+        
       } catch (err) {
         console.error("Error uploading files:", err);
         this.$message.error("Upload failed.");
+        
+        // Reset upload state on failure
+        this.isUploading = false;
+        this.uploadProgress = 0;
+        this.uploadStatus = '';
       }
     },
     getBase64(file) {
@@ -1458,5 +1559,6 @@ export default {
   height: 600px;
   border: none;
 }
+
 
 </style>

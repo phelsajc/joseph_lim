@@ -823,13 +823,21 @@
       </el-tab-pane>
       <el-tab-pane label="Attachments" name="attachments">
         <div class="mb-4">
-          <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange">
+          <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange" :disabled="isUploading">
             <template #trigger>
               <el-button ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
-                :on-change="handleChange">Select attachments</el-button>
+                :on-change="handleChange" :disabled="isUploading">Select attachments</el-button>
             </template>
-            <el-button size="small" type="primary" @click="submitUpload">Submit</el-button>
+            <el-button size="small" type="primary" @click="submitUpload" :loading="isUploading" :disabled="isUploading">
+              {{ isUploading ? 'Uploading...' : 'Submit' }}
+            </el-button>
           </el-upload>
+          
+          <!-- Upload Progress -->
+          <div v-if="isUploading" class="mt-3">
+            <el-progress :percentage="uploadProgress" :status="uploadProgress === 100 ? 'success' : ''"></el-progress>
+            <p class="text-sm text-gray-600 mt-2">{{ uploadStatus }}</p>
+          </div>
         </div>
         <el-card style="max-width: 100%">
           <el-dialog :visible.sync="dialogVisible" width="50%">
@@ -1360,13 +1368,21 @@
       <div v-if="tab === 'attachments'" class="mobile-section">
         <h3>Attachments</h3>
         <div class="mb-4">
-          <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange">
+          <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange" :disabled="isUploading">
             <template #trigger>
               <el-button ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
-                :on-change="handleChange">Select attachments</el-button>
+                :on-change="handleChange" :disabled="isUploading">Select attachments</el-button>
             </template>
-            <el-button size="small" type="primary" @click="submitUpload">Submit</el-button>
+            <el-button size="small" type="primary" @click="submitUpload" :loading="isUploading" :disabled="isUploading">
+              {{ isUploading ? 'Uploading...' : 'Submit' }}
+            </el-button>
           </el-upload>
+          
+          <!-- Upload Progress -->
+          <div v-if="isUploading" class="mt-3">
+            <el-progress :percentage="uploadProgress" :status="uploadProgress === 100 ? 'success' : ''"></el-progress>
+            <p class="text-sm text-gray-600 mt-2">{{ uploadStatus }}</p>
+          </div>
         </div>
         <el-card style="max-width: 100%">
           <el-dialog :visible.sync="dialogVisible" width="50%">
@@ -1446,6 +1462,10 @@ export default {
       dialogFormVisible: false,
       isProcessing: false,
       profile: {},
+      // Upload progress tracking
+      isUploading: false,
+      uploadProgress: 0,
+      uploadStatus: '',
       fam: [],
       soc: [],
       loading: true,
@@ -2690,49 +2710,194 @@ export default {
     handleChange(file, fileList) {
       this.form_att.files = fileList.map((fileItem) => fileItem.raw);
     },
+    
+    // Image compression utility
+    compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+          // Calculate new dimensions
+          let { width, height } = img;
+          
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width *= ratio;
+            height *= ratio;
+          }
+          
+          // Set canvas dimensions
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw and compress
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob(
+            (blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+              });
+              resolve(compressedFile);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        
+        img.src = URL.createObjectURL(file);
+      });
+    },
     async submitUpload() {
+      // Initialize upload progress
+      this.uploadProgress = 0;
+      this.isUploading = true;
+      this.uploadStatus = 'Preparing files...';
+      
       const formData = new FormData();
       formData.append("patientid", this.form_att.patientid);
+
+      // Check network connection
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const isSlowConnection = connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
+      
+      if (isSlowConnection) {
+        this.$message.warning("Slow network detected. Upload may take longer...");
+      }
+
+      const totalFiles = this.form_att.files.length;
+      let processedFiles = 0;
 
       for (let i = 0; i < this.form_att.files.length; i++) {
         const file = this.form_att.files[i];
         const extension = file.name.split(".").pop().toLowerCase();
+        
+        // Update progress
+        this.uploadStatus = `Processing file ${i + 1} of ${totalFiles}: ${file.name}`;
+        this.uploadProgress = (processedFiles / totalFiles) * 30; // 30% for processing
 
+        // Check file size (10MB limit for mobile data)
+        if (file.size > 10 * 1024 * 1024) {
+          this.$message.error(`File "${file.name}" is too large. Maximum size is 10MB.`);
+          this.isUploading = false;
+          return;
+        }
+
+        let processedFile = file;
+
+        // Handle HEIC/HEIF conversion
         if (extension === "heic" || extension === "heif") {
           try {
+            this.uploadStatus = `Converting HEIC file: ${file.name}`;
             const bmpBlob = await heic2any({
               blob: file,
               toType: "image/bmp",
               quality: 0.9,
             });
 
-            const convertedFile = new File(
+            processedFile = new File(
               [bmpBlob],
               file.name.replace(/\.(heic|heif)$/i, ".jpg"),
               { type: "image/bmp" }
             );
-
-            formData.append(`files[${i}]`, convertedFile);
           } catch (error) {
             console.error("HEIC conversion failed:", error);
             this.$message.error("HEIC conversion failed.");
+            this.isUploading = false;
             return;
           }
-        } else {
-          formData.append(`files[${i}]`, file);
         }
+        
+        // Compress images (JPEG, PNG, BMP, WebP)
+        const imageTypes = ['jpg', 'jpeg', 'png', 'bmp', 'webp'];
+        if (imageTypes.includes(extension.toLowerCase())) {
+          try {
+            this.uploadStatus = `Compressing image: ${file.name}`;
+            processedFile = await this.compressImage(processedFile, 0.8, 1920, 1080);
+            console.log(`Compressed ${file.name}: ${file.size} -> ${processedFile.size} bytes`);
+          } catch (error) {
+            console.error("Image compression failed:", error);
+            // Continue with original file if compression fails
+          }
+        }
+
+        formData.append(`files[${i}]`, processedFile);
+        processedFiles++;
+        this.uploadProgress = (processedFiles / totalFiles) * 30; // 30% for processing
       }
 
-      try {
-        const response = await Patients.addAttachments(formData);
-        this.form_att.file = "";
-        this.get_attachments(this.form_att.patientid);
-        this.$message.success("File uploaded successfully!");
-        this.$refs.uploadRef.clearFiles();
-      } catch (err) {
-        console.error("Error uploading files:", err);
-        this.$message.error("Upload failed. " + err);
+      // Retry mechanism for mobile data
+      const maxRetries = 3;
+      let retryCount = 0;
+      
+      while (retryCount < maxRetries) {
+        try {
+          this.uploadStatus = 'Uploading files...';
+          this.uploadProgress = 30; // Start upload at 30%
+          
+          const response = await Patients.addAttachments(formData);
+          
+          // Upload successful
+          this.uploadProgress = 100;
+          this.uploadStatus = 'Upload completed!';
+          
+          this.form_att.file = "";
+          this.get_attachments(this.form_att.patientid);
+          this.$message.success("File uploaded successfully!");
+          this.$refs.uploadRef.clearFiles();
+          
+          // Reset upload state
+          this.isUploading = false;
+          this.uploadProgress = 0;
+          this.uploadStatus = '';
+          
+          return; // Success, exit the retry loop
+        } catch (err) {
+          retryCount++;
+          console.error(`Upload attempt ${retryCount} failed:`, err);
+          
+          // Check if it's a network-related error
+          const isNetworkError = !err.response || err.code === 'ECONNABORTED' || err.code === 'NETWORK_ERROR';
+          
+          if (isNetworkError && retryCount < maxRetries) {
+            this.uploadStatus = `Upload failed (attempt ${retryCount}/${maxRetries}). Retrying...`;
+            this.$message.warning(`Upload failed (attempt ${retryCount}/${maxRetries}). Retrying...`);
+            // Wait before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+            continue;
+          }
+          
+          // Final error handling
+          let errorMessage = "Upload failed.";
+          
+          if (isNetworkError) {
+            errorMessage = "Network error. Please check your connection and try again.";
+          } else if (err.response && err.response.data) {
+            if (err.response.data.message) {
+              errorMessage += " " + err.response.data.message;
+            } else if (err.response.data.error) {
+              errorMessage += " " + err.response.data.error;
+            } else if (typeof err.response.data === 'string') {
+              errorMessage += " " + err.response.data;
+            }
+          } else if (err.message) {
+            errorMessage += " " + err.message;
+          } else if (typeof err === 'string') {
+            errorMessage += " " + err;
+          }
+          
+          this.$message.error(errorMessage);
+          break;
+        }
       }
+      
+      // Reset upload state on failure
+      this.isUploading = false;
+      this.uploadProgress = 0;
+      this.uploadStatus = '';
     },
     deleteAtt(id) {
       this.$confirm("Are you done with this file?", "Warning", {
