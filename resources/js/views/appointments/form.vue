@@ -461,6 +461,14 @@
                 </el-checkbox-button>
               </el-checkbox-group>
             </el-form-item>
+            <el-form-item label="Smoking Details" v-if="soc.includes('Smoking')">
+              <el-input v-model="smoking_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please provide details about smoking habits" />
+            </el-form-item>
+            <el-form-item label="Alcoholic Beverage Drinking Details" v-if="soc.includes('Alcoholic Beverage Drinking')">
+              <el-input v-model="alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please provide details about alcoholic beverage drinking habits" />
+            </el-form-item>
             <el-form-item label="Others">
               <el-input v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
                 :rows="2" type="textarea" placeholder="Please input" />
@@ -546,6 +554,42 @@
             <el-input v-model="form.email" autosize clearable />
           </el-form-item> -->
         </el-form>
+      </el-tab-pane>
+      
+      <el-tab-pane label="Obstetric and Gynecologic History" name="obgyn" v-if="checkRole(['admin', 'doctor'])">
+        <el-card style="max-width: 100%">
+          <el-form label-position="top">
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="Pregnancy">
+                  <el-input v-model="form.pregnancy" type="textarea" rows="4" placeholder="Enter pregnancy history" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="LMP (Last Menstrual Period)">
+                  <el-date-picker
+                    v-model="form.lmp"
+                    type="date"
+                    placeholder="Select LMP date"
+                    format="yyyy-MM-dd"
+                    value-format="yyyy-MM-dd"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="Contraceptive Use">
+                  <el-input v-model="form.contraceptive_use" type="textarea" rows="4" placeholder="Enter contraceptive use history" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="Menopause">
+                  <el-input v-model="form.menopause" type="textarea" rows="4" placeholder="Enter menopause information" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-card>
       </el-tab-pane>
       <el-tab-pane label="Vitals" name="second">
         <el-card style="max-width: 100%">
@@ -786,41 +830,6 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="Obstetric and Gynecologic History" name="obgyn" v-if="checkRole(['admin', 'doctor'])">
-        <el-card style="max-width: 100%">
-          <el-form label-position="top">
-            <el-row :gutter="20">
-              <el-col :span="6">
-                <el-form-item label="Pregnancy">
-                  <el-input v-model="form.pregnancy" type="textarea" rows="4" placeholder="Enter pregnancy history" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="LMP (Last Menstrual Period)">
-                  <el-date-picker
-                    v-model="form.lmp"
-                    type="date"
-                    placeholder="Select LMP date"
-                    format="yyyy-MM-dd"
-                    value-format="yyyy-MM-dd"
-                    style="width: 100%"
-                  />
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="Contraceptive Use">
-                  <el-input v-model="form.contraceptive_use" type="textarea" rows="4" placeholder="Enter contraceptive use history" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label="Menopause">
-                  <el-input v-model="form.menopause" type="textarea" rows="4" placeholder="Enter menopause information" />
-                </el-form-item>
-              </el-col>
-            </el-row>
-          </el-form>
-        </el-card>
-      </el-tab-pane>
       <el-tab-pane label="Attachments" name="attachments">
         <div class="mb-4">
           <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange" :disabled="isUploading">
@@ -987,6 +996,14 @@
                 <el-checkbox-button label="Smoking">Smoking</el-checkbox-button>
                 <el-checkbox-button label="Alcoholic Beverage Drinking">Alcoholic Beverage Drinking</el-checkbox-button>
               </el-checkbox-group>
+            </el-form-item>
+            <el-form-item label="Smoking Details" v-if="soc.includes('Smoking')">
+              <el-input v-model="smoking_details" :autosize="{ minRows: 2, maxRows: 4 }" 
+                type="textarea" placeholder="Please provide details about smoking habits" />
+            </el-form-item>
+            <el-form-item label="Alcoholic Beverage Drinking Details" v-if="soc.includes('Alcoholic Beverage Drinking')">
+              <el-input v-model="alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }" 
+                type="textarea" placeholder="Please provide details about alcoholic beverage drinking habits" />
             </el-form-item>
             <el-form-item label="Others">
               <el-input v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }" 
@@ -1468,6 +1485,8 @@ export default {
       uploadStatus: '',
       fam: [],
       soc: [],
+      smoking_details: '',
+      alcohol_details: '',
       loading: true,
       tab: "first",
       rx_list: [],
