@@ -688,31 +688,31 @@
             </el-form>
           </el-row>
           <el-row :gutter="20">
-            <el-table :data="rx_list" style="width: 100%" class="compact-table">
-              <el-table-column prop="medicine" label="Medicine" width="290" />
-              <el-table-column prop="qty" label="Qty" width="70" />
-              <el-table-column label="Breakfast">
-                <el-table-column prop="bb" label="Before" width="80" />
-                <el-table-column prop="ab" label="After" width="80" />
+            <el-table :data="rx_list" style="width: 100%" class="compact-table" size="small">
+              <el-table-column prop="medicine" label="Medicine" width="200" show-overflow-tooltip />
+              <el-table-column prop="qty" label="Qty" width="50" align="center" />
+              <el-table-column label="Breakfast" width="120">
+                <el-table-column prop="bb" label="B" width="60" align="center" />
+                <el-table-column prop="ab" label="A" width="60" align="center" />
               </el-table-column>
-              <el-table-column label="Lunch">
-                <el-table-column prop="bl" label="Before" width="80" />
-                <el-table-column prop="al" label="After" width="80" />
+              <el-table-column label="Lunch" width="120">
+                <el-table-column prop="bl" label="B" width="60" align="center" />
+                <el-table-column prop="al" label="A" width="60" align="center" />
               </el-table-column>
-              <el-table-column label="Dinner">
-                <el-table-column prop="bs" label="Before" width="80" />
-                <el-table-column prop="as" label="After" width="80" />
+              <el-table-column label="Dinner" width="120">
+                <el-table-column prop="bs" label="B" width="60" align="center" />
+                <el-table-column prop="as" label="A" width="60" align="center" />
               </el-table-column>
-              <el-table-column prop="bt" label="Bedtime" width="80" />
-              <el-table-column prop="remarks" label="Remarks" width="260" />
-              <el-table-column align="center" label="Actions" width="300">
+              <el-table-column prop="bt" label="Bedtime" width="70" align="center" />
+              <el-table-column prop="remarks" label="Remarks" width="150" show-overflow-tooltip />
+              <el-table-column align="center" label="Actions" width="180">
                 <template slot-scope="scope">
-                  <el-button v-role="['doctor', 'admin']" type="primary" size="mini"
-                    @click="editMed(scope.row)">Edit</el-button>
+                  <el-button v-role="['doctor', 'admin']" type="primary" size="mini" icon="el-icon-edit"
+                    @click="editMed(scope.row)"></el-button>
                   <el-button v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
-                    type="warning" size="mini" @click="cancelEdit()">Cancel</el-button>
-                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini"
-                    @click="deleteMed(scope.row.id)">Delete</el-button>
+                    type="warning" size="mini" icon="el-icon-close" @click="cancelEdit()"></el-button>
+                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
+                    @click="deleteMed(scope.row.id)"></el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -1196,31 +1196,31 @@
             </el-form>
           </el-row>
           <el-row :gutter="20">
-            <el-table :data="rx_list" style="width: 100%" class="compact-table">
-              <el-table-column prop="medicine" label="Medicine" width="200" />
-              <el-table-column prop="qty" label="Qty" width="60" />
-              <el-table-column label="Breakfast">
-                <el-table-column prop="bb" label="Before" width="70" />
-                <el-table-column prop="ab" label="After" width="70" />
+            <el-table :data="rx_list" style="width: 100%" class="compact-table" size="small">
+              <el-table-column prop="medicine" label="Medicine" width="150" show-overflow-tooltip />
+              <el-table-column prop="qty" label="Qty" width="40" align="center" />
+              <el-table-column label="Breakfast" width="100">
+                <el-table-column prop="bb" label="B" width="50" align="center" />
+                <el-table-column prop="ab" label="A" width="50" align="center" />
               </el-table-column>
-              <el-table-column label="Lunch">
-                <el-table-column prop="bl" label="Before" width="70" />
-                <el-table-column prop="al" label="After" width="70" />
+              <el-table-column label="Lunch" width="100">
+                <el-table-column prop="bl" label="B" width="50" align="center" />
+                <el-table-column prop="al" label="A" width="50" align="center" />
               </el-table-column>
-              <el-table-column label="Dinner">
-                <el-table-column prop="bs" label="Before" width="70" />
-                <el-table-column prop="as" label="After" width="70" />
+              <el-table-column label="Dinner" width="100">
+                <el-table-column prop="bs" label="B" width="50" align="center" />
+                <el-table-column prop="as" label="A" width="50" align="center" />
               </el-table-column>
-              <el-table-column prop="bt" label="Bedtime" width="70" />
-              <el-table-column prop="remarks" label="Remarks" width="200" />
-              <el-table-column align="center" label="Actions" width="200">
+              <el-table-column prop="bt" label="Bedtime" width="60" align="center" />
+              <el-table-column prop="remarks" label="Remarks" width="120" show-overflow-tooltip />
+              <el-table-column align="center" label="Actions" width="120">
                 <template slot-scope="scope">
-                  <el-button v-role="['doctor', 'admin']" type="primary" size="mini"
-                    @click="editMed(scope.row)">Edit</el-button>
+                  <el-button v-role="['doctor', 'admin']" type="primary" size="mini" icon="el-icon-edit"
+                    @click="editMed(scope.row)"></el-button>
                   <el-button v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
-                    type="warning" size="mini" @click="cancelEdit()">Cancel</el-button>
-                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini"
-                    @click="deleteMed(scope.row.id)">Delete</el-button>
+                    type="warning" size="mini" icon="el-icon-close" @click="cancelEdit()"></el-button>
+                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
+                    @click="deleteMed(scope.row.id)"></el-button>
                 </template>
               </el-table-column>
             </el-table>
