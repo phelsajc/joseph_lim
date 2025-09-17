@@ -145,57 +145,57 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->SetFont('Arial', '', 8);
         $this->cell(-3, 3, '', '0', 0, 'R');
 
-        $this->Cell(45, 5, "Medicine Name", 'LTR', 0, 'C');
+        $this->Cell(40, 5, "Medicine Name", 'LTR', 0, 'C');
         $this->Cell(8, 5, "QTY", "TR", 0, 'C');
 
-        $this->Cell(12, 5, "Breakfast", 'T', 0, 'C');
-        $this->Cell(12, 5, "Lunch", 1, 0, 'C');
+        $this->Cell(16, 5, "Breakfast", 'T', 0, 'C');
+        $this->Cell(16, 5, "Lunch", 1, 0, 'C');
 
 
-        $this->Cell(12, 5, "Supper", 1, 0, 'C');
+        $this->Cell(16, 5, "Supper", 1, 0, 'C');
 
         $this->Cell(9, 5, "Beds", "TR", 0, 'C');
 
 
-        $this->Cell(40, 5, "Remarks", "TR", 0, 'C');
+        $this->Cell(30, 5, "Remarks", "TR", 0, 'C');
 
         $this->Ln(5);
         $this->cell(-3, 3, '', '0', 0, 'R');
 
         $this->SetFont('Arial', '', 9);
-        $this->Cell(45, 5, "", 'LBR', 0, 'C');
+        $this->Cell(40, 5, "", 'LBR', 0, 'C');
 
         $this->Cell(8, 5, "", "RB", 0, 'C');
 
-        $this->Cell(6, 5, "B", 1, 0, 'C');//bf
-        $this->Cell(6, 5, "A", 1, 0, 'C');
+        $this->Cell(8, 5, "B", 1, 0, 'C');//bf
+        $this->Cell(8, 5, "A", 1, 0, 'C');
 
 
-        $this->Cell(6, 5, "B", 1, 0, 'C');
-        $this->Cell(6, 5, "A", 1, 0, 'C');
+        $this->Cell(8, 5, "B", 1, 0, 'C');
+        $this->Cell(8, 5, "A", 1, 0, 'C');
 
-        $this->Cell(6, 5, "B", 1, 0, 'C');
-        $this->Cell(6, 5, "A", 1, 0, 'C');
+        $this->Cell(8, 5, "B", 1, 0, 'C');
+        $this->Cell(8, 5, "A", 1, 0, 'C');
 
 
         $this->Cell(9, 5, "", "RB", 0, 'C');
 
 
-        $this->Cell(40, 5, "", "RB", 0, 'C');
+        $this->Cell(30, 5, "", "RB", 0, 'C');
         $this->Ln(5);
 
         $this->SetWidths(
             array(
-                45,
+                40,
                 8,
-                6,
-                6,
-                6,
-                6,
-                6,
-                6,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
                 9,
-                40
+                30
             )
         );
     }
