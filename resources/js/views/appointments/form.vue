@@ -438,12 +438,12 @@
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="Mother Details">
-                  <el-input v-model="form.mother_details" type="textarea" rows="6" placeholder="Enter mother's medical history, age, health conditions, etc." />
+                  <el-input v-model="profile.mother_details" type="textarea" rows="6" placeholder="Enter mother's medical history, age, health conditions, etc." />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="Father Details">
-                  <el-input v-model="form.father_details" type="textarea" rows="6" placeholder="Enter father's medical history, age, health conditions, etc." />
+                  <el-input v-model="profile.father_details" type="textarea" rows="6" placeholder="Enter father's medical history, age, health conditions, etc." />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -462,11 +462,11 @@
               </el-checkbox-group>
             </el-form-item>
             <el-form-item label="Smoking Details" v-if="soc.includes('Smoking')">
-              <el-input v-model="smoking_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+              <el-input v-model="profile.smoking_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
                 :rows="2" type="textarea" placeholder="Please provide details about smoking habits" />
             </el-form-item>
             <el-form-item label="Alcoholic Beverage Drinking Details" v-if="soc.includes('Alcoholic Beverage Drinking')">
-              <el-input v-model="alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+              <el-input v-model="profile.alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
                 :rows="2" type="textarea" placeholder="Please provide details about alcoholic beverage drinking habits" />
             </el-form-item>
             <el-form-item label="Others">
@@ -689,7 +689,7 @@
           </el-row>
           <el-row :gutter="20">
             <el-table :data="rx_list" style="width: 100%" class="compact-table" size="small">
-              <el-table-column prop="medicine" label="Medicine" width="200" show-overflow-tooltip />
+              <el-table-column prop="medicine" label="Medicine" width="300" />
               <el-table-column prop="qty" label="Qty" width="50" align="center" />
               <el-table-column label="Breakfast" width="120">
                 <el-table-column prop="bb" label="B" width="60" align="center" />
@@ -987,7 +987,7 @@
       </div>
 
       <!-- Social/Environment History Section -->
-      <div v-if="tab === 'soc'" class="mobile-section">
+      <!-- <div v-if="tab === 'soc'" class="mobile-section">
         <h3>Social / Environment History</h3>
         <div class="block">
           <el-form label-position="top" class="demo-form-inline">
@@ -1015,7 +1015,7 @@
             </el-form-item>
           </el-form>
         </div>
-      </div>
+      </div> -->
 
       <!-- Diagnosis Section -->
       <div v-if="tab === 'first'" class="mobile-section">
@@ -1197,7 +1197,7 @@
           </el-row>
           <el-row :gutter="20">
             <el-table :data="rx_list" style="width: 100%" class="compact-table" size="small">
-              <el-table-column prop="medicine" label="Medicine" width="150" show-overflow-tooltip />
+              <el-table-column prop="medicine" label="Medicine" width="300" />
               <el-table-column prop="qty" label="Qty" width="40" align="center" />
               <el-table-column label="Breakfast" width="100">
                 <el-table-column prop="bb" label="B" width="50" align="center" />
@@ -1485,14 +1485,14 @@ export default {
       uploadStatus: '',
       fam: [],
       soc: [],
-      smoking_details: '',
-      alcohol_details: '',
       loading: true,
       tab: "first",
       rx_list: [],
       diagnostic_list: [],
       services_list: [],
       form: {
+      smoking_details: '',
+      alcohol_details: '',
         fasting_mode: "",
         sendXrayToEmail: false,
         email: "",

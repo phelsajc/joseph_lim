@@ -464,6 +464,8 @@ class PatientController extends BaseController
         $dataPatient->tb = $request->tb;
         $dataPatient->seizure = $request->seizure;
         $dataPatient->hypertension = $request->hypertension;
+        $dataPatient->smoking_details = $request->smoking_details;
+        $dataPatient->alcohol_details = $request->alcohol_details;
         $dataPatient->diabetes = $request->diabetes;
         $dataPatient->copd = $request->copd;
         $dataPatient->pmh_others = $request->pmh_others;
