@@ -1,31 +1,59 @@
 <template>
   <div class="app-container loading-container" v-loading="pageloading" element-loading-text="Loading...">
-    <div class="mb-4">
-      <el-dropdown @command="handleCommand">
-        <el-button type="primary">
-          Actions<i class="el-icon-arrow-down el-icon--right" />
-        </el-button>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="update_diagnosis">Update Diagnosis</el-dropdown-item>
-          <el-dropdown-item command="print_rx">Print Rx</el-dropdown-item>
-          <!-- <el-dropdown-item command="email_rx">Email Rx</el-dropdown-item> -->
-          <el-dropdown-item command="print_labs">Print Diagnostics</el-dropdown-item>
-          <el-dropdown-item command="print_referral">Print Referral</el-dropdown-item>
-          <el-dropdown-item command="print_medcert">Print Med Cert</el-dropdown-item>
-          <el-dropdown-item v-role="['secretary', 'admin', 'doctor']" command="done_consult">Done
-            Consultation</el-dropdown-item>
-          <el-dropdown-item command="cancel_apt">Cancel Appointment</el-dropdown-item>
-          <el-dropdown-item v-role="['doctor', 'admin']" command="view_chart">View Chart</el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
-      <el-popconfirm v-model="popconfirmUpddateDiagnosis" title="Are you done with this appointment?"
-        @confirm="onSubmit">
-        <template #reference>
-          <el-button v-if="!isMobile" ref="updateDiagnosisBtn" style="display: none" type="primary">
-            Update Diagnosis
+    <div class="action-toolbar">
+      <div class="action-buttons">
+        <el-dropdown @command="handleCommand" trigger="click">
+          <el-button type="primary" size="large" class="action-btn">
+            <i class="el-icon-menu"></i>
+            Actions
+            <i class="el-icon-arrow-down el-icon--right" />
           </el-button>
-        </template>
-      </el-popconfirm>
+          <el-dropdown-menu slot="dropdown" class="action-menu">
+            <el-dropdown-item command="update_diagnosis" class="action-item">
+              <i class="el-icon-edit"></i>
+              Update Diagnosis
+            </el-dropdown-item>
+            <el-dropdown-item command="print_rx" class="action-item">
+              <i class="el-icon-printer"></i>
+              Print Rx
+            </el-dropdown-item>
+            <el-dropdown-item command="print_labs" class="action-item">
+              <i class="el-icon-document"></i>
+              Print Diagnostics
+            </el-dropdown-item>
+            <el-dropdown-item command="print_referral" class="action-item">
+              <i class="el-icon-s-promotion"></i>
+              Print Referral
+            </el-dropdown-item>
+            <el-dropdown-item command="print_medcert" class="action-item">
+              <i class="el-icon-document-copy"></i>
+              Print Med Cert
+            </el-dropdown-item>
+            <el-dropdown-item v-role="['secretary', 'admin', 'doctor']" command="done_consult" class="action-item success">
+              <i class="el-icon-check"></i>
+              Done Consultation
+            </el-dropdown-item>
+            <el-dropdown-item command="cancel_apt" class="action-item danger">
+              <i class="el-icon-close"></i>
+              Cancel Appointment
+            </el-dropdown-item>
+            <el-dropdown-item v-role="['doctor', 'admin']" command="view_chart" class="action-item">
+              <i class="el-icon-view"></i>
+              View Chart
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+        
+        <el-popconfirm v-model="popconfirmUpddateDiagnosis" title="Are you done with this appointment?"
+          @confirm="onSubmit">
+          <template #reference>
+            <el-button v-if="!isMobile" ref="updateDiagnosisBtn" style="display: none" type="success" size="large" class="action-btn">
+              <i class="el-icon-check"></i>
+              Update Diagnosis
+            </el-button>
+          </template>
+        </el-popconfirm>
+      </div>
     </div>
 
     <el-dialog :title="'Historical Records'" class="compact-table" width="100%" :visible.sync="historyDiaglog"
@@ -272,57 +300,116 @@
     </el-dialog>
     <br />
 
-    <el-card class="profile-card">
-      <div slot="header" class="clearfix">
-        <span>Profile Information</span>
+    <el-card class="profile-card modern-profile-card" shadow="hover">
+      <div slot="header" class="profile-header">
+        <div class="profile-title">
+          <i class="el-icon-user"></i>
+          <span>Patient Profile</span>
+        </div>
+        <div class="profile-date">
+          <i class="el-icon-date"></i>
+          <span>{{ currentDt() }}</span>
+        </div>
       </div>
-      <el-row class="profile-content">
-        <el-col :span="6" class="profile-photo">
-          <el-image style="width: 50%; height: auto" :src="profile.photo" alt="Profile Photo" fit="cover" />
-        </el-col>
-        <el-col :span="6">
-          <div class="profile-item">
-            <span class="profile-label">Name:</span>
-            <span class="profile-value">{{ profile.patientname }}</span>
+      <div class="profile-content">
+        <div class="profile-photo-section">
+          <div class="profile-photo-container">
+            <el-image 
+              :src="profile.photo" 
+              alt="Profile Photo" 
+              fit="cover" 
+              class="profile-photo"
+              :preview-src-list="[profile.photo]"
+            >
+              <div slot="error" class="image-slot">
+                <i class="el-icon-user-solid"></i>
+              </div>
+            </el-image>
+            <div class="profile-status">
+              <el-tag type="info" size="small">
+                Patient
+              </el-tag>
+            </div>
           </div>
-          <div class="profile-item">
-            <span class="profile-label">Age:</span>
-            <span class="profile-value">{{ profile.age }}</span>
+        </div>
+        <div class="profile-details">
+          <div class="profile-section">
+            <h4 class="section-title">Basic Information</h4>
+            <div class="profile-grid">
+              <div class="profile-item">
+                <div class="profile-label">
+                  <i class="el-icon-user"></i>
+                  <span>Name</span>
+                </div>
+                <div class="profile-value">{{ profile.patientname }}</div>
+              </div>
+              <div class="profile-item">
+                <div class="profile-label">
+                  <i class="el-icon-time"></i>
+                  <span>Age</span>
+                </div>
+                <div class="profile-value">{{ profile.age }} years old</div>
+              </div>
+              <div class="profile-item">
+                <div class="profile-label">
+                  <i class="el-icon-calendar"></i>
+                  <span>Birth Date</span>
+                </div>
+                <div class="profile-value">{{ dateFormat(profile.birthdate) }}</div>
+              </div>
+              <div class="profile-item">
+                <div class="profile-label">
+                  <i class="el-icon-s-custom"></i>
+                  <span>Civil Status</span>
+                </div>
+                <div class="profile-value">{{ profile.civil_status }}</div>
+              </div>
+              <div class="profile-item">
+                <div class="profile-label">
+                  <i class="el-icon-user"></i>
+                  <span>Gender</span>
+                </div>
+                <div class="profile-value">
+                  <el-tag :type="profile.sex == '2' ? 'success' : 'primary'" size="small">
+                    {{ profile.sex == "2" ? "Female" : "Male" }}
+                  </el-tag>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="profile-item">
-            <span class="profile-label">Civil Status:</span>
-            <span class="profile-value">{{ profile.civil_status }}</span>
+          <div class="profile-section">
+            <h4 class="section-title">Contact & Medical</h4>
+            <div class="profile-grid">
+              <div class="profile-item">
+                <div class="profile-label">
+                  <i class="el-icon-phone"></i>
+                  <span>Contact</span>
+                </div>
+                <div class="profile-value">{{ profile.contactno }}</div>
+              </div>
+              <div class="profile-item">
+                <div class="profile-label">
+                  <i class="el-icon-location"></i>
+                  <span>Address</span>
+                </div>
+                <div class="profile-value">{{ profile.address }}</div>
+              </div>
+              <div class="profile-item">
+                <div class="profile-label">
+                  <i class="el-icon-medicine"></i>
+                  <span>Blood Type</span>
+                </div>
+                <div class="profile-value">
+                  <el-tag v-if="profile.blood_type" type="danger" size="small">
+                    {{ profile.blood_type }}
+                  </el-tag>
+                  <span v-else class="text-muted">Not specified</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="profile-item">
-            <span class="profile-label">Address:</span>
-            <span class="profile-value">{{ profile.address }}</span>
-          </div>
-          <div class="profile-item">
-            <span class="profile-label">Date:</span>
-            <span class="profile-value">{{ currentDt() }}</span>
-          </div>
-        </el-col>
-        <el-col :span="6">
-          <div class="profile-item">
-            <span class="profile-label">Birth Date:</span>
-            <span class="profile-value">{{ dateFormat(profile.birthdate) }}</span>
-          </div>
-          <div class="profile-item">
-            <span class="profile-label">Contact No:</span>
-            <span class="profile-value">{{ profile.contactno }}</span>
-          </div>
-          <div class="profile-item">
-            <span class="profile-label">Gender:</span>
-            <span class="profile-value">{{
-              profile.sex == "2" ? "Female" : "Male"
-              }}</span>
-          </div>
-          <div class="profile-item">
-            <span class="profile-label">Blood Type:</span>
-            <span class="profile-value">{{ profile.blood_type }}</span>
-          </div>
-        </el-col>
-      </el-row>
+        </div>
+      </div>
     </el-card>
     <br />
 
@@ -345,8 +432,14 @@
     </div>
 
     <!-- Desktop Tab Navigation -->
-    <el-tabs v-model="tab" type="card" class="demo-tabs" v-if="!isMobile">
-      <el-tab-pane label="Histories" name="history" v-if="checkRole(['admin', 'doctor'])">
+    <el-tabs v-model="tab" type="card" class="modern-tabs" v-if="!isMobile">
+      <el-tab-pane name="history" v-if="checkRole(['admin', 'doctor'])">
+        <template #label>
+          <span class="tab-label">
+            <i class="el-icon-document"></i>
+            Histories
+          </span>
+        </template>
         <el-card style="max-width: 100%">
           <el-form label-position="top">
             <el-row :gutter="20">
@@ -556,7 +649,13 @@
         </el-form>
       </el-tab-pane>
       
-      <el-tab-pane label="Obstetric and Gynecologic History" name="obgyn" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane name="obgyn" v-if="checkRole(['admin', 'doctor'])">
+        <template #label>
+          <span class="tab-label">
+            <i class="el-icon-female"></i>
+            OB-GYN
+          </span>
+        </template>
         <el-card style="max-width: 100%">
           <el-form label-position="top">
             <el-row :gutter="20">
@@ -591,41 +690,142 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="Vitals" name="second">
-        <el-card style="max-width: 100%">
-          <el-form :inline="true" label-position="top" class="demo-form-inline">
-            <el-form-item label="Systolic">
-              <el-input v-model="form.vit_sys" autosize clearable />
-            </el-form-item>
-            <el-form-item label="Diastolic">
-              <el-input v-model="form.vit_dia" clearable />
-            </el-form-item>
-            <el-form-item label="Weight">
-              <el-input v-model="form.weight" clearable placeholder="kilograms" />
-            </el-form-item>
-            <el-form-item label="Height">
-              <el-input v-model="form.height" clearable placeholder="centimeters" />
-            </el-form-item>
-            <el-form-item label="BMI">
-              <el-input v-model="form.bmi" clearable />
-            </el-form-item>
-            <el-form-item label="Temperature">
-              <el-input v-model="form.vit_temp" clearable />
-            </el-form-item>
-            <el-form-item label="Cardiac Rate">
-              <el-input v-model="form.vit_cr" clearable />
-            </el-form-item>
-            <el-form-item label="Respiratory Rate">
-              <el-input v-model="form.vit_rr" clearable />
-            </el-form-item>
-            <el-form-item v-role="['secretary', 'admin']" label="">
-              <br />
-              <el-button type="primary" @click="upDateBP()">Update</el-button>
-            </el-form-item>
-          </el-form>
+      <el-tab-pane name="second">
+        <template #label>
+          <span class="tab-label">
+            <i class="el-icon-data-line"></i>
+            Vitals
+          </span>
+        </template>
+        <el-card class="modern-card" shadow="hover">
+          <div slot="header" class="card-header">
+            <i class="el-icon-data-line"></i>
+            <span>Vital Signs</span>
+          </div>
+          <div class="vitals-container">
+            <div class="vitals-grid">
+              <div class="vital-group">
+                <h4 class="group-title">Blood Pressure</h4>
+                <div class="vital-inputs">
+                  <el-form-item label="Systolic" class="vital-item">
+                    <el-input 
+                      v-model="form.vit_sys" 
+                      placeholder="mmHg"
+                      size="large"
+                      class="vital-input"
+                    >
+                      <template slot="prepend">SYS</template>
+                    </el-input>
+                  </el-form-item>
+                  <el-form-item label="Diastolic" class="vital-item">
+                    <el-input 
+                      v-model="form.vit_dia" 
+                      placeholder="mmHg"
+                      size="large"
+                      class="vital-input"
+                    >
+                      <template slot="prepend">DIA</template>
+                    </el-input>
+                  </el-form-item>
+                </div>
+              </div>
+              
+              <div class="vital-group">
+                <h4 class="group-title">Body Measurements</h4>
+                <div class="vital-inputs">
+                  <el-form-item label="Weight" class="vital-item">
+                    <el-input 
+                      v-model="form.weight" 
+                      placeholder="kg"
+                      size="large"
+                      class="vital-input"
+                    >
+                      <template slot="append">kg</template>
+                    </el-input>
+                  </el-form-item>
+                  <el-form-item label="Height" class="vital-item">
+                    <el-input 
+                      v-model="form.height" 
+                      placeholder="cm"
+                      size="large"
+                      class="vital-input"
+                    >
+                      <template slot="append">cm</template>
+                    </el-input>
+                  </el-form-item>
+                  <el-form-item label="BMI" class="vital-item">
+                    <el-input 
+                      v-model="form.bmi" 
+                      placeholder="Auto-calculated"
+                      size="large"
+                      class="vital-input"
+                      readonly
+                    >
+                      <template slot="prepend">BMI</template>
+                    </el-input>
+                  </el-form-item>
+                </div>
+              </div>
+              
+              <div class="vital-group">
+                <h4 class="group-title">Vital Signs</h4>
+                <div class="vital-inputs">
+                  <el-form-item label="Temperature" class="vital-item">
+                    <el-input 
+                      v-model="form.vit_temp" 
+                      placeholder="°C"
+                      size="large"
+                      class="vital-input"
+                    >
+                      <template slot="append">°C</template>
+                    </el-input>
+                  </el-form-item>
+                  <el-form-item label="Heart Rate" class="vital-item">
+                    <el-input 
+                      v-model="form.vit_cr" 
+                      placeholder="bpm"
+                      size="large"
+                      class="vital-input"
+                    >
+                      <template slot="append">bpm</template>
+                    </el-input>
+                  </el-form-item>
+                  <el-form-item label="Respiratory Rate" class="vital-item">
+                    <el-input 
+                      v-model="form.vit_rr" 
+                      placeholder="rpm"
+                      size="large"
+                      class="vital-input"
+                    >
+                      <template slot="append">rpm</template>
+                    </el-input>
+                  </el-form-item>
+                </div>
+              </div>
+            </div>
+            
+            <div class="vitals-actions">
+              <el-button 
+                v-role="['secretary', 'admin']" 
+                type="primary" 
+                size="large"
+                icon="el-icon-check"
+                @click="upDateBP()"
+                class="update-btn"
+              >
+                Update Vitals
+              </el-button>
+            </div>
+          </div>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="Medicines" name="fourth" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane name="fourth" v-if="checkRole(['admin', 'doctor'])">
+        <template #label>
+          <span class="tab-label">
+            <i class="el-icon-medicine"></i>
+            Medicines
+          </span>
+        </template>
         <el-card style="max-width: 100%">
           <el-row :gutter="24">
             <el-form :inline="true" label-position="top" class="demo-form-inline">
@@ -728,7 +928,13 @@
           </el-row>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="Diagnostics" name="fifth" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane name="fifth" v-if="checkRole(['admin', 'doctor'])">
+        <template #label>
+          <span class="tab-label">
+            <i class="el-icon-data-analysis"></i>
+            Diagnostics
+          </span>
+        </template>
         <el-card style="max-width: 100%">
           <el-radio-group v-model="form.fasting_mode">
             <el-radio label="1">Fasting 8-10 hours </el-radio>
@@ -764,7 +970,13 @@
           <el-divider />
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="Medical Certificate" name="medcert" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane name="medcert" v-if="checkRole(['admin', 'doctor'])">
+        <template #label>
+          <span class="tab-label">
+            <i class="el-icon-document-copy"></i>
+            Med Cert
+          </span>
+        </template>
         <el-card style="max-width: 100%">
           <el-form label-position="top">
             <el-row :gutter="20">
@@ -793,7 +1005,13 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="Referral" name="referral" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane name="referral" v-if="checkRole(['admin', 'doctor'])">
+        <template #label>
+          <span class="tab-label">
+            <i class="el-icon-s-promotion"></i>
+            Referral
+          </span>
+        </template>
         <el-card style="max-width: 100%">
           <el-form label-position="top">
             <el-row :gutter="20">
@@ -830,7 +1048,13 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="Attachments" name="attachments">
+      <el-tab-pane name="attachments">
+        <template #label>
+          <span class="tab-label">
+            <i class="el-icon-paperclip"></i>
+            Attachments
+          </span>
+        </template>
         <div class="mb-4">
           <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange" :disabled="isUploading">
             <template #trigger>
@@ -3208,8 +3432,493 @@ button {
   width: 100%;
 }
 
+/* Modern Profile Card Styles */
+.modern-profile-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.modern-profile-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  border-bottom: 2px solid #f0f2f5;
+  margin-bottom: 20px;
+}
+
+.profile-title {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.profile-title i {
+  margin-right: 8px;
+  color: #409EFF;
+  font-size: 20px;
+}
+
+.profile-date {
+  display: flex;
+  align-items: center;
+  color: #909399;
+  font-size: 14px;
+}
+
+.profile-date i {
+  margin-right: 5px;
+}
+
+.profile-content {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.profile-photo-section {
+  flex-shrink: 0;
+}
+
+.profile-photo-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #f0f2f5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-status {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+}
+
+.profile-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.profile-section {
+  background: #fafbfc;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #409EFF;
+}
+
+.section-title {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+}
+
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 16px;
+  background: #409EFF;
+  margin-right: 8px;
+  border-radius: 2px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.profile-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.profile-label {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #909399;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-label i {
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+.profile-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c3e50;
+  word-break: break-word;
+}
+
+.text-muted {
+  color: #c0c4cc;
+  font-style: italic;
+}
+
+/* Modern Tab Styles */
+.modern-tabs {
+  margin-top: 20px;
+}
+
+.modern-tabs .el-tabs__header {
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  padding: 5px;
+}
+
+.modern-tabs .el-tabs__nav-wrap {
+  background: transparent;
+}
+
+.modern-tabs .el-tabs__item {
+  color: rgba(255, 255, 255, 0.8);
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  margin: 0 2px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.modern-tabs .el-tabs__item:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modern-tabs .el-tabs__item.is-active {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tab-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab-label i {
+  font-size: 16px;
+}
+
+/* Modern Card Styles */
+.modern-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.modern-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 0;
+  border-bottom: 2px solid #f0f2f5;
+  margin-bottom: 20px;
+}
+
+.card-header i {
+  margin-right: 8px;
+  color: #409EFF;
+  font-size: 18px;
+}
+
+/* Vitals Container Styles */
+.vitals-container {
+  padding: 20px 0;
+}
+
+.vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.vital-group {
+  background: #fafbfc;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #67c23a;
+}
+
+.group-title {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vital-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.vital-item {
+  margin-bottom: 0;
+}
+
+.vital-input {
+  width: 100%;
+}
+
+.vitals-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.update-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.update-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.4);
+}
+
+/* Action Toolbar Styles */
+.action-toolbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.action-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.action-menu {
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border: none;
+  padding: 8px 0;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.action-item:hover {
+  background: #f5f7fa;
+  color: #409EFF;
+}
+
+.action-item.success:hover {
+  background: #f0f9ff;
+  color: #67c23a;
+}
+
+.action-item.danger:hover {
+  background: #fef0f0;
+  color: #f56c6c;
+}
+
+.action-item i {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+/* Enhanced Form Styling */
+.app-container {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.loading-container {
+  border-radius: 12px;
+}
+
+/* Card Enhancements */
+.el-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.el-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Form Input Enhancements */
+.el-input__inner {
+  border-radius: 8px;
+  border: 2px solid #e4e7ed;
+  transition: all 0.3s ease;
+}
+
+.el-input__inner:focus {
+  border-color: #409EFF;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+}
+
+.el-textarea__inner {
+  border-radius: 8px;
+  border: 2px solid #e4e7ed;
+  transition: all 0.3s ease;
+}
+
+.el-textarea__inner:focus {
+  border-color: #409EFF;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+}
+
+/* Button Enhancements */
+.el-button {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.el-button--primary {
+  background: linear-gradient(135deg, #409EFF 0%, #67c23a 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+}
+
+.el-button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.4);
+}
+
+.el-button--success {
+  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.3);
+}
+
+.el-button--success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(103, 194, 58, 0.4);
+}
+
+/* Table Enhancements */
+.el-table {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.el-table th {
+  background: #f8f9fa;
+  color: #2c3e50;
+  font-weight: 600;
+  border-bottom: 2px solid #e4e7ed;
+}
+
+.el-table td {
+  border-bottom: 1px solid #f0f2f5;
+}
+
 /* Mobile responsive improvements */
 @media (max-width: 768px) {
+  .app-container {
+    padding: 10px;
+  }
+  
+  .action-toolbar {
+    padding: 15px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .action-btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .profile-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .profile-photo-container {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+  }
+  
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .vitals-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
   .mobile-section .el-col {
     margin-bottom: 10px;
   }
@@ -3228,6 +3937,10 @@ button {
     width: 100%;
     margin-bottom: 8px;
     margin-right: 0;
+  }
+  
+  .modern-tabs .el-tabs__header {
+    background: linear-gradient(135deg, #409EFF 0%, #67c23a 100%);
   }
 }
 </style>
