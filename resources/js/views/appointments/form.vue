@@ -998,11 +998,11 @@
               </el-checkbox-group>
             </el-form-item>
             <el-form-item label="Smoking Details" v-if="soc.includes('Smoking')">
-              <el-input v-model="smoking_details" :autosize="{ minRows: 2, maxRows: 4 }" 
+              <el-input v-model="profile.smoking_details" :autosize="{ minRows: 2, maxRows: 4 }" 
                 type="textarea" placeholder="Please provide details about smoking habits" />
             </el-form-item>
             <el-form-item label="Alcoholic Beverage Drinking Details" v-if="soc.includes('Alcoholic Beverage Drinking')">
-              <el-input v-model="alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }" 
+              <el-input v-model="profile.alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }" 
                 type="textarea" placeholder="Please provide details about alcoholic beverage drinking habits" />
             </el-form-item>
             <el-form-item label="Others">
