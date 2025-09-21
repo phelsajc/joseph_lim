@@ -295,6 +295,12 @@ export default {
   created() {
     this.dashoboard();
   },
+  mounted() {
+    Echo.channel('patients')
+      .listen('NewAppointments', (e) => {
+        this.dashoboard();
+      });
+  },
   data() {
     return {
       lineChartData: lineChartData.newVisitis,
