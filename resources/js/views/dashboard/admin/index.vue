@@ -85,21 +85,66 @@
             </div>
           </div>
         </el-col>
-      </el-row>
+    </el-row>
     </div>
 
     <!-- Calendar Section -->
     <div class="calendar-section">
       <div class="calendar-card">
         <div class="calendar-header">
-          <h3 class="calendar-title">Upcoming Appointments</h3>
+          <div class="calendar-title-section">
+            <h3 class="calendar-title">Upcoming Appointments</h3>
+            <p class="calendar-subtitle">Manage your daily schedule and appointments</p>
+          </div>
           <div class="calendar-actions">
-            <el-button size="mini" @click="viewAllAppointments">View All</el-button>
+            <el-button-group>
+              <el-button size="mini" icon="el-icon-refresh" @click="refreshCalendar">Refresh</el-button>
+              <el-button size="mini" icon="el-icon-plus" @click="addAppointment">Add Appointment</el-button>
+              <el-button size="mini" @click="viewAllAppointments">View All</el-button>
+            </el-button-group>
           </div>
         </div>
         <div class="calendar-content">
-          <full-calendar :events="events" locale="en"></full-calendar>
+          <div class="calendar-wrapper">
+            <full-calendar 
+              :events="events" 
+              locale="en"
+              :config="calendarConfig"
+              @event-click="handleEventClick"
+              @day-click="handleDayClick"
+            ></full-calendar>
+          </div>
         </div>
+       <!--  <div class="calendar-footer" v-if="events && events.length > 0">
+          <div class="upcoming-events">
+            <h4 class="events-title">Today's Schedule</h4>
+            <div class="events-list">
+              <div 
+                v-for="event in todayEvents" 
+                :key="event.id" 
+                class="event-item"
+                @click="handleEventClick(event)"
+              >
+                <div class="event-time">
+                  <i class="el-icon-time"></i>
+                  <span>{{ formatEventTime(event.start) }}</span>
+                </div>
+                <div class="event-details">
+                  <span class="event-title">{{ event.title }}</span>
+                  <span class="event-description" v-if="event.description">{{ event.description }}</span>
+                </div>
+                <div class="event-status">
+                  <el-tag 
+                    size="mini" 
+                    :type="getEventStatusType(event)"
+                  >
+                    {{ getEventStatus(event) }}
+                  </el-tag>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> -->
       </div>
     </div>
 
@@ -121,7 +166,7 @@
                 <i class="el-icon-user"></i>
               </div>
               <div class="patient-info">
-                <span class="patient-name">{{ patient.name || 'Unknown Patient' }}</span>
+                <span class="patient-name">{{ patient.patient || 'Unknown Patient' }}</span>
                 <span class="patient-time">{{ patient.appointment_time || 'No time set' }}</span>
               </div>
               <div class="patient-status">
@@ -198,6 +243,33 @@ export default {
       series: [],
       revenue_series: [],
       todayspxs: [],
+      calendarConfig: {
+        header: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'month,agendaWeek,agendaDay'
+        },
+        defaultView: 'month',
+        height: 'auto',
+        aspectRatio: 1.8,
+        editable: true,
+        selectable: true,
+        selectMirror: true,
+        dayMaxEvents: true,
+        weekends: true,
+        eventLimit: true,
+        eventLimitText: 'more',
+        eventColor: '#667eea',
+        eventTextColor: '#ffffff',
+        dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        buttonText: {
+          today: 'Today',
+          month: 'Month',
+          week: 'Week',
+          day: 'Day'
+        },
+        eventRender: this.customEventRender
+      },
       chartOptions: {
         chart: {
           height: 350,
@@ -304,6 +376,20 @@ export default {
       },
     };
   },
+  computed: {
+    todayEvents() {
+      if (!this.events || this.events.length === 0) return [];
+      
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+      
+      return this.events.filter(event => {
+        const eventDate = new Date(event.start);
+        const eventDateStr = eventDate.toISOString().split('T')[0];
+        return eventDateStr === todayStr;
+      }).sort((a, b) => new Date(a.start) - new Date(b.start));
+    }
+  },
   methods: {
     handleSetLineChartData(type) {
       this.lineChartData = lineChartData[type];
@@ -350,6 +436,62 @@ export default {
     viewAllPatients() {
       this.$router.push('/patients');
     },
+    refreshCalendar() {
+      this.dashoboard();
+      this.$message.success('Calendar refreshed successfully');
+    },
+    addAppointment() {
+      this.$router.push('/appointments/form');
+    },
+    handleEventClick(event) {
+      this.$message.info(`Event clicked: ${event.title}`);
+      // You can add more functionality here like opening a modal with event details
+    },
+    handleDayClick(date) {
+      this.$message.info(`Day clicked: ${date.format()}`);
+      // You can add functionality to create new appointments on day click
+    },
+    formatEventTime(startTime) {
+      const date = new Date(startTime);
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+    },
+    getEventStatus(event) {
+      const now = new Date();
+      const eventTime = new Date(event.start);
+      
+      if (eventTime < now) {
+        return 'Completed';
+      } else if (eventTime.toDateString() === now.toDateString()) {
+        return 'Today';
+      } else {
+        return 'Upcoming';
+      }
+    },
+    getEventStatusType(event) {
+      const now = new Date();
+      const eventTime = new Date(event.start);
+      
+      if (eventTime < now) {
+        return 'success';
+      } else if (eventTime.toDateString() === now.toDateString()) {
+        return 'warning';
+      } else {
+        return 'info';
+      }
+    },
+    customEventRender(event, element) {
+      // Custom event rendering for better visual appearance
+      element.css({
+        'border-radius': '8px',
+        'border': 'none',
+        'box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
+        'font-weight': '500'
+        });
+    },
   },
 };
 </script>
@@ -363,7 +505,7 @@ export default {
   .dashboard-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 16px;
-    padding: 32px;
+  padding: 32px;
     margin-bottom: 32px;
     color: white;
     box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
@@ -567,36 +709,224 @@ export default {
       .calendar-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         margin-bottom: 24px;
-        padding-bottom: 16px;
+        padding-bottom: 20px;
         border-bottom: 2px solid #f0f2f5;
         
-        .calendar-title {
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #2c3e50;
-          margin: 0;
+        .calendar-title-section {
+          .calendar-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0 0 4px 0;
+          }
+          
+          .calendar-subtitle {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin: 0;
+            font-weight: 400;
+          }
         }
         
         .calendar-actions {
-          .el-button {
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            
-            &:hover {
-              transform: translateY(-1px);
+          .el-button-group {
+            .el-button {
+              border-radius: 8px;
+              font-weight: 500;
+              transition: all 0.3s ease;
+              margin-left: 4px;
+              
+              &:first-child {
+                margin-left: 0;
+              }
+              
+              &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+              }
             }
           }
         }
       }
       
       .calendar-content {
-        .comp-full-calendar {
-          max-width: 100%;
+        .calendar-wrapper {
+          background: #fafbfc;
           border-radius: 12px;
-          overflow: hidden;
+          padding: 16px;
+          border: 1px solid #e9ecef;
+          
+          .comp-full-calendar {
+            max-width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            
+            // Custom FullCalendar styles
+            .fc-toolbar {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 16px 20px;
+              border-radius: 8px 8px 0 0;
+              margin-bottom: 0;
+              
+              .fc-button {
+                background: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                border-radius: 6px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                
+                &:hover {
+                  background: rgba(255, 255, 255, 0.3);
+                  border-color: rgba(255, 255, 255, 0.5);
+                  transform: translateY(-1px);
+                }
+                
+                &.fc-state-active {
+                  background: rgba(255, 255, 255, 0.4);
+                  border-color: rgba(255, 255, 255, 0.6);
+                }
+              }
+              
+              .fc-toolbar-title {
+                font-size: 1.3rem;
+                font-weight: 600;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+              }
+            }
+            
+            .fc-view-container {
+              border-radius: 0 0 8px 8px;
+              overflow: hidden;
+            }
+            
+            .fc-day-header {
+              background: #f8f9fa;
+              color: #495057;
+              font-weight: 600;
+              padding: 12px 8px;
+              border-color: #dee2e6;
+            }
+            
+            .fc-day {
+              border-color: #dee2e6;
+              transition: all 0.3s ease;
+              
+              &:hover {
+                background: #f8f9fa;
+              }
+              
+              &.fc-today {
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+                border-color: #667eea;
+              }
+            }
+            
+            .fc-event {
+              border-radius: 6px;
+              border: none;
+              padding: 4px 8px;
+              font-weight: 500;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+              transition: all 0.3s ease;
+              
+              &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+              }
+            }
+          }
+        }
+      }
+      
+      .calendar-footer {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f2f5;
+        
+        .upcoming-events {
+          .events-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0 0 16px 0;
+            display: flex;
+            align-items: center;
+            
+            &::before {
+              content: '📅';
+              margin-right: 8px;
+              font-size: 1.1rem;
+            }
+          }
+          
+          .events-list {
+            .event-item {
+              display: flex;
+              align-items: center;
+              padding: 12px 16px;
+              margin-bottom: 8px;
+              background: #f8f9fa;
+              border-radius: 10px;
+              border-left: 4px solid #667eea;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              
+              &:hover {
+                background: #e9ecef;
+                transform: translateX(4px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              }
+              
+              &:last-child {
+                margin-bottom: 0;
+              }
+              
+              .event-time {
+                display: flex;
+                align-items: center;
+                margin-right: 16px;
+                color: #667eea;
+                font-weight: 600;
+                font-size: 0.9rem;
+                
+                i {
+                  margin-right: 6px;
+                  font-size: 14px;
+                }
+              }
+              
+              .event-details {
+                flex: 1;
+                
+                .event-title {
+                  display: block;
+                  font-weight: 600;
+                  color: #2c3e50;
+                  margin-bottom: 2px;
+                  font-size: 0.95rem;
+                }
+                
+                .event-description {
+                  display: block;
+                  font-size: 0.85rem;
+                  color: #6c757d;
+                }
+              }
+              
+              .event-status {
+                .el-tag {
+                  border-radius: 20px;
+                  font-weight: 500;
+                  font-size: 0.75rem;
+                }
+              }
+            }
+          }
         }
       }
     }
