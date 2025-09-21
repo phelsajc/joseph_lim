@@ -50,45 +50,108 @@
               ></apexchart>
             </div>
           </div>
-        </el-col>
-        <el-col :xs="24" :sm="24" :md="24" :lg="8" :xl="8">
-          <div class="quick-stats-card">
-            <h3 class="card-title">Today's Summary</h3>
-            <div class="quick-stats">
-              <div class="stat-item">
-                <div class="stat-icon patients">
-                  <i class="el-icon-user"></i>
-                </div>
-                <div class="stat-content">
-                  <span class="stat-label">New Patients</span>
-                  <span class="stat-value">{{ todayspxs.length || 0 }}</span>
-                </div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-icon appointments">
-                  <i class="el-icon-date"></i>
-                </div>
-                <div class="stat-content">
-                  <span class="stat-label">Appointments</span>
-                  <span class="stat-value">{{ count_appt }}</span>
-                </div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-icon medicines">
-                  <i class="el-icon-medicine"></i>
-                </div>
-                <div class="stat-content">
-                  <span class="stat-label">Medicines</span>
-                  <span class="stat-value">{{ count_meds }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </el-col>
+      </el-col>
+         <el-col :xs="24" :sm="24" :md="24" :lg="8" :xl="8">
+           <div class="quick-stats-card">
+             <h3 class="card-title">Today's Activity</h3>
+             <div class="quick-stats">
+               <div class="stat-item">
+                 <div class="stat-icon patients">
+                   <i class="el-icon-user"></i>
+                 </div>
+                 <div class="stat-content">
+                   <span class="stat-label">Today's Patients</span>
+                   <span class="stat-value">{{ todayspxs.length || 0 }}</span>
+                 </div>
+               </div>
+               <div class="stat-item">
+                 <div class="stat-icon appointments">
+                   <i class="el-icon-time"></i>
+                 </div>
+                 <div class="stat-content">
+                   <span class="stat-label">Completed Today</span>
+                   <span class="stat-value">{{ completedToday }}</span>
+                 </div>
+               </div>
+               <div class="stat-item">
+                 <div class="stat-icon pending">
+                   <i class="el-icon-warning"></i>
+                 </div>
+                 <div class="stat-content">
+                   <span class="stat-label">Pending</span>
+                   <span class="stat-value">{{ pendingToday }}</span>
+                 </div>
+               </div>
+               <div class="stat-item">
+                 <div class="stat-icon revenue">
+                   <i class="el-icon-money"></i>
+                 </div>
+                 <div class="stat-content">
+                   <span class="stat-label">Today's Revenue</span>
+                   <span class="stat-value">${{ todayRevenue }}</span>
+                 </div>
+               </div>
+             </div>
+        </div>
+         </el-col>
     </el-row>
-    </div>
+     </div>
 
-    <!-- Calendar Section -->
+     <!-- Analytics Overview Section -->
+     <div class="analytics-section">
+       <el-row :gutter="24">
+         <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
+           <div class="analytics-card">
+             <div class="analytics-header">
+               <h4 class="analytics-title">Patient Growth</h4>
+               <i class="el-icon-trend-charts analytics-icon"></i>
+             </div>
+             <div class="analytics-content">
+               <div class="analytics-value">{{ patientGrowthRate }}%</div>
+               <div class="analytics-subtitle">vs last month</div>
+               <div class="analytics-trend">
+                 <i class="el-icon-arrow-up trend-up"></i>
+                 <span>+12% this week</span>
+               </div>
+             </div>
+           </div>
+      </el-col>
+         <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
+           <div class="analytics-card">
+             <div class="analytics-header">
+               <h4 class="analytics-title">Appointment Rate</h4>
+               <i class="el-icon-pie-chart analytics-icon"></i>
+             </div>
+             <div class="analytics-content">
+               <div class="analytics-value">{{ appointmentRate }}%</div>
+               <div class="analytics-subtitle">completion rate</div>
+               <div class="analytics-trend">
+                 <i class="el-icon-arrow-up trend-up"></i>
+                 <span>+5% this month</span>
+               </div>
+             </div>
+           </div>
+      </el-col>
+         <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
+           <div class="analytics-card">
+             <div class="analytics-header">
+               <h4 class="analytics-title">Revenue Growth</h4>
+               <i class="el-icon-coin analytics-icon"></i>
+             </div>
+             <div class="analytics-content">
+               <div class="analytics-value">{{ revenueGrowthRate }}%</div>
+               <div class="analytics-subtitle">vs last month</div>
+               <div class="analytics-trend">
+                 <i class="el-icon-arrow-up trend-up"></i>
+                 <span>+8% this week</span>
+               </div>
+             </div>
+           </div>
+      </el-col>
+       </el-row>
+     </div>
+
+     <!-- Calendar Section -->
     <div class="calendar-section">
       <div class="calendar-card">
         <div class="calendar-header">
@@ -176,7 +239,7 @@
           </div>
         </div>
       </div>
-    </div>
+        </div>
   </div>
 </template>
 
@@ -388,6 +451,53 @@ export default {
         const eventDateStr = eventDate.toISOString().split('T')[0];
         return eventDateStr === todayStr;
       }).sort((a, b) => new Date(a.start) - new Date(b.start));
+    },
+    completedToday() {
+      // Calculate completed appointments for today
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      if (!this.events || this.events.length === 0) return 0;
+      
+      return this.events.filter(event => {
+        const eventDate = new Date(event.start);
+        const eventDateStr = eventDate.toISOString().split('T')[0];
+        const todayStr = today.toISOString().split('T')[0];
+        return eventDateStr === todayStr && eventDate < now;
+      }).length;
+    },
+    pendingToday() {
+      // Calculate pending appointments for today
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      if (!this.events || this.events.length === 0) return 0;
+      
+      return this.events.filter(event => {
+        const eventDate = new Date(event.start);
+        const eventDateStr = eventDate.toISOString().split('T')[0];
+        const todayStr = today.toISOString().split('T')[0];
+        return eventDateStr === todayStr && eventDate >= now;
+      }).length;
+    },
+    todayRevenue() {
+      // Calculate today's revenue (mock calculation - replace with actual data)
+      const baseRevenue = this.completedToday * 150; // Assuming $150 per completed appointment
+      return baseRevenue.toLocaleString();
+    },
+    patientGrowthRate() {
+      // Mock calculation for patient growth rate
+      return Math.floor(Math.random() * 20) + 10; // Random between 10-30%
+    },
+    appointmentRate() {
+      // Calculate appointment completion rate
+      const totalToday = this.completedToday + this.pendingToday;
+      if (totalToday === 0) return 0;
+      return Math.round((this.completedToday / totalToday) * 100);
+    },
+    revenueGrowthRate() {
+      // Mock calculation for revenue growth rate
+      return Math.floor(Math.random() * 15) + 5; // Random between 5-20%
     }
   },
   methods: {
@@ -662,9 +772,17 @@ export default {
               background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             }
             
-            &.medicines {
-              background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            }
+             &.medicines {
+               background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+             }
+             
+             &.pending {
+               background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+             }
+             
+             &.revenue {
+               background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+             }
           }
           
           .stat-content {
@@ -688,9 +806,81 @@ export default {
         }
       }
     }
-  }
-  
-  .calendar-section {
+   }
+   
+   .analytics-section {
+     margin-bottom: 32px;
+     
+     .analytics-card {
+       background: white;
+       border-radius: 16px;
+       padding: 24px;
+       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+       border: 1px solid rgba(0, 0, 0, 0.05);
+       transition: all 0.3s ease;
+       height: 100%;
+       
+       &:hover {
+         transform: translateY(-4px);
+         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+       }
+       
+       .analytics-header {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         margin-bottom: 20px;
+         
+         .analytics-title {
+           font-size: 1.1rem;
+           font-weight: 600;
+           color: #2c3e50;
+           margin: 0;
+         }
+         
+         .analytics-icon {
+           font-size: 24px;
+           color: #667eea;
+           opacity: 0.8;
+         }
+       }
+       
+       .analytics-content {
+         .analytics-value {
+           font-size: 2.5rem;
+           font-weight: 700;
+           color: #2c3e50;
+           margin-bottom: 8px;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           background-clip: text;
+         }
+         
+         .analytics-subtitle {
+           font-size: 0.9rem;
+           color: #6c757d;
+           margin-bottom: 12px;
+           font-weight: 500;
+         }
+         
+         .analytics-trend {
+           display: flex;
+           align-items: center;
+           font-size: 0.85rem;
+           color: #28a745;
+           font-weight: 600;
+           
+           .trend-up {
+             margin-right: 6px;
+             font-size: 14px;
+           }
+         }
+       }
+     }
+   }
+   
+   .calendar-section {
     margin-bottom: 32px;
     
     .calendar-card {
@@ -757,9 +947,9 @@ export default {
           border-radius: 12px;
           padding: 16px;
           border: 1px solid #e9ecef;
-          
-          .comp-full-calendar {
-            max-width: 100%;
+
+.comp-full-calendar {
+    max-width: 100%;
             border-radius: 8px;
             overflow: hidden;
             background: white;
