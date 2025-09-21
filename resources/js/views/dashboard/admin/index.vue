@@ -1,12 +1,46 @@
 <template>
-  <div class="dashboard-editor-container">
-    <!-- <github-corner style="position: absolute; top: 0px; border: 0; right: 0;" /> -->
+  <div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <div class="header-content">
+        <div class="welcome-section">
+          <h1 class="dashboard-title">Dashboard Overview</h1>
+          <p class="dashboard-subtitle">Welcome back! Here's what's happening with your medical practice today.</p>
+        </div>
+        <div class="header-actions">
+          <el-button type="primary" icon="el-icon-plus" @click="handleQuickAction">
+            Quick Action
+          </el-button>
+        </div>
+      </div>
+    </div>
 
-    <panel-group @handleSetLineChartData="handleSetLineChartData" :total_patients="count_px" :total_meds="count_meds" :total_dxs="count_dx" :total_appts="count_appt"/>
+    <!-- Statistics Cards -->
+    <div class="stats-section">
+      <panel-group 
+        @handleSetLineChartData="handleSetLineChartData" 
+        :total_patients="count_px" 
+        :total_meds="count_meds" 
+        :total_dxs="count_dx" 
+        :total_appts="count_appt"
+      />
+    </div>
 
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
-      <!-- <line-chart :chart-data="lineChartData" /> -->
-      <div id="chart">
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <el-row :gutter="24">
+        <el-col :xs="24" :sm="24" :md="24" :lg="16" :xl="16">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Monthly Census Report</h3>
+              <div class="chart-actions">
+                <el-button-group>
+                  <el-button size="mini" @click="refreshChart">Refresh</el-button>
+                  <el-button size="mini" icon="el-icon-download" @click="exportChart">Export</el-button>
+                </el-button-group>
+              </div>
+            </div>
+            <div class="chart-content">
               <apexchart
                 ref="radar"
                 type="line"
@@ -15,40 +49,89 @@
                 :series="series"
               ></apexchart>
             </div>
-    </el-row>
+          </div>
+        </el-col>
+        <el-col :xs="24" :sm="24" :md="24" :lg="8" :xl="8">
+          <div class="quick-stats-card">
+            <h3 class="card-title">Today's Summary</h3>
+            <div class="quick-stats">
+              <div class="stat-item">
+                <div class="stat-icon patients">
+                  <i class="el-icon-user"></i>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">New Patients</span>
+                  <span class="stat-value">{{ todayspxs.length || 0 }}</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon appointments">
+                  <i class="el-icon-date"></i>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Appointments</span>
+                  <span class="stat-value">{{ count_appt }}</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon medicines">
+                  <i class="el-icon-medicine"></i>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Medicines</span>
+                  <span class="stat-value">{{ count_meds }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
 
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
-      <full-calendar :events="events" locale="en"></full-calendar>
-    </el-row>
-
-    <el-row :gutter="32">
-      <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 24}" :lg="{span: 12}" :xl="{span: 12}" style="padding-right:8px;margin-bottom:30px;">
-        <!-- <transaction-table :patients="todayspxs" /> -->
-      </el-col>
-      <!-- <el-col :xs="24" :sm="24" :lg="12">
-        <div class="chart-wrapper">
-          <apexchart
-            ref="radar"
-            type="bar"
-            height="350"
-            :options="chartOptionsBar"
-            :series="revenue_series"
-          ></apexchart>
+    <!-- Calendar Section -->
+    <div class="calendar-section">
+      <div class="calendar-card">
+        <div class="calendar-header">
+          <h3 class="calendar-title">Upcoming Appointments</h3>
+          <div class="calendar-actions">
+            <el-button size="mini" @click="viewAllAppointments">View All</el-button>
+          </div>
         </div>
-      </el-col> -->
-    </el-row>
+        <div class="calendar-content">
+          <full-calendar :events="events" locale="en"></full-calendar>
+        </div>
+      </div>
+    </div>
 
-    <!-- <el-row :gutter="8">
-      <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 24}" :lg="{span: 12}" :xl="{span: 12}" style="padding-right:8px;margin-bottom:30px;">
-        <transaction-table />
-      </el-col>
-      <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 6}" :xl="{span: 6}" style="margin-bottom:30px;">
-        <todo-list />
-      </el-col>
-      <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 6}" :xl="{span: 6}" style="margin-bottom:30px;">
-        <box-card />
-      </el-col>
-    </el-row> -->
+    <!-- Recent Activity Section -->
+    <div class="activity-section" v-if="todayspxs && todayspxs.length > 0">
+      <div class="activity-card">
+        <div class="activity-header">
+          <h3 class="activity-title">Today's Patients</h3>
+          <el-button size="mini" @click="viewAllPatients">View All</el-button>
+        </div>
+        <div class="activity-content">
+          <div class="patient-list">
+            <div 
+              v-for="patient in todayspxs.slice(0, 5)" 
+              :key="patient.id" 
+              class="patient-item"
+            >
+              <div class="patient-avatar">
+                <i class="el-icon-user"></i>
+              </div>
+              <div class="patient-info">
+                <span class="patient-name">{{ patient.name || 'Unknown Patient' }}</span>
+                <span class="patient-time">{{ patient.appointment_time || 'No time set' }}</span>
+              </div>
+              <div class="patient-status">
+                <el-tag size="mini" type="success">Active</el-tag>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -251,26 +334,427 @@ export default {
           console.error('Error adding suggestions:', err);
         });
     },
+    handleQuickAction() {
+      this.$message.info('Quick action functionality will be implemented');
+    },
+    refreshChart() {
+      this.dashoboard();
+      this.$message.success('Chart refreshed successfully');
+    },
+    exportChart() {
+      this.$message.info('Export functionality will be implemented');
+    },
+    viewAllAppointments() {
+      this.$router.push('/appointments');
+    },
+    viewAllPatients() {
+      this.$router.push('/patients');
+    },
   },
 };
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-.dashboard-editor-container {
-  padding: 32px;
-  background-color: rgb(240, 242, 245);
-  .chart-wrapper {
-    background: #fff;
-    padding: 16px 16px 0;
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 24px;
+  
+  .dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 32px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      
+      .welcome-section {
+        .dashboard-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin: 0 0 8px 0;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-subtitle {
+          font-size: 1.1rem;
+          opacity: 0.9;
+          margin: 0;
+          font-weight: 300;
+        }
+      }
+      
+      .header-actions {
+        .el-button {
+          background: rgba(255, 255, 255, 0.2);
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          font-weight: 600;
+          padding: 12px 24px;
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+          }
+        }
+      }
+    }
+  }
+  
+  .stats-section {
     margin-bottom: 32px;
   }
+  
+  .charts-section {
+    margin-bottom: 32px;
+    
+    .chart-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      }
+      
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f0f2f5;
+        
+        .chart-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #2c3e50;
+          margin: 0;
+        }
+        
+        .chart-actions {
+          .el-button-group {
+            .el-button {
+              border-radius: 8px;
+              font-weight: 500;
+              transition: all 0.3s ease;
+              
+              &:hover {
+                transform: translateY(-1px);
+              }
+            }
+          }
+        }
+      }
+      
+      .chart-content {
+        position: relative;
+      }
+    }
+    
+    .quick-stats-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      height: 100%;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      }
+      
+      .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0 0 24px 0;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f0f2f5;
+      }
+      
+      .quick-stats {
+        .stat-item {
+          display: flex;
+          align-items: center;
+          padding: 16px 0;
+          border-bottom: 1px solid #f8f9fa;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 20px;
+            color: white;
+            
+            &.patients {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            
+            &.appointments {
+              background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+            
+            &.medicines {
+              background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+          }
+          
+          .stat-content {
+            flex: 1;
+            
+            .stat-label {
+              display: block;
+              font-size: 0.9rem;
+              color: #6c757d;
+              margin-bottom: 4px;
+              font-weight: 500;
+            }
+            
+            .stat-value {
+              display: block;
+              font-size: 1.5rem;
+              font-weight: 700;
+              color: #2c3e50;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .calendar-section {
+    margin-bottom: 32px;
+    
+    .calendar-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      }
+      
+      .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f0f2f5;
+        
+        .calendar-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #2c3e50;
+          margin: 0;
+        }
+        
+        .calendar-actions {
+          .el-button {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            
+            &:hover {
+              transform: translateY(-1px);
+            }
+          }
+        }
+      }
+      
+      .calendar-content {
+        .comp-full-calendar {
+          max-width: 100%;
+          border-radius: 12px;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+  
+  .activity-section {
+    .activity-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      }
+      
+      .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f0f2f5;
+        
+        .activity-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #2c3e50;
+          margin: 0;
+        }
+        
+        .el-button {
+          border-radius: 8px;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            transform: translateY(-1px);
+          }
+        }
+      }
+      
+      .activity-content {
+        .patient-list {
+          .patient-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #f8f9fa;
+            transition: all 0.3s ease;
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            &:hover {
+              background: #f8f9fa;
+              border-radius: 8px;
+              padding: 16px 12px;
+              margin: 0 -12px;
+            }
+            
+            .patient-avatar {
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-right: 16px;
+              color: white;
+              font-size: 18px;
+            }
+            
+            .patient-info {
+              flex: 1;
+              
+              .patient-name {
+                display: block;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 4px;
+              }
+              
+              .patient-time {
+                display: block;
+                font-size: 0.9rem;
+                color: #6c757d;
+              }
+            }
+            
+            .patient-status {
+              .el-tag {
+                border-radius: 20px;
+                font-weight: 500;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
+
+// Responsive Design
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+    
+    .dashboard-header {
+      padding: 24px 20px;
+      
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+        
+        .welcome-section {
+          .dashboard-title {
+            font-size: 2rem;
+          }
+          
+          .dashboard-subtitle {
+            font-size: 1rem;
+          }
+        }
+      }
+    }
+    
+    .charts-section {
+      .chart-card,
+      .quick-stats-card {
+        margin-bottom: 20px;
+      }
+    }
+  }
+}
+
+// Animation keyframes
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-container > * {
+  animation: fadeInUp 0.6s ease-out;
+}
+
 .is-selected {
   color: #1989fa;
 }
-
-.comp-full-calendar {
-    max-width: 100%;
-}
-
 </style>
