@@ -8,8 +8,14 @@
           <p class="dashboard-subtitle">Welcome back! Here's what's happening with your medical practice today.</p>
         </div>
         <div class="header-actions">
-          <el-button type="primary" icon="el-icon-plus" @click="handleQuickAction">
-            Quick Action
+          <el-button 
+            type="primary" 
+            icon="el-icon-plus" 
+            @click="addAppointment"
+            class="add-appointment-btn"
+            size="medium"
+          >
+            Add Appointment
           </el-button>
         </div>
       </div>
@@ -300,6 +306,13 @@ export default {
       .listen('NewAppointments', (e) => {
         this.dashoboard();
       });
+    
+    // Add keyboard shortcut for adding appointments (Ctrl/Cmd + N)
+    document.addEventListener('keydown', this.handleKeyboardShortcut);
+  },
+  beforeDestroy() {
+    // Clean up keyboard event listener
+    document.removeEventListener('keydown', this.handleKeyboardShortcut);
   },
   data() {
     return {
@@ -522,9 +535,6 @@ export default {
           console.error('Error adding suggestions:', err);
         });
     },
-    handleQuickAction() {
-      this.$message.info('Quick action functionality will be implemented');
-    },
     refreshChart() {
       this.dashoboard();
       this.$message.success('Chart refreshed successfully');
@@ -543,7 +553,7 @@ export default {
       this.$message.success('Calendar refreshed successfully');
     },
     addAppointment() {
-      this.$router.push('/appointments/form');
+      this.$router.push('/appointments/appointments');
     },
     handleEventClick(event) {
       this.$message.info(`Event clicked: ${event.title}`);
@@ -585,15 +595,22 @@ export default {
         return 'info';
       }
     },
-    customEventRender(event, element) {
-      // Custom event rendering for better visual appearance
-      element.css({
-        'border-radius': '8px',
-        'border': 'none',
-        'box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
-        'font-weight': '500'
-        });
-    },
+     customEventRender(event, element) {
+       // Custom event rendering for better visual appearance
+       element.css({
+         'border-radius': '8px',
+         'border': 'none',
+         'box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
+         'font-weight': '500'
+         });
+     },
+     handleKeyboardShortcut(event) {
+       // Ctrl/Cmd + N to add new appointment
+       if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
+         event.preventDefault();
+         this.addAppointment();
+       }
+     },
   },
 };
 </script>
@@ -627,32 +644,57 @@ export default {
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
-        .dashboard-subtitle {
-          font-size: 1.1rem;
-          opacity: 0.9;
-          margin: 0;
-          font-weight: 300;
-        }
+         .dashboard-subtitle {
+           font-size: 1.1rem;
+           opacity: 0.9;
+           margin: 0;
+           font-weight: 300;
+           
+           kbd {
+             background: rgba(255, 255, 255, 0.2);
+             border: 1px solid rgba(255, 255, 255, 0.3);
+             border-radius: 4px;
+             padding: 2px 6px;
+             font-family: 'Courier New', monospace;
+             font-size: 0.9rem;
+             font-weight: 600;
+             margin: 0 2px;
+             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+           }
+         }
       }
       
-      .header-actions {
-        .el-button {
-          background: rgba(255, 255, 255, 0.2);
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          color: white;
-          font-weight: 600;
-          padding: 12px 24px;
-          border-radius: 12px;
-          transition: all 0.3s ease;
-          
-          &:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-          }
-        }
-      }
+       .header-actions {
+         .add-appointment-btn {
+           background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+           border: 2px solid rgba(255, 255, 255, 0.3);
+           color: white;
+           font-weight: 700;
+           padding: 14px 28px;
+           border-radius: 12px;
+           font-size: 1rem;
+           text-transform: uppercase;
+           letter-spacing: 0.5px;
+           transition: all 0.3s ease;
+           box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+           
+           &:hover {
+             background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+             border-color: rgba(255, 255, 255, 0.5);
+             transform: translateY(-3px);
+             box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+           }
+           
+           &:active {
+             transform: translateY(-1px);
+           }
+           
+           .el-icon-plus {
+             margin-right: 8px;
+             font-size: 16px;
+           }
+         }
+       }
     }
   }
   
