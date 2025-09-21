@@ -1051,6 +1051,7 @@ class PatientController extends BaseController
                 'appointments.patientid',
                 'appointments.chiefcomplaints',
                 //'appointments.appointment_time',
+                'appointments.isdone',
                 'patients.patientname'
             )
             ->orderBy('appointments.appointment_dt', 'asc')
@@ -1099,7 +1100,8 @@ class PatientController extends BaseController
             $data_todays_pxs[] = [
                 'patient' => $value->patientname ?: 'Unknown Patient',
                 'complaints' => $value->chiefcomplaints,
-                //'appointment_time' => $value->appointment_time
+               //'appointment_time' => $value->appointment_time,
+                'isdone' => $value->isdone
             ];
         }
         
@@ -1124,6 +1126,10 @@ class PatientController extends BaseController
             $revenue_month_arr[] = date_format(date_create($value->apt_dt), 'F Y');
         }
         
+        // Calculate completed and pending counts based on isdone status
+        $completed_today = $todays_appt->where('isdone', 1)->count();
+        $pending_today = $todays_appt->where('isdone', 0)->count();
+        
         return response()->json([
             'graph_amt' => [["name" => 'Total', 'data' => $revenue_arr]],
             'revenue_mon' => $revenue_month_arr,
@@ -1134,7 +1140,9 @@ class PatientController extends BaseController
             'appt' => $todays_appt->count(),
             'patients' => $count_px,
             'meds' => $count_meds,
-            'dx' => $count_diagnostics
+            'dx' => $count_diagnostics,
+            'completed_today' => $completed_today,
+            'pending_today' => $pending_today
         ]);
     }
 

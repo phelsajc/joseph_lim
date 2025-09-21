@@ -66,7 +66,7 @@
                </div>
                <div class="stat-item">
                  <div class="stat-icon appointments">
-                   <i class="el-icon-time"></i>
+                   <i class="el-icon-check"></i>
                  </div>
                  <div class="stat-content">
                    <span class="stat-label">Completed Today</span>
@@ -75,10 +75,10 @@
                </div>
                <div class="stat-item">
                  <div class="stat-icon pending">
-                   <i class="el-icon-warning"></i>
+                   <i class="el-icon-time"></i>
                  </div>
                  <div class="stat-content">
-                   <span class="stat-label">Pending</span>
+                   <span class="stat-label">Pending Today</span>
                    <span class="stat-value">{{ pendingToday }}</span>
                  </div>
                </div>
@@ -302,6 +302,8 @@ export default {
       count_meds: 0,
       count_dx: 0,
       count_appt: 0,
+      completed_today: 0,
+      pending_today: 0,
       events: [],
       series: [],
       revenue_series: [],
@@ -453,32 +455,12 @@ export default {
       }).sort((a, b) => new Date(a.start) - new Date(b.start));
     },
     completedToday() {
-      // Calculate completed appointments for today
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
-      if (!this.events || this.events.length === 0) return 0;
-      
-      return this.events.filter(event => {
-        const eventDate = new Date(event.start);
-        const eventDateStr = eventDate.toISOString().split('T')[0];
-        const todayStr = today.toISOString().split('T')[0];
-        return eventDateStr === todayStr && eventDate < now;
-      }).length;
+      // Get completed count from API response
+      return this.completed_today || 0;
     },
     pendingToday() {
-      // Calculate pending appointments for today
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
-      if (!this.events || this.events.length === 0) return 0;
-      
-      return this.events.filter(event => {
-        const eventDate = new Date(event.start);
-        const eventDateStr = eventDate.toISOString().split('T')[0];
-        const todayStr = today.toISOString().split('T')[0];
-        return eventDateStr === todayStr && eventDate >= now;
-      }).length;
+      // Get pending count from API response
+      return this.pending_today || 0;
     },
     todayRevenue() {
       // Calculate today's revenue (mock calculation - replace with actual data)
@@ -510,6 +492,8 @@ export default {
         this.count_meds = response.meds;
         this.count_dx = response.dx;
         this.count_appt = response.appt;
+        this.completed_today = response.completed_today || 0;
+        this.pending_today = response.pending_today || 0;
         this.series = response.graph_census;
         this.revenue_series = response.graph_amt;
         this.chartOptions = {
@@ -768,9 +752,9 @@ export default {
               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             }
             
-            &.appointments {
-              background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            }
+             &.appointments {
+               background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+             }
             
              &.medicines {
                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
