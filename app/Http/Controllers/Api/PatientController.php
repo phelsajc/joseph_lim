@@ -1042,6 +1042,11 @@ class PatientController extends BaseController
         $count_meds = Medicine::count();
         $count_diagnostics = Services::count();
         
+        // Count new patients added today
+        $new_patients_today = Patients::where('isdeleted', 0)
+            ->whereDate('created_at', date('Y-m-d'))
+            ->count();
+        
         // Optimize today's appointments query with patient names in one query
         $todays_appt = DB::table('appointments')
             ->join('patients', 'appointments.patientid', '=', 'patients.patientid')
@@ -1142,7 +1147,8 @@ class PatientController extends BaseController
             'meds' => $count_meds,
             'dx' => $count_diagnostics,
             'completed_today' => $completed_today,
-            'pending_today' => $pending_today
+            'pending_today' => $pending_today,
+            'new_patients_today' => $new_patients_today
         ]);
     }
 

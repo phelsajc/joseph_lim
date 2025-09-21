@@ -57,11 +57,11 @@
              <div class="quick-stats">
                <div class="stat-item">
                  <div class="stat-icon patients">
-                   <i class="el-icon-user"></i>
+                   <i class="el-icon-user-solid"></i>
                  </div>
                  <div class="stat-content">
-                   <span class="stat-label">Today's Patients</span>
-                   <span class="stat-value">{{ todayspxs.length || 0 }}</span>
+                   <span class="stat-label">New Patients Today</span>
+                   <span class="stat-value">{{ new_patients_today }}</span>
                  </div>
                </div>
                <div class="stat-item">
@@ -304,6 +304,7 @@ export default {
       count_appt: 0,
       completed_today: 0,
       pending_today: 0,
+      new_patients_today: 0,
       events: [],
       series: [],
       revenue_series: [],
@@ -494,6 +495,7 @@ export default {
         this.count_appt = response.appt;
         this.completed_today = response.completed_today || 0;
         this.pending_today = response.pending_today || 0;
+        this.new_patients_today = response.new_patients_today || 0;
         this.series = response.graph_census;
         this.revenue_series = response.graph_amt;
         this.chartOptions = {
