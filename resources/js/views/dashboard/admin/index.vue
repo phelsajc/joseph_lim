@@ -82,7 +82,7 @@
                    <span class="stat-value">{{ pendingToday }}</span>
                  </div>
                </div>
-               <div class="stat-item">
+               <!-- <div class="stat-item">
                  <div class="stat-icon revenue">
                    <i class="el-icon-money"></i>
                  </div>
@@ -90,7 +90,7 @@
                    <span class="stat-label">Today's Revenue</span>
                    <span class="stat-value">${{ todayRevenue }}</span>
                  </div>
-               </div>
+               </div> -->
              </div>
         </div>
          </el-col>
@@ -98,7 +98,7 @@
      </div>
 
      <!-- Analytics Overview Section -->
-     <div class="analytics-section">
+     <!-- <div class="analytics-section">
        <el-row :gutter="24">
          <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
            <div class="analytics-card">
@@ -149,7 +149,7 @@
            </div>
       </el-col>
        </el-row>
-     </div>
+     </div> -->
 
      <!-- Calendar Section -->
     <div class="calendar-section">

@@ -1036,70 +1036,105 @@ class PatientController extends BaseController
     public function dashboard()
     {
         date_default_timezone_set('Asia/Manila');
-        $count_px = Patients::where(['isdeleted' => 0])->get();
-        $count_meds = Medicine::all();
-        $count_diagnostics = Services::all();
+        
+        // Use count() instead of get()->count() for better performance
+        $count_px = Patients::where('isdeleted', 0)->count();
+        $count_meds = Medicine::count();
+        $count_diagnostics = Services::count();
+        
+        // Optimize today's appointments query with patient names in one query
         $todays_appt = DB::table('appointments')
-            ->where('appointment_dt', date("Y-m-d"))
-            ->where('is_cancel', 0)
-            ->orderBy('appointment_dt', 'asc')
+            ->join('patients', 'appointments.patientid', '=', 'patients.patientid')
+            ->where('appointments.appointment_dt', date("Y-m-d"))
+            ->where('appointments.is_cancel', 0)
+            ->select(
+                'appointments.patientid',
+                'appointments.chiefcomplaints',
+                //'appointments.appointment_time',
+                'patients.patientname'
+            )
+            ->orderBy('appointments.appointment_dt', 'asc')
             ->get();
-        $curr_month = date("Y-m");
-        $graph_census = DB::connection('mysql')->select("select count(appointment_dt) as cnt, DATE_FORMAT(appointment_dt , '%Y-%m') apt_dt  from appointments where is_cancel = 0 group by DATE_FORMAT(appointment_dt , '%Y-%m')");
-        //$calendar = DB::connection('mysql')->select("select * from appointments where DATE_FORMAT(appointment_dt , '%Y-%m') = '$curr_month' and is_cancel = 0");
-        $calendar = DB::connection('mysql')->select("select appointment_dt,patientid from appointments where is_cancel = 0 group by appointment_dt,patientid");
-        $data_graph = array();
-        $data_graph_month = array();
-        foreach ($graph_census as $key => $value) {
+        
+        // Optimize graph census query
+        $graph_census = DB::table('appointments')
+            ->selectRaw('count(appointment_dt) as cnt, DATE_FORMAT(appointment_dt, "%Y-%m") as apt_dt')
+            ->where('is_cancel', 0)
+            ->groupBy(DB::raw('DATE_FORMAT(appointment_dt, "%Y-%m")'))
+            ->orderBy('apt_dt', 'asc')
+            ->get();
+        
+        // Optimize calendar query with patient names in one query (no more N+1 queries!)
+        $calendar = DB::table('appointments')
+            ->join('patients', 'appointments.patientid', '=', 'patients.patientid')
+            ->where('appointments.is_cancel', 0)
+            ->select(
+                'appointments.appointment_dt',
+                'appointments.patientid',
+                'patients.patientname'
+            )
+            ->groupBy('appointments.appointment_dt', 'appointments.patientid', 'patients.patientname')
+            ->get();
+        
+        // Process graph data
+        $data_graph = [];
+        $data_graph_month = [];
+        foreach ($graph_census as $value) {
             $data_graph[] = $value->cnt;
             $data_graph_month[] = date_format(date_create($value->apt_dt), 'F Y');
         }
-        $data_calendar = array();
-        foreach ($calendar as $key => $value) {
-            $arr = array();
-            //$arr['title'] = $value->patientid?Helpers::patientDetail($value->patientid)->patientname:'';
-
-            $getName = 'xxxx';
-            if ($value->patientid) {
-                $getName = Helpers::patientDetail($value->patientid)->patientname;
-            }
-            $arr['title'] = $getName;//Helpers::patientDetail($value->patientid)?Helpers::patientDetail($value->patientid)->patientname:'';
-            //$arr['start'] = date_format(date_create($value->appointment_dt),'Y-m-d');
-            $arr['start'] = date_format(date_create($value->appointment_dt), 'Y-m-d');
-            $data_calendar[] = $arr;
+        
+        // Process calendar data (no more N+1 queries!)
+        $data_calendar = [];
+        foreach ($calendar as $value) {
+            $data_calendar[] = [
+                'title' => $value->patientname ?: 'Unknown Patient',
+                'start' => date_format(date_create($value->appointment_dt), 'Y-m-d')
+            ];
         }
-        $data_todays_pxs = array();
-        foreach ($todays_appt as $key => $value) {
-            $arr = array();
-            $arr['patient'] = Helpers::patientDetail($value->patientid) ? Helpers::patientDetail($value->patientid)->patientname : '';
-            $arr['complaints'] = $value->chiefcomplaints;
-            $data_todays_pxs[] = $arr;
+        
+        // Process today's patients (no more N+1 queries!)
+        $data_todays_pxs = [];
+        foreach ($todays_appt as $value) {
+            $data_todays_pxs[] = [
+                'patient' => $value->patientname ?: 'Unknown Patient',
+                'complaints' => $value->chiefcomplaints,
+                //'appointment_time' => $value->appointment_time
+            ];
         }
-        /* $graph_revenue = DB::connection('mysql')->select("select sum(s.fee) as amt, DATE_FORMAT(appointment_dt , '%Y-%m') as apt_dt from appointments a 
-        left join servicesrendered s on a.id = s.appointment_id 
-        group by DATE_FORMAT(a.appointment_dt , '%Y-%m')"); */
-        $graph_revenue = DB::connection('mysql')->select("select sum(s.fee)  as amt, sum(a.discount)  discount, DATE_FORMAT(a.appointment_dt , '%Y-%m') as apt_dt from appointments a 
-        left join servicesrendered s on a.id = s.appointment_id where a.is_cancel = 0
-        group by DATE_FORMAT(a.appointment_dt , '%Y-%m')");
-        $revenue_month_arr = array();
-        $revenue_arr = array();
-        $total_amt = 0;
-        foreach ($graph_revenue as $key => $value) {
-            $total_amt += $value->amt;
-            $revenue_arr[] = $value->amt ? $value->amt - $value->discount : 0;
+        
+        // Optimize revenue query
+        $graph_revenue = DB::table('appointments')
+            ->leftJoin('servicesrendered', 'appointments.id', '=', 'servicesrendered.appointment_id')
+            ->where('appointments.is_cancel', 0)
+            ->selectRaw('
+                COALESCE(SUM(servicesrendered.fee), 0) as amt,
+                COALESCE(SUM(appointments.discount), 0) as discount,
+                DATE_FORMAT(appointments.appointment_dt, "%Y-%m") as apt_dt
+            ')
+            ->groupBy(DB::raw('DATE_FORMAT(appointments.appointment_dt, "%Y-%m")'))
+            ->orderBy('apt_dt', 'asc')
+            ->get();
+        
+        // Process revenue data
+        $revenue_arr = [];
+        $revenue_month_arr = [];
+        foreach ($graph_revenue as $value) {
+            $revenue_arr[] = max(0, ($value->amt ?: 0) - ($value->discount ?: 0));
             $revenue_month_arr[] = date_format(date_create($value->apt_dt), 'F Y');
         }
+        
         return response()->json([
-            'graph_amt' => array(["name" => 'Total', 'data' => $revenue_arr]),
+            'graph_amt' => [["name" => 'Total', 'data' => $revenue_arr]],
             'revenue_mon' => $revenue_month_arr,
             'todaysAppt' => $data_todays_pxs,
             'calendar' => $data_calendar,
-            'graph_census' => array(["name" => 'No. of Patients', 'data' => $data_graph]),
+            'graph_census' => [["name" => 'No. of Patients', 'data' => $data_graph]],
             'data_graph_month' => $data_graph_month,
             'appt' => $todays_appt->count(),
-            'patients' => $count_px->count(),
-            'meds' => $count_meds->count(),
-            'dx' => $count_diagnostics->count()
+            'patients' => $count_px,
+            'meds' => $count_meds,
+            'dx' => $count_diagnostics
         ]);
     }
 
