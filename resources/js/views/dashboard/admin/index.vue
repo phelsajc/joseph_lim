@@ -245,7 +245,75 @@
           </div>
         </div>
       </div>
-        </div>
+    </div>
+
+    <!-- Add Appointment Modal -->
+    <el-dialog
+      title="Add New Appointment"
+      :visible.sync="showAppointmentModal"
+      width="600px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="appointment-modal"
+    >
+      <div class="modal-content">
+        <el-form ref="appForm" :model="form" :rules="rules" label-position="left" label-width="150px" style="max-width: 500px;">
+          <el-form-item :label="'Patient'" prop="patient">
+            <el-autocomplete
+              v-model="form.patient"
+              :fetch-suggestions="querySearch"
+              popper-class="my-autocomplete"
+              placeholder="Please input"
+              @select="handleSelect"
+              style="width: 150%;"
+            >
+              <template #suffix>
+                <el-icon class="el-input__icon">
+                  <edit />
+                </el-icon>
+              </template>
+              <template #default="{ item }">
+                <div class="value">{{ item.patientname }}</div>
+              </template>
+            </el-autocomplete>
+          </el-form-item>
+          <el-form-item :label="'Date'" prop="apt_dt">
+            <el-date-picker v-model="form.apt_dt" type="date" :picker-options="pickerOptions" placeholder="Pick a day" style="width: 40%;"/>
+          </el-form-item>
+          <el-form-item :label="'Systolic'" prop="vit_sys">
+            <el-input v-model="form.vit_sys" style="width: 23%;"/>
+          </el-form-item>
+          <el-form-item :label="'Diastolic'" prop="vit_dia">
+            <el-input v-model="form.vit_dia" style="width: 23%;"/>
+          </el-form-item>
+          <el-form-item :label="'Weight'" prop="weight">
+            <el-input v-model="form.weight" style="width: 23%;"/>
+          </el-form-item>
+          <el-form-item :label="'Height'" prop="height">
+            <el-input v-model="form.height" style="width: 23%;"/>
+          </el-form-item>
+          <el-form-item :label="'Temperature'" prop="vit_temp">
+            <el-input v-model="form.vit_temp" style="width: 23%;"/>
+          </el-form-item>
+          <el-form-item :label="'CR'" prop="vit_cr">
+            <el-input v-model="form.vit_cr" style="width: 23%;"/>
+          </el-form-item>
+          <el-form-item :label="'RR'" prop="vit_rr">
+            <el-input v-model="form.vit_rr" style="width: 23%;"/>
+          </el-form-item>
+          <el-form-item :label="'Remarks'" prop="remarks">
+            <el-input v-model="form.nurse_remarks" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px" :rows="2" type="textarea" placeholder="Please input" />
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <div slot="footer" class="modal-footer">
+        <el-button @click="closeAppointmentModal">Cancel</el-button>
+        <el-button type="primary" :loading="savingAppointment" @click="saveAppointment">
+          {{ savingAppointment ? 'Saving...' : 'Save Appointment' }}
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -263,6 +331,7 @@ import fullCalendar from 'vue-fullcalendar'
 import Patients from '@/api/patients';
 import ApexCharts from "apexcharts";
 import VueApexCharts from "vue-apexcharts";
+import moment from 'moment-timezone';
 
 const lineChartData = {
   newVisitis: {
@@ -459,6 +528,49 @@ export default {
           offsetX: -5,
         },
       },
+      form: {
+        complaints: '',
+        cancel_reason: '',
+        pid: null,
+        apt_dt: null,
+        patient: null,
+        remakrs: null,
+        vit_sys: null,
+        vit_dia: null,
+        weight: null,
+        vit_temp: null,
+        vit_cr: null,
+        vit_rr: null,
+      },
+      showAppointmentModal: false,
+      savingAppointment: false,
+      patientLoading: false,
+      patientOptions: [],
+      appointmentForm: {
+        patient_id: '',
+        appointment_date: '',
+        appointment_time: '',
+        chief_complaints: '',
+        appointment_type: 'consultation',
+        duration: 30,
+        notes: ''
+      },
+      appointmentRules: {
+        patient_id: [
+          { required: true, message: 'Please select a patient', trigger: 'change' }
+        ],
+        appointment_date: [
+          { required: true, message: 'Please select appointment date', trigger: 'change' }
+        ],
+        appointment_time: [
+          { required: true, message: 'Please select appointment time', trigger: 'change' }
+        ]
+      },
+      datePickerOptions: {
+        disabledDate(time) {
+          return time.getTime() < Date.now() - 8.64e7; // Disable past dates
+        }
+      },
     };
   },
   computed: {
@@ -503,6 +615,63 @@ export default {
     }
   },
   methods: {
+    async querySearch(queryString, cb) {
+      if (queryString === '') {
+        // If query string is empty, reset suggestions
+        cb([]);
+        return;
+      }
+      try {
+        this.loading = true;
+        // Make an asynchronous request to your Laravel backend API using Axios
+        const response = await Patients.findpatients(queryString);
+        // Extract the array of suggestions from the response data
+        const suggestions = response.suggestions;
+        // Call back function
+        cb(suggestions);
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        cb([]);
+      } finally {
+        this.loading = false;
+      }
+    },
+    handleSelect(ev){
+      this.form.patient = ev.patientname;
+      this.form.pid = ev.pid;
+    },
+    saveAppointment(){
+      this.$refs['appForm'].validate((valid) => {
+        if (valid) {
+          //this.isProcessing = true;
+          this.form.apt_dt = moment(this.form.apt_dt).tz('Asia/Manila').format('YYYY-MM-DD');
+          Patients.addAppointment(this.form).then((response) => {
+            this.form.complaints = '';
+            this.form.pid = null;
+            this.form.apt_dt = null;
+            this.form.patient = null;
+            this.form.remakrs = null;
+            this.$message({
+              message: 'Appointment has been created successfully.',
+              type: 'success',
+              duration: 5 * 1000,
+            });
+            this.showAppointmentModal = false;
+          })
+            .catch((err) => {
+              console.error('Error adding suggestions:', err);
+            })
+            .finally(() => {
+              // This will always run, regardless of the request outcome
+              //this.isProcessing = false;
+            });
+          //}, 5000);
+        }else{
+          console.log('error submit!!');
+          return false;
+        }
+      });
+    },
     handleSetLineChartData(type) {
       this.lineChartData = lineChartData[type];
     },
@@ -553,7 +722,8 @@ export default {
       this.$message.success('Calendar refreshed successfully');
     },
     addAppointment() {
-      this.$router.push('/appointments/appointments');
+      this.showAppointmentModal = true;
+      this.resetAppointmentForm();
     },
     handleEventClick(event) {
       this.$message.info(`Event clicked: ${event.title}`);
@@ -604,13 +774,95 @@ export default {
          'font-weight': '500'
          });
      },
-     handleKeyboardShortcut(event) {
-       // Ctrl/Cmd + N to add new appointment
-       if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
-         event.preventDefault();
-         this.addAppointment();
-       }
-     },
+    handleKeyboardShortcut(event) {
+      // Ctrl/Cmd + N to add new appointment
+      if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
+        event.preventDefault();
+        this.addAppointment();
+      }
+    },
+    resetAppointmentForm() {
+      this.appointmentForm = {
+        patient_id: '',
+        appointment_date: '',
+        appointment_time: '',
+        chief_complaints: '',
+        appointment_type: 'consultation',
+        duration: 30,
+        notes: ''
+      };
+      this.patientOptions = [];
+      // Clear form validation
+      if (this.$refs.appointmentForm) {
+        this.$refs.appointmentForm.clearValidate();
+      }
+    },
+    closeAppointmentModal() {
+      this.showAppointmentModal = false;
+      this.resetAppointmentForm();
+    },
+    searchPatients(query) {
+      if (query !== '') {
+        this.patientLoading = true;
+        // Simulate API call - replace with actual patient search API
+        setTimeout(() => {
+          this.patientOptions = [
+            { id: 1, name: 'John Doe' },
+            { id: 2, name: 'Jane Smith' },
+            { id: 3, name: 'Bob Johnson' },
+            { id: 4, name: 'Alice Brown' },
+            { id: 5, name: 'Charlie Wilson' }
+          ].filter(patient => 
+            patient.name.toLowerCase().includes(query.toLowerCase())
+          );
+          this.patientLoading = false;
+        }, 200);
+      } else {
+        this.patientOptions = [];
+      }
+    },
+    saveAppointment1() {
+      this.$refs.appointmentForm.validate((valid) => {
+        if (valid) {
+          this.savingAppointment = true;
+          
+          // Prepare appointment data
+          const appointmentData = {
+            ...this.appointmentForm,
+            appointment_date: this.formatDateForAPI(this.appointmentForm.appointment_date),
+            appointment_time: this.appointmentForm.appointment_time
+          };
+          
+          // Simulate API call - replace with actual appointment creation API
+          setTimeout(() => {
+            this.savingAppointment = false;
+            this.closeAppointmentModal();
+            this.$message.success('Appointment created successfully!');
+            
+            // Refresh dashboard data
+            this.dashoboard();
+          }, 1000);
+          
+          // TODO: Replace with actual API call
+          // Patients.createAppointment(appointmentData).then(() => {
+          //   this.savingAppointment = false;
+          //   this.closeAppointmentModal();
+          //   this.$message.success('Appointment created successfully!');
+          //   this.dashoboard();
+          // }).catch(() => {
+          //   this.savingAppointment = false;
+          //   this.$message.error('Failed to create appointment');
+          // });
+        } else {
+          this.$message.error('Please fill in all required fields');
+        }
+      });
+    },
+    formatDateForAPI(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      return d.toISOString().split('T')[0];
+    },
   },
 };
 </script>
@@ -1310,5 +1562,162 @@ export default {
 
 .is-selected {
   color: #1989fa;
+}
+
+// Appointment Modal Styles
+.appointment-modal {
+  .el-dialog {
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    
+    .el-dialog__header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 24px;
+      border-radius: 16px 16px 0 0;
+      
+      .el-dialog__title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: white;
+      }
+      
+      .el-dialog__headerbtn {
+        .el-dialog__close {
+          color: white;
+          font-size: 20px;
+          
+          &:hover {
+            color: rgba(255, 255, 255, 0.8);
+          }
+        }
+      }
+    }
+    
+    .el-dialog__body {
+      padding: 30px 24px;
+      background: #fafbfc;
+    }
+    
+    .el-dialog__footer {
+      padding: 20px 24px;
+      background: white;
+      border-radius: 0 0 16px 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+  }
+  
+  .modal-content {
+    .appointment-form {
+      .el-form-item {
+        margin-bottom: 20px;
+        
+        .el-form-item__label {
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 14px;
+        }
+        
+        .el-input, .el-select, .el-textarea, .el-date-picker, .el-time-picker {
+          .el-input__inner, .el-textarea__inner {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            
+            &:focus {
+              border-color: #667eea;
+              box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+          }
+        }
+        
+        .el-select {
+          .el-input__suffix {
+            .el-input__suffix-inner {
+              .el-select__caret {
+                color: #667eea;
+              }
+            }
+          }
+        }
+        
+        .el-textarea {
+          .el-textarea__inner {
+            resize: vertical;
+            min-height: 80px;
+          }
+        }
+        
+        .el-input-number {
+          width: 100%;
+          
+          .el-input__inner {
+            text-align: center;
+          }
+        }
+      }
+    }
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    
+    .el-button {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      
+      &.el-button--default {
+        background: #f8f9fa;
+        border-color: #e2e8f0;
+        color: #6c757d;
+        
+        &:hover {
+          background: #e9ecef;
+          border-color: #dee2e6;
+          color: #495057;
+        }
+      }
+      
+      &.el-button--primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        
+        &:hover {
+          background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+}
+
+// Responsive modal
+@media (max-width: 768px) {
+  .appointment-modal {
+    .el-dialog {
+      width: 95% !important;
+      margin: 20px auto !important;
+      
+      .el-dialog__body {
+        padding: 20px 16px;
+      }
+      
+      .el-dialog__footer {
+        padding: 16px;
+      }
+    }
+  }
 }
 </style>

@@ -90,9 +90,9 @@
                 <el-checkbox v-model="rememberMe" class="remember-me">
                   Remember me
                 </el-checkbox>
-                <a href="#" class="forgot-password" @click.prevent="handleForgotPassword">
+                <!-- <a href="#" class="forgot-password" @click.prevent="handleForgotPassword">
                   Forgot password?
-                </a>
+                </a> -->
               </div>
               
               <el-form-item class="submit-item">
