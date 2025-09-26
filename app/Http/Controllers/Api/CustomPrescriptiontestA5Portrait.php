@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 //use TJGazel\LaraFpdf\LaraFpdf;
 use Codedge\Fpdf\Fpdf\Fpdf;
 use App\Model\Generics;
-
+use Illuminate\Support\Str;
 class CustomPrescriptiontestA5Portrait extends Fpdf
 {
     private $data;
@@ -210,10 +210,10 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         // If medicine_id is 0, check if generic_name already contains parentheses
         if (strpos($medicine, '(') !== false) {
             // Generic name already has parentheses, just add space
-            return $genericName . ' ' . $medicine . ' ';
+            return Str::title($genericName . ' ' . $medicine . ' ');
         } else {
             // Generic name has no parentheses, add parentheses around medicine
-            return $genericName . ' (' . $medicine . ') ';
+            return Str::title($genericName . ' (' . $medicine . ') ');
         }
     }
 

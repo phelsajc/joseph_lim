@@ -392,13 +392,12 @@
               :picker-options="pickerOptions"
               placeholder="Pick a day"
             />
+          </el-form-item>          
+          <el-form-item :label="'Systolic'" prop="vit_sys">
+            <el-input v-model="form_appointment.vit_sys"/>
           </el-form-item>
-          <el-form-item label="BP">
-            <el-input
-              v-model="form_appointment.bp"
-              clearable
-              placeholder="Blood Pressure"
-            />
+          <el-form-item :label="'Diastolic'" prop="vit_dia">
+            <el-input v-model="form_appointment.vit_dia"/>
           </el-form-item>
           <el-form-item label="HR">
             <el-input v-model="form_appointment.hr" clearable placeholder="Heart Rate" />
@@ -415,7 +414,15 @@
           </el-form-item>
           <el-form-item :label="'Height'" prop="height">
             <el-input v-model="form_appointment.height" />
-          </el-form-item>
+          </el-form-item><el-form-item label="Cardiac Rate">
+              <el-input v-model="form_appointment.vit_cr" clearable />
+            </el-form-item>
+            <el-form-item label="Respiratory Rate">
+              <el-input v-model="form_appointment.vit_rr" clearable />
+            </el-form-item>
+            <el-form-item label="O2 Stat">
+              <el-input v-model="form_appointment.o2_stat" clearable />
+            </el-form-item>
           <el-form-item :label="'Temperature'" prop="vit_temp">
             <el-input v-model="form_appointment.vit_temp" />
           </el-form-item>
@@ -427,9 +434,9 @@
           :inline="true"
           style="width: 100%"
         >
-          <el-form-item :label="'Complaints'" prop="complaints" style="width: 100%">
+          <el-form-item :label="'Remarks'" prop="complaints" style="width: 100%">
             <el-input
-              v-model="form_appointment.complaints"
+              v-model="form_appointment.nurse_remarks"
               :autosize="{ minRows: 3, maxRows: 5 }"
               style="width: 800px"
               :rows="2"

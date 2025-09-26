@@ -690,7 +690,7 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane name="second">
+      <!-- <el-tab-pane name="second">
         <template #label>
           <span class="tab-label">
             <i class="el-icon-data-line"></i>
@@ -818,7 +818,47 @@
             </div>
           </div>
         </el-card>
+      </el-tab-pane> -->
+
+      <el-tab-pane label="Vitals" name="second" v-if="checkRole(['admin','secretary','doctor'])">
+        <el-card style="max-width: 100%">
+          <el-form :inline="true" label-position="top" class="demo-form-inline">
+            <el-form-item label="Systolic">
+              <el-input v-model="form.vit_sys" autosize clearable />
+            </el-form-item>
+            <el-form-item label="Diastolic">
+              <el-input v-model="form.vit_dia" clearable />
+            </el-form-item>
+            <el-form-item label="Weight">
+              <el-input v-model="form.weight" clearable placeholder="kilograms" />
+            </el-form-item>
+            <el-form-item label="Height">
+              <el-input v-model="form.height" clearable placeholder="centimeters" />
+            </el-form-item>
+            <el-form-item label="BMI">
+              <el-input v-model="form.bmi" clearable />
+            </el-form-item>
+            <el-form-item label="Temperature">
+              <el-input v-model="form.vit_temp" clearable />
+            </el-form-item>
+            <el-form-item label="Cardiac Rate">
+              <el-input v-model="form.vit_cr" clearable />
+            </el-form-item>
+            <el-form-item label="Respiratory Rate">
+              <el-input v-model="form.vit_rr" clearable />
+            </el-form-item>
+            <el-form-item label="O2 Stat">
+              <el-input v-model="form.o2_stat" clearable />
+            </el-form-item>
+            <el-form-item v-role="['secretary', 'admin']" label="">
+              <br />
+              <el-button type="primary" @click="upDateBP()">Update</el-button>
+            </el-form-item>
+          </el-form>
+        </el-card>
       </el-tab-pane>
+
+
       <el-tab-pane name="fourth" v-if="checkRole(['admin', 'doctor'])">
         <template #label>
           <span class="tab-label">

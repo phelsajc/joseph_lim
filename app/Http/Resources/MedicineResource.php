@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-
+use Illuminate\Support\Str;
 class MedicineResource extends JsonResource
 {
     /**
@@ -16,8 +16,8 @@ class MedicineResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'medicine' => strtoupper($this->medicine_name),
-            'generic' => strtoupper($this->generic_name),
+            'medicine' => Str::title($this->medicine_name),
+            'generic' => Str::title($this->generic_name),
         ];
     }
 }

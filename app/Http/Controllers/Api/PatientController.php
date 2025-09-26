@@ -282,6 +282,7 @@ class PatientController extends BaseController
         $data->vit_dia = $request->vit_dia;
         $data->vit_cr = $request->vit_cr;
         $data->vit_rr = $request->vit_rr;
+        $data->o2_stat = $request->o2_stat;
         $data->save();
 
         event(new NewAppointments($data));
@@ -343,6 +344,7 @@ class PatientController extends BaseController
         $data->vit_temp = $request->vit_temp;
         $data->vit_cr = $request->vit_cr;
         $data->vit_rr = $request->vit_rr;
+        $data->o2_stat = $request->o2_stat;
         $data->weight = $request->weight;
         $data->height = $request->height;
         $data->bmi = $request->bmi;
@@ -1170,6 +1172,7 @@ class PatientController extends BaseController
         $field->vit_dia = $request->vit_dia;
         $field->vit_temp = $request->vit_temp;
         $field->vit_rr = $request->vit_rr;
+        $field->o2_stat = $request->o2_stat;
         $field->vit_cr = $request->vit_cr;
         $field->weight = $request->weight;
         $field->height = $request->height;

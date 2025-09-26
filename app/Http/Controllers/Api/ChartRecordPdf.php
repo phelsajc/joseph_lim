@@ -160,7 +160,7 @@ class ChartRecordPdf extends Fpdf
 
     $this->SetXY(12, 78);
     $diagnose_dt = date_create($data->appointment_dt);
-    $this->MultiCell(193, 2, " Date:" . date_format($diagnose_dt, "M d, Y") . "         Weight: " . $data->weight. "        Height: " . $data->height . "       Temperature: " . $data->vit_temp .  "        BMI: " . $data->bmi . " \n", '', 'L', 0);
+    $this->MultiCell(193, 2, " Date:" . date_format($diagnose_dt, "M d, Y") . "         Weight: " . $data->weight. "        Height: " . $data->height . "       Temperature: " . $data->vit_temp .  "        BMI: " . $data->bmi.  "        BP: " . $data->bmi . " \n", '', 'L', 0);
     $this->Cell(0.1, 5, '', 0, 0, 'C');
     //CHIEF COMPLAINTS
     $this->SetFillColor(211, 211, 211);
