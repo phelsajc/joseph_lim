@@ -219,36 +219,26 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
     public function meal()
     {
-        $this->Ln(1);
-        #do not remove
         $this->mealHeader();
-        $rowCount = 0;
-
-        $this->SetFont('Arial', '', 9);
+        $this->SetFont('Arial', '', 8.5);
         foreach ($this->data['query_prescription'] as $key => $item) {
             $checkGenericname = Generics::where(['id' => $item['generic_id']])->first();
-            $this->cell(-3, 3, '', '0', 0, 'R');
+            $this->cell(-8, 3, '', '0', 0, 'R');
             $this->Row(
                 array(
+                    // $item['generic_name'] . ' (' . $item['medicine'] . ')',
                     $this->formatMedicineName($item['generic_name'], $item['medicine'], $item['medicine_id']),
                     $item['qty'],
-                    $item['breakfastbefore'] ?? '',
-                    $item['breakfastafter'] ?? '',
-                    $item['lunchbefore'] ?? '',
-                    $item['lunchafter'] ?? '',
-                    $item['supperbefore'] ?? '',
-                    $item['supperafter'] ?? '',
-                    $item['bedtime'] ?? '',
-                    $item['remarks']
+                    $item['breakfastbefore'],
+                    $item['breakfastafter'],
+                    $item['lunchbefore'],
+                    $item['lunchafter'],
+                    $item['supperbefore'],
+                    $item['supperafter'],
+                    $item['bedtime'],
+                    $item['remarks']//10
                 )
             );
-            $rowCount++;
-
-            //if ($rowCount > 0 && $rowCount % 11 == 0) {
-            if ($rowCount % 5 == 0 && $rowCount != count($this->data['query_prescription'])) {
-                $this->AddPage();
-             $this->mealHeader(); // Redraw headers on new page
-            }
         }
     }
 

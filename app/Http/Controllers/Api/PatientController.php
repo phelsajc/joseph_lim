@@ -512,8 +512,10 @@ class PatientController extends BaseController
         $getPreviousRecords = DB::table('appointments')
             ->where('patientid', $data->patientid)
             ->where('is_cancel', 0)
+            ->where('id', '!=', $id) // Exclude current appointment
+            ->where('appointment_dt', '<', $data->appointment_dt) // Get appointments before current date
             ->orderBy('appointment_dt', 'desc')
-            ->limit(2)
+            ->limit(1) // Get only the most recent previous record
             ->get();
         $px_profile = Helpers::patientDetail($data->patientid);
         $px_profile->profile_name = url('/storage/app/public/pp/' . $px_profile->profile_name);
@@ -551,7 +553,7 @@ class PatientController extends BaseController
             'px_profile' => $px_profile,
             'data' => $data,
             //'getPreviousRecords'=>$getPreviousRecords,
-            'prev_data' => sizeof($getPreviousRecords) > 1 ? $getPreviousRecords[1] : []
+            'prev_data' => $getPreviousRecords->count() > 0 ? $getPreviousRecords[0] : []
         ]);
     }
 

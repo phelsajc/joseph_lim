@@ -2393,7 +2393,7 @@ export default {
           }
 
           if (this.form.cc === null) {
-            this.form.cc = response.prev_data.cc;
+            this.form.cc = response.prev_data.chiefcomplaints;
           }
 
           if (this.form.history === null) {
@@ -2411,6 +2411,25 @@ export default {
           if (this.form.remarks === null) {
             this.form.remarks = response.prev_data.remarks;
           }
+          /* xxxxx */
+
+          /* if (this.form.history === null) {
+            this.form.history = response.prev_data.history;
+          }
+
+          if (this.form.pe === null) {
+            this.form.pe = response.prev_data.pe;
+          }
+
+          if (this.form.diagnosis === null) {
+            this.form.diagnosis = response.prev_data.diagnosis;
+          }
+
+          if (this.form.remarks === null) {
+            this.form.remarks = response.prev_data.remarks;
+          } */
+
+
           this.form.pregnancy = response.px_profile.pregnancy;
           this.form.lmp = response.px_profile.lmp;
           this.form.contraceptive_use = response.px_profile.contraceptive_use;
