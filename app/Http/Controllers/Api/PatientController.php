@@ -8,6 +8,7 @@
  */
 
 namespace App\Http\Controllers\Api;
+use Mpdf\Mpdf;
 use App\Model\Patients;
 use App\Model\Profile;
 use App\Model\Appointments;
@@ -416,7 +417,7 @@ class PatientController extends BaseController
         $data->diagnosis = $request->diagnosis;
         $data->fasting_mode = $request->fasting_mode;
         $data->send_xray_email = $request->sendXrayToEmail ?? 0;
-        //$data->plan = $request->plan;
+        $data->form_content = $request->form_content;
 
         /* $data->clearance_undersigned = $request->clearance_undersigned!='Invalid date'?$clearance_undersigned:null;//$undersigned;
         $data->clearance_diagnosis = $request->clearance_diagnosis;
@@ -670,6 +671,21 @@ class PatientController extends BaseController
         $myPdf = new Referral($data);
         $myPdf->Output('I', time() . "-.pdf", true);
         exit;
+    }
+    public function printform($id)
+    {
+            $data = [];
+            $data['appointment_detail'] = Appointments::findOrFail($id);
+            $data['profile'] = Profile::findOrFail(1);
+            $data['patient_detail'] = Patients::where('patientid', $data['appointment_detail']->patientid)->first();
+
+            /*$pdf = new FormController($data);
+            $pdf->generate();
+            $pdf->Output('example.pdf', 'I'); // I = inline display
+            exit; */
+            $myPdf = new PdfService($data);
+            $myPdf->generatePdf();
+            exit; 
     }
 
     public function printriskstrat($id)

@@ -25,6 +25,10 @@
               <i class="el-icon-s-promotion"></i>
               Print Referral
             </el-dropdown-item>
+            <el-dropdown-item command="print_form" class="action-item">
+              <i class="el-icon-s-promotion"></i>
+              Print Form
+            </el-dropdown-item>
             <el-dropdown-item command="print_medcert" class="action-item">
               <i class="el-icon-document-copy"></i>
               Print Med Cert
@@ -1150,6 +1154,24 @@
           </el-dialog>
         </el-card>
       </el-tab-pane>
+      <el-tab-pane name="form">
+        <template #label>
+          <span class="tab-label">
+            <i class="el-icon-edit-outline"></i>
+            Form
+          </span>
+        </template>
+        <el-card style="max-width: 100%">
+          <div class="form-editor-container">
+            <h3 style="margin-bottom: 20px; color: #409EFF;">Form Editor</h3>
+            <Tinymce 
+              v-model="form.form_content" 
+              :height="400"
+              :menubar="'file edit insert view format table'"
+            />
+          </div>
+        </el-card>
+      </el-tab-pane>
     </el-tabs>
 
     <!-- Mobile Content Sections -->
@@ -1719,8 +1741,9 @@ import debounce from "lodash/debounce";
 import checkRole from "@/utils/role"; // Role checking
 import DatePicker from "vue2-datepicker";
 import heic2any from "heic2any";
+import Tinymce from "@/components_old/Tinymce";
 export default {
-  components: { DatePicker },
+  components: { DatePicker, Tinymce },
   directives: { role },
   data() {
     return {
@@ -1755,8 +1778,8 @@ export default {
       diagnostic_list: [],
       services_list: [],
       form: {
-      smoking_details: '',
-      alcohol_details: '',
+        smoking_details: '',
+        alcohol_details: '',
         fasting_mode: "",
         sendXrayToEmail: false,
         email: "",
@@ -1776,6 +1799,7 @@ export default {
         pe: "",
         diagnosis: "",
         nurse_remarks: "",
+        form_content: "",
         plan: "",
         height: null,
         bmi: null,
@@ -2259,6 +2283,9 @@ export default {
       }
       if (command === "print_referral") {
         this.printreferral();
+      }
+      if (command === "print_form") {
+        this.printform();
       }
       if (command === "cancel_apt") {
         this.cancelAppointment();
@@ -2938,6 +2965,9 @@ export default {
     },
     printreferral(type) {
       window.open("/api/printreferral/" + this.form.id);
+    },
+    printform(type) {
+      window.open("/api/printform/" + this.form.id);
     },
     doneConsult() {
       this.$confirm("Are you done with this consultation?", "Warning", {

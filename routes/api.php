@@ -64,6 +64,7 @@ Route::
                 Route::get('printpdf2/{id}', 'PatientController@printpdf2');
                 Route::get('printmedcert/{id}', 'PatientController@printmedcert');
                 Route::get('printreferral/{id}', 'PatientController@printreferral');
+                Route::get('printform/{id}', 'PatientController@printform');
                 Route::get('printriskstrat/{id}', 'PatientController@printriskstrat');
                 Route::get('printrequest/{id}/{type}', 'PatientController@printrequest');
                 Route::get('printclearance/{id}', 'PatientController@printclearance');
