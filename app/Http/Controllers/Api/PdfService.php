@@ -211,7 +211,15 @@ class PdfService extends TCPDF
 
         // print a block of text using Write()
         //$pdf->Write(0, $txt, '', 0, 'C', true, 0, false, false, 0);
-        $pdf->writeHTMLCell(130, 10, 10, 45, $txt, 0, 0, false, true, 'J', true);
+        
+        // Set line height to normal (1.0) before writing HTML
+        $pdf->setHtmlVSpace(array(
+            'p' => array(0 => array('h' => 0.5, 'n' => 0), 1 => array('h' => 0.5, 'n' => 0)),
+            'br' => array(0 => array('h' => 0.5, 'n' => 0), 1 => array('h' => 0.5, 'n' => 0))
+        ));
+        
+        // Use writeHTMLCell with normal line spacing
+        $pdf->writeHTMLCell(130, 0, 10, 45, $txt, 0, 0, false, true, 'J', true);
 
         // ---------------------------------------------------------
 
