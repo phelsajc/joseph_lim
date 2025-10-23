@@ -39,6 +39,7 @@ class AppointmentResource extends JsonResource
             'sequence' => $this->sequence,
             'type' => $this->isold_patient,
             'apt_dt' => date_format(date_create($this->appointment_dt), 'F d, Y'),
+            'flwup_dt' => $this->followup?date_format(date_create($this->followup), 'F d, Y'):'',
             'fee' => $fee-$this->discount,
             'discount' => $this->discount,
             'cancel_reason' => $this->cancel_reason,

@@ -96,7 +96,7 @@ class RequestprescriptionA5 extends Fpdf
         $this->AliasNbPages();
         $this->cell(10, 3, '', '0', 0, 'R');
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
-        $this->cell(75, 3, strtoupper($this->data['patient_detail']->patientname), 'B', 0, 'L');
+        $this->cell(75, 3, strtoupper(utf8_decode($this->data['patient_detail']->patientname)), 'B', 0, 'L');
         $this->SetFont('');
 
         $this->cell(-13, 3, '', 0, 0);

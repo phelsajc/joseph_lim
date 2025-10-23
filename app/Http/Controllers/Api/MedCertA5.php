@@ -133,7 +133,7 @@ class MedCertA5 extends Fpdf
 
         $paragraph = [
             ['text' => 'This is to certify that '],
-            ['text' => $name, 'style' => 'BU'],
+            ['text' => utf8_decode($name), 'style' => 'BU'],
             ['text' => ", $age years of age", 'style' => 'BU'],
             ['text' => strtolower(", $gender, ")],
             ['text' => 'presently residing at '],

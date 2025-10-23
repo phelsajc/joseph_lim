@@ -90,11 +90,45 @@ class MYPDF extends TCPDF
     public function Footer()
     {
         // Position at 15 mm from bottom
-        $this->SetY(-15);
+        #$this->SetY(-15);
         // Set font
-        $this->SetFont('helvetica', 'I', 8);
+        #$this->SetFont('helvetica', 'I', 8);
         // Page number
-        $this->Cell(0, 10, 'Page ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+        #$this->Cell(0, 10, 'Page ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+   
+        
+        
+        $this->SetY(-20);
+        $this->SetFont('helvetica', 'B', 7);
+        $PageNo = intval($this->PageNo());
+        if (!empty($this->Getdata['profile']->signature)) {
+            $signature = $this->Getdata['profile']->signature;
+        
+            // remove "data:image/png;base64," if it exists
+            if (strpos($signature, 'base64,') !== false) {
+                $signature = explode('base64,', $signature)[1];
+            }
+        
+            // decode and create temporary file
+            $imgData = base64_decode($signature);
+            $tempFile = tempnam(sys_get_temp_dir(), 'sig_');
+            file_put_contents($tempFile, $imgData);
+        
+            // insert the image into PDF
+            $this->Image($tempFile, 85, 180, 110, 20, 'PNG');
+        
+            // remove the temp file after
+            unlink($tempFile);
+        }
+        
+        $this->Cell(35, 10, '', '', 0, '');
+        $this->cell(85, -3, strtoupper($this->Getdata['profile']->name), '', 0, 'R');
+        $this->Ln(3);
+        $this->SetFont('helvetica', '', 7);
+        $this->cell(100, 3, "License No:", '', 0, 'R');
+        $this->cell(20, 3, $this->Getdata['profile']->prc, 'B', 1, 'R');
+        $this->cell(100, 3, "PTR. No.", '', 0, 'R');
+        $this->cell(20, 3, $this->Getdata['profile']->ptr, 'B', 1, 'R');
     }
 
     function Getdata($data)
@@ -167,7 +201,7 @@ class PdfService extends TCPDF
         // ---------------------------------------------------------
 
         // set font
-        $pdf->SetFont('helvetica', 'BI', 8);
+        $pdf->SetFont('helvetica', '', 8);
 
         // add a page
         $pdf->AddPage();
@@ -177,7 +211,7 @@ class PdfService extends TCPDF
 
         // print a block of text using Write()
         //$pdf->Write(0, $txt, '', 0, 'C', true, 0, false, false, 0);
-        $pdf->writeHTMLCell(80, 50, 10, 45, $txt, 0, 1, false, true, 'J', true);
+        $pdf->writeHTMLCell(130, 10, 10, 45, $txt, 0, 0, false, true, 'J', true);
 
         // ---------------------------------------------------------
 

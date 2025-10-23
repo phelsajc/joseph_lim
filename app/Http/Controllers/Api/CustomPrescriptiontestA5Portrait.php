@@ -95,7 +95,9 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->AliasNbPages();
         $this->cell(10, 3, '', '0', 0, 'R');
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
-        $this->cell(75, 3, strtoupper(utf8_decode($this->data['patient_detail']->patientname)), 'B', 0, 'L');
+        $this->cell(75, 3, mb_strtoupper($this->data['patient_detail']->patientname, 'UTF-8'), 'B', 0, 'L');
+        //$this->cell(75, 3, mb_strtoupper($this->data['patient_detail']->patientname, 'UTF-8'), 'B', 0, 'L');
+
         $this->SetFont('');
 
         $this->cell(-13, 3, '', 0, 0);
@@ -223,7 +225,8 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->SetFont('Arial', '', 8.5);
         foreach ($this->data['query_prescription'] as $key => $item) {
             $checkGenericname = Generics::where(['id' => $item['generic_id']])->first();
-            $this->cell(-8, 3, '', '0', 0, 'R');
+            //$this->cell(-8, 3, '', '0', 0, 'R');
+            $this->cell(-3, 3, '', '0', 0, 'R');
             $this->Row(
                 array(
                     // $item['generic_name'] . ' (' . $item['medicine'] . ')',

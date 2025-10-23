@@ -73,7 +73,7 @@ export default {
     },
   },
   mounted() {
-    this.initTinymce();
+    this.waitForTinyMCE();
   },
   activated() {
     this.initTinymce();
@@ -85,8 +85,38 @@ export default {
     this.destroyTinymce();
   },
   methods: {
+    waitForTinyMCE() {
+      let attempts = 0;
+      const maxAttempts = 50; // 5 seconds max wait time
+      
+      const checkTinyMCE = () => {
+        attempts++;
+        
+        if (typeof window.tinymce !== 'undefined') {
+          console.log('TinyMCE loaded successfully!');
+          this.initTinymce();
+        } else if (attempts >= maxAttempts) {
+          console.error('TinyMCE failed to load after 5 seconds. Check if the script file exists and is accessible.');
+          console.error('Expected file: /static/tinymce4.7.5/tinymce.min.js');
+          console.error('Current window.tinymce:', typeof window.tinymce);
+        } else {
+          console.log(`Waiting for TinyMCE to load... (attempt ${attempts}/${maxAttempts})`);
+          setTimeout(checkTinyMCE, 100);
+        }
+      };
+      
+      // Start checking after a short delay to allow scripts to load
+      setTimeout(checkTinyMCE, 100);
+    },
     initTinymce() {
       const _this = this;
+      
+      // Check if TinyMCE is loaded
+      if (typeof window.tinymce === 'undefined') {
+        console.error('TinyMCE is not loaded. Please check if the script is included correctly.');
+        return;
+      }
+      
       window.tinymce.init({
         language: this.language,
         selector: `#${this.tinymceId}`,

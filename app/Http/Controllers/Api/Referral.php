@@ -126,7 +126,7 @@ class Referral extends Fpdf
         $this->SetFont('Arial', '', 10);
         $this->Cell(2,5,'','',0,'');        
         $this->SetFont('Arial', '', 10);
-        $px = $this->data['patient_detail']->patientname;
+        $px = utf8_decode($this->data['patient_detail']->patientname);
         $x = 10;
         $y = 96;
 

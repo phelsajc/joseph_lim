@@ -1164,10 +1164,10 @@
         <el-card style="max-width: 100%">
           <div class="form-editor-container">
             <h3 style="margin-bottom: 20px; color: #409EFF;">Form Editor</h3>
-            <Tinymce 
+            <QuillEditor 
               v-model="form.form_content" 
               :height="400"
-              :menubar="'file edit insert view format table'"
+              placeholder="Enter form content here..."
             />
           </div>
         </el-card>
@@ -1741,9 +1741,9 @@ import debounce from "lodash/debounce";
 import checkRole from "@/utils/role"; // Role checking
 import DatePicker from "vue2-datepicker";
 import heic2any from "heic2any";
-import Tinymce from "@/components_old/Tinymce";
+import QuillEditor from "@/components/QuillEditor";
 export default {
-  components: { DatePicker, Tinymce },
+  components: { DatePicker, QuillEditor },
   directives: { role },
   data() {
     return {

@@ -83,6 +83,11 @@
           <div class="handle"><span>{{ scope.row.apt_dt }}</span></div>
         </template>
       </el-table-column>
+      <el-table-column align="center" label="Follow Up Date">
+        <template slot-scope="scope">
+          <div class="handle"><span>{{ scope.row.flwup_dt }}</span></div>
+        </template>
+      </el-table-column>
       
     <el-table-column align="center" label="Actions">      
       <template #default="scope">

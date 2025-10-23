@@ -573,7 +573,7 @@ class PatientController extends BaseController
 
         $userQuery = DB::table('appointments')
             ->join('patients', 'patients.patientid', '=', 'appointments.patientid')
-            ->select('patients.patientname', 'patients.profile_name', 'appointments.isactive', 'appointments.cancel_reason', 'appointments.state', 'appointments.sequence', 'appointments.isdone', 'patients.profile', 'patients.isold_patient', 'appointments.chiefcomplaints', 'appointments.discount', 'appointments.patientid', 'appointments.id', 'appointments.appointment_dt')
+            ->select('patients.patientname', 'patients.profile_name', 'appointments.isactive', 'appointments.cancel_reason', 'appointments.state', 'appointments.sequence', 'appointments.isdone', 'patients.profile', 'patients.isold_patient', 'appointments.chiefcomplaints', 'appointments.discount', 'appointments.patientid', 'appointments.id', 'appointments.appointment_dt', 'appointments.followup')
             //->where('LOWER(patients.patientname)', 'LIKE', '%'.$keyword.'%')
             //->whereRaw('LOWER(patients.patientname) LIKE ?', ['%'.$keyword.'%'])
 
