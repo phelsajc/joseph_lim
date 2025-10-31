@@ -17,6 +17,8 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         parent::__construct('P', 'mm', 'A5');
         $this->SetTitle('My pdf title', true);
         $this->SetAuthor('TJGazel', true);
+        // Set auto page break with proper margin to avoid footer overlap
+        $this->SetAutoPageBreak(true, 30);
         $this->AddPage('P');
         $this->Body();
     }
@@ -95,7 +97,12 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->AliasNbPages();
         $this->cell(10, 3, '', '0', 0, 'R');
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
-        $this->cell(75, 3, mb_strtoupper($this->data['patient_detail']->patientname, 'UTF-8'), 'B', 0, 'L');
+        $name = utf8_decode(
+            ucfirst(strtolower($this->data['patient_detail']->lastname)) . ', ' .
+            ucfirst(strtolower($this->data['patient_detail']->firstname)) . ' ' .
+            ucfirst(substr($this->data['patient_detail']->middlename, 0, 1)) . '.'
+        );
+        $this->cell(75, 3, $name , 'B', 0, 'L');
         //$this->cell(75, 3, mb_strtoupper($this->data['patient_detail']->patientname, 'UTF-8'), 'B', 0, 'L');
 
         $this->SetFont('');
@@ -287,7 +294,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Ln(1);
         $this->Cell(25, -9, '', 0, '');
         $this->Cell(40, -3, '', 'B', '');
-        $this->SetAutoPageBreak(true, 25);
+        $this->SetAutoPageBreak(true, 30);
     }
 
     function SetWidths($w)

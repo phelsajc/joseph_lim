@@ -12,7 +12,7 @@ use App\Model\Services;
 use App\Model\Medicine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use App\Http\Resources\MedicineResource;
+use App\Http\Resources\ServicesResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use DB;
@@ -34,14 +34,14 @@ class ServicesController extends BaseController
     public function index(Request $request)
     {
         $searchParams = $request->all();
-        $userQuery = Medicine::query();
+        $userQuery = Services::query();
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'keyword', '');
 
         if (!empty($keyword)) {
-            $userQuery->whereRaw('LOWER(medicine_name) LIKE ?', ['%'.$keyword.'%']);
+            $userQuery->whereRaw('LOWER(description) LIKE ?', ['%'.$keyword.'%']);
         }
-        return MedicineResource::collection($userQuery->paginate($limit));
+        return ServicesResource::collection($userQuery->paginate($limit));
     }
 
     public function getAllServices()
@@ -61,7 +61,32 @@ class ServicesController extends BaseController
             $arr['fee'] = $value->fee;
             $data[] = $arr;
         }
-        //return response()->json(['suggestions' => array_merge($data1,$data2)]);
         return response()->json(['suggestions' => $data]);
+    }
+
+    public function store(Request $request) {
+        $field = new Services();
+        $field->description = $request->service;
+        $field->fee = $request->fee;
+        $field->save();
+        return response()->json(true);
+    }
+
+    public function update(Request $request) {
+        $field = Services::find($request->id);
+        $field->description = $request->service;
+        $field->fee = $request->fee;
+        $field->save();
+        return response()->json(true);
+    }
+
+    function delete($id) {
+        Services::find($id)->delete();
+        return response()->json(true);
+    }
+
+    function edit($id) {
+        $data = Services::where('service_id ',$id)->first();
+        return response()->json($data);
     }
 }

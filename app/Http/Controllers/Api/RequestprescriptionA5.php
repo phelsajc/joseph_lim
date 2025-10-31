@@ -96,7 +96,39 @@ class RequestprescriptionA5 extends Fpdf
         $this->AliasNbPages();
         $this->cell(10, 3, '', '0', 0, 'R');
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
-        $this->cell(75, 3, strtoupper(utf8_decode($this->data['patient_detail']->patientname)), 'B', 0, 'L');
+        //$this->cell(75, 3, strtolower(utf8_decode($this->data['patient_detail']->lastname)).', '.ucfirst(utf8_decode($this->data['patient_detail']->firstname)).' '.ucfirst(utf8_decode($this->data['patient_detail']->middlename)).'.', 'B', 0, 'L');
+        $name = utf8_decode(
+            ucfirst(strtolower($this->data['patient_detail']->lastname)) . ', ' .
+            ucfirst(strtolower($this->data['patient_detail']->firstname)) . ' ' .
+            ucfirst(substr($this->data['patient_detail']->middlename, 0, 1)) . '.'
+        );
+        
+        $this->Cell(
+            75,
+            3,
+            $name ,
+            'B',
+            0,
+            'L'
+        );
+
+        
+       
+        /* $this->Cell(
+            75,
+            3,
+            
+            mb_strtoupper(mb_substr(mb_strtolower($this->data['patient_detail']->lastname, 'UTF-8'), 0, 1, 'UTF-8'), 'UTF-8') .
+            mb_substr(mb_strtolower($this->data['patient_detail']->lastname, 'UTF-8'), 1, null, 'UTF-8').', '.
+            mb_strtoupper(mb_substr(mb_strtolower($this->data['patient_detail']->firstname, 'UTF-8'), 0, 1, 'UTF-8'), 'UTF-8') .
+            mb_substr(mb_strtolower($this->data['patient_detail']->firstname, 'UTF-8'), 1, null, 'UTF-8').' '.
+            mb_strtoupper(mb_substr(mb_strtolower($this->data['patient_detail']->middlename, 'UTF-8'), 0, 1, 'UTF-8'), 'UTF-8').'.',
+            'B',
+            0,
+            'L'
+        ); */
+ 
+        
         $this->SetFont('');
 
         $this->cell(-13, 3, '', 0, 0);

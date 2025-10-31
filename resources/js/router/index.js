@@ -167,6 +167,19 @@ export const asyncRoutes = [
     ],
   }, */
   {
+    path: '/services',
+    component: Layout,
+    redirect: 'services',
+    children: [
+      {
+        path: 'services',
+        component: () => import('@/views/services/index'),
+        name: 'Services',
+        meta: { title: 'Services', icon: 'service', noCache: false, roles: ['admin', 'doctor'], affix: true },
+      },
+    ],
+  },
+  {
     path: '/medicines',
     component: Layout,
     redirect: 'medicines',

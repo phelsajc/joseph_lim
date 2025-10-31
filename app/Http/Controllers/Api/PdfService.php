@@ -21,17 +21,17 @@ class MYPDF extends TCPDF
         $this->Image(public_path() . '/img/cp.jpg', 108, 6, 11, 11, 'JPG');
         $this->Ln(1);
         $this->SetFont('helvetica', 'B', 12);
-        $this->Cell(42, 4, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
+        $this->Cell(52, 4, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
         $this->SetFont('helvetica', 'B', 9);
         $this->Ln(1);
-        $this->Cell(50, 10, strtoupper($this->Getdata['profile']->specialization1.' - '.$this->Getdata['profile']->specialization2), 0, 0, 'R');
+        $this->Cell(60, 10, strtoupper($this->Getdata['profile']->specialization1.' - '.$this->Getdata['profile']->specialization2), 0, 0, 'R');
         $this->Ln(5);
         $this->SetFont('helvetica', '', 8);
-        $this->Cell(38, 11, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
+        $this->Cell(48, 11, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
         $this->Ln(1);
-        $this->Cell(49, 15, 'Diplomate, Philippine Rheumatology Association', 0, 0, 'R');
+        $this->Cell(59, 15, 'Diplomate, Philippine Rheumatology Association', 0, 0, 'R');
         $this->Ln(1);
-        $this->Cell(29.5, 19, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');     
+        $this->Cell(39.5, 19, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');     
         $this->SetLineWidth(0.5);
         $this->SetFont('helvetica', 'B', 7);
         $this->Ln(0.05);
@@ -181,10 +181,10 @@ class PdfService extends TCPDF
         // set default monospaced font
         $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
-        // set margins
-        $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-        $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-        $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+        // set margins - increase top margin to avoid header overlap
+        $pdf->SetMargins(10, 50, 10); // Left, Top, Right margins
+        $pdf->SetHeaderMargin(5);
+        $pdf->SetFooterMargin(15);
 
         // set auto page breaks
         $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
@@ -218,8 +218,9 @@ class PdfService extends TCPDF
             'br' => array(0 => array('h' => 0.5, 'n' => 0), 1 => array('h' => 0.5, 'n' => 0))
         ));
         
-        // Use writeHTMLCell with normal line spacing
-        $pdf->writeHTMLCell(130, 0, 10, 45, $txt, 0, 0, false, true, 'J', true);
+        // Use writeHTMLCell with proper positioning to avoid header overlap
+        // Start content below the header area (Y position 50 to match top margin)
+        $pdf->writeHTMLCell(130, 0, 10, 50, $txt, 0, 0, false, true, 'J', true);
 
         // ---------------------------------------------------------
 

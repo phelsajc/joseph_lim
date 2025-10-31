@@ -147,6 +147,12 @@ Route::middleware('auth:api')->group(function () {
                 Route::get('generateAtt','PatientController@generateAtt'); */
 
                 
+                #Services
+                Route::get('services', 'ServicesController@index');
+                Route::post('service', 'ServicesController@store');
+                Route::patch('service', 'ServicesController@update');
+                Route::delete('service/{id}', 'ServicesController@delete');
+                
                 Route::get('email-prescription/{id}', 'PatientController@emailPrescription');
 
 
