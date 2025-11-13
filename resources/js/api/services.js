@@ -14,6 +14,9 @@ export default {
     return request.get('find-services/' + params);
   },
   getAllServices(params) {
+    return request.get('get-all-services',params);
+  },
+  list(params) {
     return request.get('services',params);
   },
   getAppointmentService(id) {

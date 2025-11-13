@@ -13,7 +13,7 @@ class Rx_service extends Model
      */
 
     protected $table = "servicesrendered";
-    protected $primaryKey = "lab_test_id";
+    protected $primaryKey = "rendered_id";
     public $timestamps = false;
 
 }

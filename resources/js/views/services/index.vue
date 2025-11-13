@@ -117,7 +117,7 @@ export default {
   methods: {
     async getServices() {
       this.loading = true;
-      const { data, meta } = await Services.getAllServices({
+      const { data, meta } = await Services.list({
         params: this.query,
       });
       this.item_list = data;

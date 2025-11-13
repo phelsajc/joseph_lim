@@ -13,7 +13,7 @@ class Services extends Model
      */
 
     protected $table = "services";
-    protected $primaryKey = "services_id";
+    protected $primaryKey = "service_id";
     public $timestamps = false;
 
 }

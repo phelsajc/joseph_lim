@@ -115,4 +115,16 @@ export default {
   ImportMedicine(id,appid){
     return request.get('import-medicine/' + id+"/"+appid);
   },
+  GetService(id){
+    return request.get('get-service/' + id);
+  },
+  UpdateService(data) {
+    return request.post('update-service', data);
+  },
+  add_service(data) {
+    return request.post('add-service', data);
+  },
+  remove_service(id) {
+    return request.delete('remove-service/'+ id);
+  },
 };

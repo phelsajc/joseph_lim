@@ -88,6 +88,16 @@
           <div class="handle"><span>{{ scope.row.flwup_dt }}</span></div>
         </template>
       </el-table-column>
+      <el-table-column align="center" label="Discount" width="55">
+        <template slot-scope="scope">
+          <div class="handle"><span>{{ scope.row.discount }}</span></div>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="FinalFee" width="55">
+        <template slot-scope="scope">
+          <div class="handle"><span>{{ scope.row.fee }}</span></div>
+        </template>
+      </el-table-column>
       
     <el-table-column align="center" label="Actions">      
       <template #default="scope">

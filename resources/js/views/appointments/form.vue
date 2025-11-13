@@ -1014,6 +1014,74 @@
           <el-divider />
         </el-card>
       </el-tab-pane>
+      <el-tab-pane name="sixth" v-if="checkRole(['admin', 'doctor'])">
+        <span slot="label" class="tab-label">
+          <i class="el-icon-service"></i>
+          Services
+        </span>
+        <div class="tab-content">
+          <el-card class="services-card">
+            <div slot="header" class="section-header">
+              <i class="el-icon-service"></i>
+              <span>Services & Billing</span>
+              <div class="header-actions">
+                <el-button type="primary" size="small" @click="viewServicesTbl = true">
+                  <i class="el-icon-plus"></i>
+                  Add Services
+                </el-button>
+              </div>
+            </div>
+
+            <div class="services-form-section">
+              <el-form :inline="true" label-position="top" class="enhanced-form">
+                <el-row :gutter="20">
+                  <el-col :span="6">
+                    <el-form-item label="Discount" class="form-item-enhanced">
+                      <el-input v-model="form.discount" placeholder="Discount amount" class="enhanced-input" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-form>
+            </div>
+
+            <div class="services-list-section">
+              <el-table :data="services_list" class="enhanced-table" v-if="services_list.length > 0">
+                <el-table-column prop="service" label="Service" min-width="200">
+                  <template slot-scope="scope">
+                    <div class="service-cell">
+                      <i class="el-icon-service"></i>
+                      <span>{{ scope.row.service }}</span>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="fee" label="Fee" width="120" align="right">
+                  <template slot-scope="scope">
+                    <span class="fee-amount">₱{{ scope.row.fee }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column align="center" label="Actions" width="200">
+                  <template slot-scope="scope">
+                    <!-- <el-button v-role="['doctor', 'admin']" type="primary" size="mini" icon="el-icon-edit"
+                      @click="editService(scope.row.id)" class="edit-btn">
+                      Edit
+                    </el-button> -->
+                    <el-button v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
+                      @click="removeService(scope.row.id)" class="delete-btn">
+                      Delete
+                    </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+
+              <div v-else class="empty-state">
+                <i class="el-icon-service"></i>
+                <p>No services added yet</p>
+                <p class="empty-subtitle">Click "Add Services" to add procedures</p>
+              </div>
+            </div>
+          </el-card>
+        </div>
+      </el-tab-pane>
       <el-tab-pane name="medcert" v-if="checkRole(['admin', 'doctor'])">
         <template #label>
           <span class="tab-label">
@@ -1747,6 +1815,7 @@ export default {
   directives: { role },
   data() {
     return {
+      servicesDialogFormVisible: false,
       isPdf: false,
       rotation: 0,
       popconfirmUpddateDiagnosis: false,
@@ -1944,6 +2013,11 @@ export default {
         service_id: 0,
         // discount: 0,
       },
+      form_edit_services: {
+        id: null,
+        service: null,
+        amount: 0,
+      },
       form_att: {
         patientid: "",
         file: "",
@@ -2033,6 +2107,7 @@ export default {
     this.getmeds();
     this.getdiagnostics();
     this.getservices();
+    this.getAllServices();
     this.loadTemplatesFromDatabase();
   },
   computed: {
@@ -2572,7 +2647,7 @@ export default {
         type: "warning",
       })
         .then(() => {
-          Services.remove_service(row)
+          Patients.remove_service(row)
             .then((response) => {
               this.getservices();
             })
@@ -2587,8 +2662,8 @@ export default {
           });
         });
     },
-    getAllServices() {
-      Services.getAllServices()
+    async getAllServices() {
+      await Services.getAllServices()
         .then((response) => {
           this.getAllServicesOffered = response;
         })
@@ -2662,22 +2737,19 @@ export default {
         });
     },
     addServices() {
-      if (this.servicesRendered.rendered.length > 0) {
-        Services.add_service(this.servicesRendered)
-          .then((response) => {
-            this.getservices();
-            this.service.service = "";
-            this.service.fee = 0;
-            this.service.discount = 0;
-            this.servicesRendered.rendered = [];
-            this.servicesRenderedModel = [];
-          })
-          .catch((err) => {
-            console.error("Error adding suggestions:", err);
-          });
-      } else {
-        alert("Service is required.");
-      }
+      Patients.add_service(this.servicesRendered)
+        .then((response) => {
+          this.getservices();
+          this.service.service = "";
+          this.service.fee = 0;
+          this.service.discount = 0;
+          this.servicesRendered.rendered = [];
+          this.servicesRenderedModel = [];
+          this.viewServicesTbl = false;
+        })
+        .catch((err) => {
+          console.error("Error adding suggestions:", err);
+        });
     },
     addNewServices(e) {
       if (this.servicesRenderedModel.length > 0) {

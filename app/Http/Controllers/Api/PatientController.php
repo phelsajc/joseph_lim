@@ -79,7 +79,7 @@ class PatientController extends BaseController
         return PatientsResource::collection($userQuery);
         //return PatientsResource::collection($userQuery->paginate($limit));
     }
-    
+
     function deletePatient($id)
     {
         Patients::where(['patientid' => $id])->update([
@@ -122,7 +122,7 @@ class PatientController extends BaseController
             $data->fam = substr($fam, 0, -1);
         }
         $data->fam_others = $request->fam_others; 
-        
+
         $pmh = '';
         if($request->pmh){
             foreach ($request->pmh as $key => $value) {
@@ -130,7 +130,7 @@ class PatientController extends BaseController
             }
             $data->pmh = substr($pmh, 0, -1);
         }
-        
+
         $soc = '';
         if($request->soc){
             foreach ($request->soc as $key => $value) {
@@ -339,7 +339,7 @@ class PatientController extends BaseController
         $data->chiefcomplaints = $request->chiefcomplaints;
         $data->updated_by = Auth::user()->id;
         $data->updated_dt = date("Y-m-d H:i:s");
-        $data->vit_sys = $request->vit_sys;        
+        $data->vit_sys = $request->vit_sys;
         $data->nurse_remarks = $request->nurse_remarks;
         $data->vit_dia = $request->vit_dia;
         $data->vit_temp = $request->vit_temp;
@@ -364,8 +364,8 @@ class PatientController extends BaseController
         $data->menopause = $request->menopause;
         $data->mother_details = $request->mother_details;
         $data->father_details = $request->father_details; */
-        
-        
+
+
         $data->referral_doctor = $request->referral_doctor;
         $data->referral_addr1 = $request->referral_addr1;
         $data->referral_addr2 = $request->referral_addr2;
@@ -422,7 +422,7 @@ class PatientController extends BaseController
         /* $data->clearance_undersigned = $request->clearance_undersigned!='Invalid date'?$clearance_undersigned:null;//$undersigned;
         $data->clearance_diagnosis = $request->clearance_diagnosis;
         $data->clearance_remarks = $request->clearance_remarks*/
-        
+
 
         /* $data->fit_undersigned = $request->fit_undersigned!='Invalid date'?$fit_undersigned:null;//$undersigned;
         $data->fit_diagnosis = $request->fit_diagnosis;
@@ -488,9 +488,9 @@ class PatientController extends BaseController
             $dataPatient->fam = substr($fam, 0, -1);
         }
         $dataPatient->fam_others = $request->fam_others;
-        
 
-        
+
+
         $soc = '';
         $getSoc = explode(",", $request->soc);
         if ($request->soc) {
@@ -501,9 +501,9 @@ class PatientController extends BaseController
         }
         $dataPatient->soc_others = $request->soc_others;
         $dataPatient->vaccination_sup = $request->vaccination_sup;
-        
+
         $dataPatient->save();
-        
+
         return response()->json($data->medcert_opt3 == 1 ? 7 : 8);
     }
 
@@ -623,7 +623,7 @@ class PatientController extends BaseController
     public function printpdf2($id)
     {
         $data = array();
-        $data['query_prescription'] = Rx::where(['appointment_id' => $id])->orderby('rx_id','asc')->get();
+        $data['query_prescription'] = Rx::where(['appointment_id' => $id])->orderby('rx_id', 'asc')->get();
         $data['appointment_detail'] = Appointments::where(['id' => $id])->first();
         $data['profile'] = Profile::where(['id' => 1])->first();
         $data['patient_detail'] = Patients::where(['patientid' => $data['appointment_detail']->patientid])->first();
@@ -631,7 +631,7 @@ class PatientController extends BaseController
         $myPdf->Output('I', time() . "-.pdf", true);
         exit;
     }
-    
+
     public function emailPrescription($id)
     {
         date_default_timezone_set('Asia/Manila');
@@ -640,14 +640,14 @@ class PatientController extends BaseController
         $data['appointment_detail'] = Appointments::where('id', $id)->first();
         $data['profile'] = Profile::where('id', 1)->first();
         $data['patient_detail'] = Patients::where('patientid', $data['appointment_detail']->patientid)->first();
-    
+
         // Generate the PDF and store it in memory
         $pdf = new CustomPrescriptiontestA5Portrait($data);
         $pdfContent = $pdf->Output('', 'S'); // Output as string (S = string)
         $subject = date("F d, Y");
         // Send email with PDF attached
-        Mail::to($data['appointment_detail']->email)->send(new PrescriptionPdfMail($pdfContent,$subject));
-    
+        Mail::to($data['appointment_detail']->email)->send(new PrescriptionPdfMail($pdfContent, $subject));
+
         return response()->json(['message' => 'PDF sent via email.']);
     }
 
@@ -674,18 +674,18 @@ class PatientController extends BaseController
     }
     public function printform($id)
     {
-            $data = [];
-            $data['appointment_detail'] = Appointments::findOrFail($id);
-            $data['profile'] = Profile::findOrFail(1);
-            $data['patient_detail'] = Patients::where('patientid', $data['appointment_detail']->patientid)->first();
+        $data = [];
+        $data['appointment_detail'] = Appointments::findOrFail($id);
+        $data['profile'] = Profile::findOrFail(1);
+        $data['patient_detail'] = Patients::where('patientid', $data['appointment_detail']->patientid)->first();
 
-            /*$pdf = new FormController($data);
-            $pdf->generate();
-            $pdf->Output('example.pdf', 'I'); // I = inline display
-            exit; */
-            $myPdf = new PdfService($data);
-            $myPdf->generatePdf();
-            exit; 
+        /*$pdf = new FormController($data);
+        $pdf->generate();
+        $pdf->Output('example.pdf', 'I'); // I = inline display
+        exit; */
+        $myPdf = new PdfService($data);
+        $myPdf->generatePdf();
+        exit;
     }
 
     public function printriskstrat($id)
@@ -741,7 +741,7 @@ class PatientController extends BaseController
         /* $data['query_prescriptions'] = Rx::where(['appointment_id'=>$id])->get();
         $data['query_diagnostics'] = Ancillary::where(['appointment_id'=>$id])->get(); */
         $data['profile'] = Profile::where(['id' => 1])->first();
-        $data['getHistory'] = Appointments::where(['patientid' => $data['patient_detail']->patientid,'isdone' => 1])->orderby('id','desc')->get();
+        $data['getHistory'] = Appointments::where(['patientid' => $data['patient_detail']->patientid, 'isdone' => 1])->orderby('id', 'desc')->get();
         $myPdf = new ChartRecordPdf($data);
         $myPdf->Output('I', time() . "-.pdf", true);
         exit;
@@ -749,23 +749,7 @@ class PatientController extends BaseController
 
     function getpastConsultationList($id)
     {
-        $data = Appointments::where(['patientid' => $id])->get();
-
-        $px_profile = Helpers::patientDetail($id);
-        /* $get_OldPatients = OldPatients::where(["Patient_id" => $px_profile->patientid])->first();
-        $get_OldDiagnosis = $get_OldPatients ? OldDiagnosis::where(["PatientID" => $get_OldPatients->PatientID])->get() : [];
-        $old_data = array();
-        foreach ($get_OldDiagnosis as $key => $value) {
-            $arr = array();
-            $arr['hpi'] = $value->HPI;
-            $arr['pmhx'] = $value->pmHx;
-            $arr['desc'] = $value->description;
-            $arr['date'] = date_format(date_create($value->DateOfVisit), 'F d, Y');
-            $arr['cc'] = $value->CC;
-            $arr['recom'] = $value->Recom;
-            $old_data[] = $arr;
-        } */
-
+        $data = Appointments::where(['patientid' => $id, 'isdone' => 1])->get();
         $array = array();
         foreach ($data as $key => $value) {
             $arr = array();
@@ -801,7 +785,7 @@ class PatientController extends BaseController
         $rx->created_dt = date("Y-m-d H:i:s");
         $rx->medicine = $request->custom_meds ? $request->custom_brand : $request->meds;
         $rx->generic_id = $request->custom_meds ? 0 : $medicineDetail->generic_id;
-        $rx->generic_name = $request->custom_meds ? $request->custom_generic: $medicineDetail->generic_name;
+        $rx->generic_name = $request->custom_meds ? $request->custom_generic : $medicineDetail->generic_name;
         $rx->save();
         return response()->json($medicineDetail);
     }
@@ -832,7 +816,7 @@ class PatientController extends BaseController
         $rx->generic_id = $request->custom_meds ? 0 : ($medicineDetail ? $medicineDetail->generic_id : 0);
         $rx->generic_name = $request->custom_meds ? $request->custom_generic . ' ' . $request->custom_dosage : ($medicineDetail ? $medicineDetail->generic_name . ' ' . $medicineDetail->unit : '');
         $rx->save();
-        
+
         return response()->json(['success' => true, 'message' => 'Medicine updated successfully']);
     }
 
@@ -869,7 +853,7 @@ class PatientController extends BaseController
         foreach ($request->rendered as $key => $value) {
             $rx = new Rx_service();
             $rx->appointment_id = $value['id'];
-            $rx->service_id = $value['service_id'];
+            //$rx->rendered_id = $value['rendered_id'];
             $rx->fee = $value['fee'];
             $rx->created_dt = date("Y-m-d H:i:s");
             $rx->service = $value['service'];
@@ -901,11 +885,11 @@ class PatientController extends BaseController
 
     function getAppointmentMedicine($id)
     {
-        $data = RX::where(['appointment_id' => $id])->orderby('rx_id','desc')->get();
+        $data = RX::where(['appointment_id' => $id])->orderby('rx_id', 'desc')->get();
         $array = array();
         foreach ($data as $key => $value) {
             $arr = array();
-            $arr['medicine'] = $value->generic_name.' '. $value->medicine ;
+            $arr['medicine'] = $value->generic_name . ' ' . $value->medicine;
             $arr['generic'] = $value->generic_name;
             $arr['brand'] = $value->medicine;
             $arr['dosage'] = $value->medicine;
@@ -987,43 +971,43 @@ class PatientController extends BaseController
     {
         try {
             date_default_timezone_set('Asia/Manila');
-            
+
             if (!$request->hasFile('files')) {
                 return response()->json(['error' => 'No files uploaded'], 400);
             }
-            
+
             // Validate file size (10MB limit)
             $maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
-            
+
             $uploadedFiles = [];
             foreach ($request->file('files') as $file) {
                 // Check file size
                 if ($file->getSize() > $maxFileSize) {
                     return response()->json(['error' => 'File too large. Maximum size is 10MB.'], 413);
                 }
-                
+
                 // Check if file is valid
                 if (!$file->isValid()) {
                     return response()->json(['error' => 'Invalid file: ' . $file->getErrorMessage()], 400);
                 }
-                
+
                 $att = new Attachments();
                 $getidno = explode("-0", $request->patientid);
-                
+
                 // Use unique filename to prevent conflicts
                 $originalName = $file->getClientOriginalName();
                 $extension = $file->getClientOriginalExtension();
                 $filename = time() . '_' . uniqid() . '.' . $extension;
-                
+
                 // Store file with unique name
                 $file->storeAs('uploads', $filename, 'public');
-                
+
                 $att->patientid = sizeof($getidno) > 1 ? $getidno[1] : $request->patientid;
                 $att->filename = $filename;
                 $att->created_dt = date("Y-m-d H:i:s");
                 $att->isold_record = false;
                 $att->save();
-                
+
                 $uploadedFiles[] = [
                     'filename' => $filename,
                     'original_name' => $originalName,
@@ -1056,17 +1040,17 @@ class PatientController extends BaseController
     public function dashboard()
     {
         date_default_timezone_set('Asia/Manila');
-        
+
         // Use count() instead of get()->count() for better performance
         $count_px = Patients::where('isdeleted', 0)->count();
         $count_meds = Medicine::count();
         $count_diagnostics = Services::count();
-        
+
         // Count new patients added today
         $new_patients_today = Patients::where('isdeleted', 0)
             ->whereDate('created_at', date('Y-m-d'))
             ->count();
-        
+
         // Optimize today's appointments query with patient names in one query
         $todays_appt = DB::table('appointments')
             ->join('patients', 'appointments.patientid', '=', 'patients.patientid')
@@ -1081,7 +1065,7 @@ class PatientController extends BaseController
             )
             ->orderBy('appointments.appointment_dt', 'asc')
             ->get();
-        
+
         // Optimize graph census query
         $graph_census = DB::table('appointments')
             ->selectRaw('count(appointment_dt) as cnt, DATE_FORMAT(appointment_dt, "%Y-%m") as apt_dt')
@@ -1089,7 +1073,7 @@ class PatientController extends BaseController
             ->groupBy(DB::raw('DATE_FORMAT(appointment_dt, "%Y-%m")'))
             ->orderBy('apt_dt', 'asc')
             ->get();
-        
+
         // Optimize calendar query with patient names in one query (no more N+1 queries!)
         $calendar = DB::table('appointments')
             ->join('patients', 'appointments.patientid', '=', 'patients.patientid')
@@ -1101,7 +1085,7 @@ class PatientController extends BaseController
             )
             ->groupBy('appointments.appointment_dt', 'appointments.patientid', 'patients.patientname')
             ->get();
-        
+
         // Process graph data
         $data_graph = [];
         $data_graph_month = [];
@@ -1109,7 +1093,7 @@ class PatientController extends BaseController
             $data_graph[] = $value->cnt;
             $data_graph_month[] = date_format(date_create($value->apt_dt), 'F Y');
         }
-        
+
         // Process calendar data (no more N+1 queries!)
         $data_calendar = [];
         foreach ($calendar as $value) {
@@ -1118,18 +1102,51 @@ class PatientController extends BaseController
                 'start' => date_format(date_create($value->appointment_dt), 'Y-m-d')
             ];
         }
-        
+
         // Process today's patients (no more N+1 queries!)
         $data_todays_pxs = [];
         foreach ($todays_appt as $value) {
             $data_todays_pxs[] = [
                 'patient' => $value->patientname ?: 'Unknown Patient',
                 'complaints' => $value->chiefcomplaints,
-               //'appointment_time' => $value->appointment_time,
+                //'appointment_time' => $value->appointment_time,
                 'isdone' => $value->isdone
             ];
         }
-        
+
+        function getService($id)
+        {
+            $field = Rx_service::where(['rendered_id' => $id])->first();
+            return response()->json($field);
+        }
+        function updateService(Request $request)
+        {
+            $field = Rx_service::find($request->id);
+            $field->fee = $request->amount;
+            $field->save();
+            return response()->json(true);
+
+
+
+            foreach ($request->rendered as $key => $value) {
+                $rx = new Rx_service();
+                $rx->appointment_id = $value['id'];
+                //$rx->rendered_id = $value['rendered_id'];
+                $rx->fee = $value['fee'];
+                $rx->created_dt = date("Y-m-d H:i:s");
+                $rx->service = $value['service'];
+                //$rx->discount = $request->discount;
+                $rx->total = $request->fee - $request->discount;
+                $rx->save();
+            }
+            $field = Appointments::find($request->id);
+            $field->discount = $request->discount;
+            $field->save();
+            return response()->json(true);
+
+
+        }
+
         // Optimize revenue query
         $graph_revenue = DB::table('appointments')
             ->leftJoin('servicesrendered', 'appointments.id', '=', 'servicesrendered.appointment_id')
@@ -1142,7 +1159,7 @@ class PatientController extends BaseController
             ->groupBy(DB::raw('DATE_FORMAT(appointments.appointment_dt, "%Y-%m")'))
             ->orderBy('apt_dt', 'asc')
             ->get();
-        
+
         // Process revenue data
         $revenue_arr = [];
         $revenue_month_arr = [];
@@ -1150,11 +1167,11 @@ class PatientController extends BaseController
             $revenue_arr[] = max(0, ($value->amt ?: 0) - ($value->discount ?: 0));
             $revenue_month_arr[] = date_format(date_create($value->apt_dt), 'F Y');
         }
-        
+
         // Calculate completed and pending counts based on isdone status
         $completed_today = $todays_appt->where('isdone', 1)->count();
         $pending_today = $todays_appt->where('isdone', 0)->count();
-        
+
         return response()->json([
             'graph_amt' => [["name" => 'Total', 'data' => $revenue_arr]],
             'revenue_mon' => $revenue_month_arr,
@@ -1665,11 +1682,12 @@ class PatientController extends BaseController
         exit;
     }
 
-    function ImportLastPrescription($id,$appId) {
+    function ImportLastPrescription($id, $appId)
+    {
         $appointment = Appointments::join('rx', 'rx.appointment_id', '=', 'appointments.id')
-        ->where(['appointments.patientid'=>$id])
-        ->orderBy('appointments.id', 'desc')->first();
-        $prescriptions = Rx::where(['appointment_id'=>$appointment->id])->get();
+            ->where(['appointments.patientid' => $id])
+            ->orderBy('appointments.id', 'desc')->first();
+        $prescriptions = Rx::where(['appointment_id' => $appointment->id])->get();
         $array = array();
         foreach ($prescriptions as $key => $value) {
             $rx = new RX();
@@ -1691,6 +1709,6 @@ class PatientController extends BaseController
             $rx->bedtime = $value->bedtime;
             $rx->save();
         }
-        return response()->json(['prescriptions' => $prescriptions,'appointments' => $appointment]);
+        return response()->json(['prescriptions' => $prescriptions, 'appointments' => $appointment]);
     }
 }
