@@ -113,6 +113,10 @@
       </template>
     </el-table-column>
       </el-table>
+      <div style="margin-top: 20px; margin-bottom: 10px; text-align: right; font-size: 16px; font-weight: bold;">
+        <span>Total Final Fee for the Day: </span>
+        <span style="color: #409EFF;">{{ totalFinalFee.toLocaleString() }}</span>
+      </div>
       <pagination v-show="total>0" :total="total" :page.sync="query.page" :limit.sync="query.limit" @pagination="getPatients" />
    <!--  </el-table-draggable> -->
 
@@ -297,6 +301,14 @@ export default {
         data: []
       },
     };
+  },
+  computed: {
+    totalFinalFee() {
+      return this.patients.reduce((sum, patient) => {
+        const fee = parseFloat(patient.fee) || 0;
+        return sum + fee;
+      }, 0);
+    }
   },
   created() {
     this.getPatients();
