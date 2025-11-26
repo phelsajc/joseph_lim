@@ -182,7 +182,13 @@ class RequestprescriptionA5 extends Fpdf
         $cnt = 0; // manual counter for numbered items
 
         foreach ($this->data['query_prescription'] as $item) {
-            if (($item['ancillary_id'] == 560 || $item['ancillary_id'] == 561 || $item['ancillary_id'] == 568) && isset($item['remarks'])) {
+            if (($item['ancillary_id'] == 560 || $item['ancillary_id'] == 561) && isset($item['remarks'])) {
+                // ✅ with number
+                $cnt++;
+                $this->cell(15, 1, '', '', 0, 'R');
+                $fullText = $cnt . ').'. ' ' . $item['ancillary'].' '.$item['remarks'] ;
+                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+            }else if ($item['ancillary_id'] == 568 && isset($item['remarks'])) {
                 // ✅ with number
                 $cnt++;
                 $this->cell(15, 1, '', '', 0, 'R');
@@ -193,6 +199,12 @@ class RequestprescriptionA5 extends Fpdf
                 $cnt++;
                 $this->cell(15, 1, '', '', 0, 'R');
                 $fullText = $cnt . ').' . $item['remarks'] . ' ' . $item['ancillary'];
+                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+            } else if ($item['ancillary_id'] == 593 && isset($item['remarks']) || $item['ancillary_id'] == 594 && isset($item['remarks'])) {
+                // ✅ with number
+                $cnt++;
+                $this->cell(15, 1, '', '', 0, 'R');
+                $fullText = $cnt . ').' . $item['ancillary'] . ' ' . $item['remarks'];
                 $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
             } 
             else {

@@ -219,10 +219,10 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         // If medicine_id is 0, check if generic_name already contains parentheses
         if (strpos($medicine, '(') !== false) {
             // Generic name already has parentheses, just add space
-            return Str::title($genericName . ' ' . $medicine . ' ');
+            return Str::title(iconv("UTF-8", "windows-1252//TRANSLIT", $genericName . ' ' . $medicine . ' '));
         } else {
             // Generic name has no parentheses, add parentheses around medicine
-            return Str::title($genericName . ' (' . $medicine . ') ');
+            return Str::title(iconv("UTF-8", "windows-1252//TRANSLIT", $genericName . ' (' . $medicine . ') '));
         }
     }
 

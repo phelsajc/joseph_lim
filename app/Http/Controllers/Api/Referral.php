@@ -113,7 +113,7 @@ class Referral extends Fpdf
         $this->SetFont('Arial', 'B', 10);
         $this->SetY(65);
         $this->MultiCell(115, 5,$this->data['appointment_detail']->referral_doctor, '', 'L');
-        $this->Ln(h: 1);
+        $this->Ln(1);
         $this->SetFont('Arial', '', 10);
         $this->MultiCell(115,5,$this->data['appointment_detail']->referral_addr1, '', 'L');
         $this->Ln(1);
@@ -137,9 +137,9 @@ class Referral extends Fpdf
             ['text' => " who was seen and examined on ", 'style' => '','iscell'=>1],
             ['text' => date_format(date_create($this->data['appointment_detail']->appointment_dt),'F d, Y'), 'style' => 'B','iscell'=>1],
             ['text' => " and was diagnosed to have ", 'style' => '','iscell'=>1],
-            ['text' =>$this->data['appointment_detail']->referral_diagnosis, 'style' => 'B','iscell'=>1],
+            ['text' =>iconv("UTF-8", "windows-1252//TRANSLIT", $this->data['appointment_detail']->referral_diagnosis), 'style' => 'B','iscell'=>1],
             ['text' =>" for ", 'style' => '','iscell'=>1],
-            ['text' =>$this->data['appointment_detail']->referral_remarks, 'style' => 'B','iscell'=>1],
+            ['text' =>iconv("UTF-8", "windows-1252//TRANSLIT", $this->data['appointment_detail']->referral_remarks), 'style' => 'B','iscell'=>1],
         ];
         $this->TextWithStyles($x, $y, $parts);
         $this->Ln(12);

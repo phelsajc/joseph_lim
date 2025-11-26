@@ -513,6 +513,7 @@ class PatientController extends BaseController
         $getPreviousRecords = DB::table('appointments')
             ->where('patientid', $data->patientid)
             ->where('is_cancel', 0)
+            ->where('isdone', 1)
             ->where('id', '!=', $id) // Exclude current appointment
             ->where('appointment_dt', '<', $data->appointment_dt) // Get appointments before current date
             ->orderBy('appointment_dt', 'desc')
@@ -672,6 +673,7 @@ class PatientController extends BaseController
         $myPdf->Output('I', time() . "-.pdf", true);
         exit;
     }
+    
     public function printform($id)
     {
         $data = [];

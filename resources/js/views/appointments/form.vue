@@ -203,7 +203,11 @@
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedCt" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
+                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.lab_test_id == 593"
+                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                    style="width: 400px" />
+                </el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
@@ -217,7 +221,11 @@
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedMri" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
+                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.lab_test_id == 594"
+                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                    style="width: 400px" />
+                </el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
@@ -255,6 +263,19 @@
                     v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
                     style="width: 400px" /></el-checkbox>
               </el-checkbox-group>
+              <!-- Synovial Fluid Extra Options -->
+              <div v-if="isSynovialFluidSelected" style="margin-top: 15px; padding-left: 20px; border-left: 3px solid #409EFF;">
+                <p style="margin-bottom: 10px; font-weight: bold; color: #409EFF;">Additional Options:</p>
+                <el-checkbox-group v-model="synovialFluidExtraOptions">
+                  <el-checkbox 
+                    v-for="option in synovialFluidOptions" 
+                    :key="option.label" 
+                    :label="option.label"
+                    @change="handleSynovialFluidExtraOption(option)">
+                    {{ option.label.toUpperCase() }}
+                  </el-checkbox>
+                </el-checkbox-group>
+              </div>
             </el-col>
           </el-row>
         </el-col>
@@ -2074,6 +2095,13 @@ export default {
       getAllDiagnosticsOfferedMicroscopy: [],
       lab_micro_remarks: "",
       xray_remarks: "",
+      synovialFluidExtraOptions: [],
+      synovialFluidOptions: [
+        { label: "cell count and differential count", procedureName: "Cell Count and Differential Count" },
+        { label: "gram stain", procedureName: "Gram Stain" },
+        { label: "culture and sensitivity", procedureName: "Culture and Sensitivity" },
+        { label: "crystal analysis", procedureName: "Crystal Analysis" }
+      ],
 
       // Physical Examination Templates
       showCustomTemplateDialog: false,
@@ -2093,6 +2121,23 @@ export default {
     },
     "form.weight": "calculateBMI",
     "form.height": "calculateBMI",
+    isSynovialFluidSelected(newVal) {
+      // Clear extra options when synovial fluid is deselected
+      if (!newVal) {
+        // Remove all synovial fluid extra options from diagnosticsRenderedModel
+        this.synovialFluidOptions.forEach(option => {
+          this.diagnosticsRenderedModel = this.diagnosticsRenderedModel.filter(
+            item => item !== option.procedureName
+          );
+          // Remove from diagnosticsRendered.rendered
+          this.diagnosticsRendered.rendered = this.diagnosticsRendered.rendered.filter(
+            p => p.procedure !== option.procedureName
+          );
+        });
+        // Clear the synovialFluidExtraOptions array
+        this.synovialFluidExtraOptions = [];
+      }
+    },
   },
   mounted() {
     this.checkIfMobile();
@@ -2117,6 +2162,12 @@ export default {
         transformOrigin: "center center",
         display: "inline-block",
       };
+    },
+    isSynovialFluidSelected() {
+      // Check if "synovial fluid" is selected (case-insensitive)
+      return this.diagnosticsRenderedModel.some(item => 
+        item && item.toLowerCase().includes("synovial fluid")
+      );
     },
     availableTabs() {
       const tabs = [
@@ -2943,6 +2994,38 @@ export default {
     },
     findProcedure(id) {
       return this.diagnosticsRendered.rendered.find(p => p.procedure_id === id) || {};
+    },
+    handleSynovialFluidExtraOption(option) {
+      const procedureName = option.procedureName;
+      const isSelected = this.synovialFluidExtraOptions.includes(option.label);
+      
+      if (isSelected) {
+        // Add to diagnosticsRenderedModel if not already present
+        if (!this.diagnosticsRenderedModel.includes(procedureName)) {
+          this.diagnosticsRenderedModel.push(procedureName);
+        }
+        // Add to diagnosticsRendered.rendered if not already added
+        if (!this.diagnosticsRendered.rendered.find(p => p.procedure === procedureName)) {
+          this.diagnosticsRendered.rendered.push({
+            id: this.$route.params.id,
+            procedure_id: 0, // Using 0 for custom procedures
+            procedure: procedureName,
+            remarks: "extra",
+            type: 19, // Using crystal analysis category ID
+            lab_micro_remarks: this.lab_micro_remarks,
+            xray_remarks: ""
+          });
+        }
+      } else {
+        // Remove from diagnosticsRenderedModel
+        this.diagnosticsRenderedModel = this.diagnosticsRenderedModel.filter(
+          item => item !== procedureName
+        );
+        // Remove from diagnosticsRendered.rendered
+        this.diagnosticsRendered.rendered = this.diagnosticsRendered.rendered.filter(
+          p => p.procedure !== procedureName
+        );
+      }
     },
     addLabOthers(v) {
       if (v !== null) {
