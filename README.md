@@ -7,12 +7,29 @@
   - Medical history tracking
   - Visit logs and patient encounters
 ### Clinical Workflow
+- Appointment scheduling
 - Order entry (labs, medications, procedures)
 - Physician notes and progress documentation
 - Treatment plans and follow-ups
+### Medication & Orders
+- Medication prescribing workflow
+- Charge (CH) / Cash (CA) transaction tagging
+### Documentation & Reporting
+- Generate clinical reports and summaries
+### HMO
+- Create,Update,Delete
+- Generate Report of patient hmo's
+- Treatment plans and follow-ups
+### Master Files
+- Patients
+- Medicines
+- Services
+- HMO's
 # Screenshots
-   <img width="1903" height="903" alt="image" src="https://github.com/user-attachments/assets/a65b7044-f534-4d45-8c9f-12977803e0cb" />
-   <img width="1919" height="866" alt="image" src="https://github.com/user-attachments/assets/03686587-d42a-4a72-9c47-c5353c34afee" />
-   <img width="1923" height="861" alt="image" src="https://github.com/user-attachments/assets/bf861167-1888-46ca-83f4-85b2c3329e30" />
+   <img width="1882" height="905" alt="image" src="https://github.com/user-attachments/assets/588c9982-6d87-4f69-b6e1-8f0d2c1be2fb" />
+   <img width="1905" height="946" alt="image" src="https://github.com/user-attachments/assets/e29829f3-c686-4b41-bb83-1a1d90cc802d" />
+   <img width="1902" height="936" alt="image" src="https://github.com/user-attachments/assets/3927607b-fb8e-4a4c-92e4-24314d76f429" />
+   <img width="1904" height="950" alt="image" src="https://github.com/user-attachments/assets/b0e89bda-611e-41aa-a50e-1c4ccfceeced" />
+
 
 
