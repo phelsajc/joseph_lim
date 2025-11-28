@@ -180,39 +180,67 @@ class RequestprescriptionA5 extends Fpdf
         $usableWidth = 148 - 20; // A5 width - margins
         $rowCount = 0;
         $cnt = 0; // manual counter for numbered items
+        $letterIndex = 0; // counter for lettered sub-items (A, B, C, D)
+        $inSynovialFluidGroup = false; // track if we're in a synovial fluid group
 
         foreach ($this->data['query_prescription'] as $item) {
-            if (($item['ancillary_id'] == 560 || $item['ancillary_id'] == 561) && isset($item['remarks'])) {
-                // ✅ with number
-                $cnt++;
+            // Check if this is an "extra" item (child of ID 568)
+            $isExtraItem = isset($item['remarks']) && $item['remarks'] == 'extra';
+            
+            if ($isExtraItem && $inSynovialFluidGroup) {
+                // Display as sub-item with letter and indentation
+                $letter = chr(65 + $letterIndex); // A=65, B=66, C=67, D=68
+                $letterIndex++;
                 $this->cell(15, 1, '', '', 0, 'R');
-                $fullText = $cnt . ').'. ' ' . $item['ancillary'].' '.$item['remarks'] ;
-                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
-            }else if ($item['ancillary_id'] == 568 && isset($item['remarks'])) {
-                // ✅ with number
-                $cnt++;
-                $this->cell(15, 1, '', '', 0, 'R');
-                $fullText = $cnt . ').'. ' ' . $item['ancillary'].' '.$item['remarks'] ;
-                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
-            } else if ($item['ancillary_id'] == 591 && isset($item['remarks'])) {
-                // ✅ with number
-                $cnt++;
-                $this->cell(15, 1, '', '', 0, 'R');
-                $fullText = $cnt . ').' . $item['remarks'] . ' ' . $item['ancillary'];
-                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
-            } else if ($item['ancillary_id'] == 593 && isset($item['remarks']) || $item['ancillary_id'] == 594 && isset($item['remarks'])) {
-                // ✅ with number
-                $cnt++;
-                $this->cell(15, 1, '', '', 0, 'R');
-                $fullText = $cnt . ').' . $item['ancillary'] . ' ' . $item['remarks'];
-                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
-            } 
-            else {
-                // ✅ with number
-                $cnt++;
-                $fullText = $cnt . ').' . $item['ancillary'];
-                $this->cell(15, 1, '', '', 0, 'R');
-                $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+                $this->cell(10, 1, '', '', 0, 'R'); // Add indentation
+                $fullText = $letter . '.)' . ' ' . strtoupper($item['ancillary']);
+                $this->MultiCell(0, $lineHeight, $fullText, 0, 'L');
+                $rowCount++;
+                if ($rowCount % 25 == 0 && $rowCount != count($this->data['query_prescription'])) {
+                    $this->AddPage();
+                }
+                continue; // Skip the rest of the loop for extra items
+            } else {
+                // Reset letter counter when exiting synovial fluid group
+                if ($inSynovialFluidGroup && !$isExtraItem) {
+                    $inSynovialFluidGroup = false;
+                    $letterIndex = 0;
+                }
+                
+                if (($item['ancillary_id'] == 560 || $item['ancillary_id'] == 561) && isset($item['remarks'])) {
+                    // ✅ with number
+                    $cnt++;
+                    $this->cell(15, 1, '', '', 0, 'R');
+                    $fullText = $cnt . ').'. ' ' . $item['ancillary'].' '.$item['remarks'] ;
+                    $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+                } else if ($item['ancillary_id'] == 568 && (isset($item['remarks']) || $item['remarks'] != 'extra')) {
+                    // ✅ with number - this is the parent synovial fluid item
+                    $cnt++;
+                    $inSynovialFluidGroup = true; // Start tracking synovial fluid group
+                    $letterIndex = 0; // Reset letter counter
+                    $this->cell(15, 1, '', '', 0, 'R');
+                    $fullText = $cnt . ').'. ' ' . $item['ancillary'].' '.$item['remarks'] ;
+                    $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+                } else if ($item['ancillary_id'] == 591 && isset($item['remarks'])) {
+                    // ✅ with number
+                    $cnt++;
+                    $this->cell(15, 1, '', '', 0, 'R');
+                    $fullText = $cnt . ').' . $item['remarks'] . ' ' . $item['ancillary'];
+                    $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+                } else if ($item['ancillary_id'] == 593 && isset($item['remarks']) || $item['ancillary_id'] == 594 && isset($item['remarks'])) {
+                    // ✅ with number
+                    $cnt++;
+                    $this->cell(15, 1, '', '', 0, 'R');
+                    $fullText = $cnt . ').' . $item['ancillary'] . ' ' . $item['remarks'];
+                    $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+                } 
+                else {
+                    // ✅ with number
+                    $cnt++;
+                    $fullText = $cnt . ').' . $item['ancillary'];
+                    $this->cell(15, 1, '', '', 0, 'R');
+                    $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
+                }
             }
 
             $rowCount++;

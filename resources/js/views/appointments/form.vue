@@ -1868,6 +1868,7 @@ export default {
       diagnostic_list: [],
       services_list: [],
       form: {
+        lab_others: null,
         smoking_details: '',
         alcohol_details: '',
         fasting_mode: "",
@@ -2098,8 +2099,8 @@ export default {
       synovialFluidExtraOptions: [],
       synovialFluidOptions: [
         { label: "cell count and differential count", procedureName: "Cell Count and Differential Count" },
-        { label: "gram stain", procedureName: "Gram Stain" },
-        { label: "culture and sensitivity", procedureName: "Culture and Sensitivity" },
+        { label: "gram stain", procedureName: "Gram Stain " },
+        { label: "culture and sensitivity", procedureName: "Culture and Sensitivity " },
         { label: "crystal analysis", procedureName: "Crystal Analysis" }
       ],
 
