@@ -33,14 +33,14 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Cell(52, 4, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
         $this->SetFont('helvetica', 'B', 9);
         $this->Ln(1);
-        $this->Cell(60, 10, strtoupper($this->data['profile']->specialization1.' - '.$this->data['profile']->specialization2), 0, 0, 'R');
+        $this->Cell(60, 10, strtoupper($this->data['profile']->specialization1 . ' - ' . $this->data['profile']->specialization2), 0, 0, 'R');
         $this->Ln(5);
         $this->SetFont('Arial', '', 8);
         $this->Cell(48, 11, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
         $this->Ln(1);
         $this->Cell(59, 15, 'Diplomate, Philippine Rheumatology Association', 0, 0, 'R');
         $this->Ln(1);
-        $this->Cell(39.5, 19, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');     
+        $this->Cell(39.5, 19, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');
         $this->SetLineWidth(0.5);
         $this->SetFont('Arial', 'B', 7);
         $this->Ln(0.05);
@@ -70,7 +70,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Tue-Thu: 9:00 AM - 12:00 PM ", 0, 'L');
         $this->SetXY(110.2, 23);
         $this->MultiCell(62, 3, "For appointment: 0968-418-7873", 0, 'L');
-        
+
         $this->SetXY(75.5, 26);
         $this->MultiCell(62, 3, "VitalRx Pharmacy and Arthritis Clinic, JTL", 0, 'L');
         $this->SetXY(75.5, 28);
@@ -79,7 +79,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 9:00 AM - 12:00 PM ", 0, 'L');
         $this->SetXY(75.5, 32);
         $this->MultiCell(62, 3, "For appointment.: 0966-073-6942", 0, 'L');
-        
+
         $this->SetXY(110, 26);
         $this->MultiCell(62, 3, "Agustin Medical Clinic ", 0, 'L');
         $this->SetXY(110, 28);
@@ -102,7 +102,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
             ucfirst(strtolower($this->data['patient_detail']->firstname)) . ' ' .
             ucfirst(substr($this->data['patient_detail']->middlename, 0, 1)) . '.'
         );
-        $this->cell(75, 3, $name , 'B', 0, 'L');
+        $this->cell(75, 3, $name, 'B', 0, 'L');
         //$this->cell(75, 3, mb_strtoupper($this->data['patient_detail']->patientname, 'UTF-8'), 'B', 0, 'L');
 
         $this->SetFont('');
@@ -141,11 +141,18 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
 
         $this->Image(public_path() . '/img/lim_wm.png', 32, 70, 80, 0, 'PNG');
-        if ($this->PageNo() == 1) {
+        /* if ($this->PageNo() == 1) {
             $this->Ln(15);
         }else{
             $this->Ln(16);
-           // $this->mealHeader();
+        } */
+
+        if ($this->PageNo() > 1) {
+            $this->Ln(17);
+        }
+
+        if ($this->PageNo() == 1) {
+            $this->Ln(12);
         }
     }
 
@@ -163,7 +170,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
         $this->Cell(16, 5, "Supper", 1, 0, 'C');
 
-        $this->Cell(9, 5, "Beds", "TR", 0, 'C');
+        $this->Cell(10.5, 5, "Bedtime", "TR", 0, 'C');
 
 
         $this->Cell(30, 5, "Remarks", "TR", 0, 'C');
@@ -187,7 +194,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Cell(8, 5, "A", 1, 0, 'C');
 
 
-        $this->Cell(9, 5, "", "RB", 0, 'C');
+        $this->Cell(10.5, 5, "", "RB", 0, 'C');
 
 
         $this->Cell(30, 5, "", "RB", 0, 'C');
@@ -203,7 +210,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
                 8,
                 8,
                 8,
-                9,
+                10.5,
                 30
             )
         );
@@ -215,7 +222,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         /* if ($medicineId != 0) {
             return $genericName . ' ' . $medicine . ' ';
         } */
-        
+
         // If medicine_id is 0, check if generic_name already contains parentheses
         if (strpos($medicine, '(') !== false) {
             // Generic name already has parentheses, just add space
@@ -229,10 +236,12 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
     public function meal()
     {
         $this->mealHeader();
+        
         $this->SetFont('Arial', '', 8.5);
         foreach ($this->data['query_prescription'] as $key => $item) {
-            $checkGenericname = Generics::where(['id' => $item['generic_id']])->first();
+            //$checkGenericname = Generics::where(['id' => $item['generic_id']])->first();
             //$this->cell(-8, 3, '', '0', 0, 'R');
+            $this->SetX(10);
             $this->cell(-3, 3, '', '0', 0, 'R');
             $this->Row(
                 array(
@@ -253,12 +262,15 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
     }
 
     public function Body()
-    { 
+    {
+        if ($this->PageNo() ==1) {
+            $this->Ln(9);
+        }        
         $this->meal();
         $this->Ln(3);
-        $this->Cell(41,3,"Diagnosis: ",'',0,'C');
-        $this->Cell(-13,3,'','',0,'');
-        $this->MultiCell(100, 3,$this->data['appointment_detail']->diagnosis, 'B', 'L');    
+        $this->Cell(41, 3, "Diagnosis: ", '', 0, 'C');
+        $this->Cell(-13, 3, '', '', 0, '');
+        $this->MultiCell(100, 3, $this->data['appointment_detail']->diagnosis, 'B', 'L');
     }
 
     public function Footer()
@@ -303,7 +315,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->widths = $w;
     }
 
-    function Row($data)
+    function Row1($data)
     {
         //Calculate the height of the row
         $nb = 0;
@@ -330,11 +342,48 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Ln($h);
     }
 
+    function Row($data)
+    {
+        $lineHeight = 4;
+        //$this->SetFont('Arial', '', 11); // Always use size 8
+
+        // Determine the max number of lines required for wrapping
+        $nb = 0;
+        for ($i = 0; $i < count($data); $i++) {
+            $text = wordwrap($data[$i], 60, "\n", true); // Wrap long text to avoid overflow
+            $nb = max($nb, $this->NbLines($this->widths[$i], $text));
+            $data[$i] = $text;
+        }
+
+        $h = $lineHeight * $nb;
+        $this->CheckPageBreak($h);
+
+        // Reset X position after potential page break to ensure consistent alignment
+        $this->SetX(10);
+        $this->cell(-3, 3, '', '0', 0, 'R'); // Move table to the left
+
+        // Draw each cell
+        for ($i = 0; $i < count($data); $i++) {
+            $w = $this->widths[$i];
+            $a = isset($this->aligns[$i]) ? $this->aligns[$i] : 'L'; // default align left
+            $x = $this->GetX();
+            $y = $this->GetY();
+
+            $this->Rect($x, $y, $w, $h); // draw border
+            $this->MultiCell($w, $lineHeight, $data[$i], 0, $a); // fixed font, wrapped text
+            $this->SetXY($x + $w, $y); // move to the right
+        }
+
+        $this->Ln($h);
+    }
+
     function CheckPageBreak($h)
     {
         //If the height h would cause an overflow, add a new page immediately
-        if ($this->GetY() + $h > $this->PageBreakTrigger)
+        if ($this->GetY() + $h > $this->PageBreakTrigger) {
             $this->AddPage($this->CurOrientation);
+            $this->mealHeader(); // Add header on new page
+        }
     }
 
     function NbLines($w, $txt)
