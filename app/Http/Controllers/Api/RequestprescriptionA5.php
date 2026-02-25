@@ -11,7 +11,7 @@ class RequestprescriptionA5 extends Fpdf
     private $aligns;
     protected $checkedItems;
 
-    public function __construct($data,$checkedItems = [])
+    public function __construct($data, $checkedItems = [])
     {
         $this->checkedItems = $checkedItems;
         $this->data = $data;
@@ -32,14 +32,14 @@ class RequestprescriptionA5 extends Fpdf
         $this->Cell(52, 4, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
         $this->SetFont('helvetica', 'B', 9);
         $this->Ln(1);
-        $this->Cell(60, 10, strtoupper($this->data['profile']->specialization1.' - '.$this->data['profile']->specialization2), 0, 0, 'R');
+        $this->Cell(60, 10, strtoupper($this->data['profile']->specialization1 . ' - ' . $this->data['profile']->specialization2), 0, 0, 'R');
         $this->Ln(5);
         $this->SetFont('Arial', '', 8);
         $this->Cell(48, 11, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
         $this->Ln(1);
         $this->Cell(59, 15, 'Diplomate, Philippine Rheumatology Association', 0, 0, 'R');
         $this->Ln(1);
-        $this->Cell(39.5, 19, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');     
+        $this->Cell(39.5, 19, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');
         $this->SetLineWidth(0.5);
         $this->SetFont('Arial', 'B', 7);
         $this->Ln(0.05);
@@ -69,7 +69,7 @@ class RequestprescriptionA5 extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Tue-Thu: 9:00 AM - 12:00 PM ", 0, 'L');
         $this->SetXY(110.2, 23);
         $this->MultiCell(62, 3, "For appointment: 0968-418-7873", 0, 'L');
-        
+
         $this->SetXY(75.5, 26);
         $this->MultiCell(62, 3, "VitalRx Pharmacy and Arthritis Clinic, JTL", 0, 'L');
         $this->SetXY(75.5, 28);
@@ -78,7 +78,7 @@ class RequestprescriptionA5 extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 9:00 AM - 12:00 PM ", 0, 'L');
         $this->SetXY(75.5, 32);
         $this->MultiCell(62, 3, "For appointment.: 0966-073-6942", 0, 'L');
-        
+
         $this->SetXY(110, 26);
         $this->MultiCell(62, 3, "Agustin Medical Clinic ", 0, 'L');
         $this->SetXY(110, 28);
@@ -97,27 +97,28 @@ class RequestprescriptionA5 extends Fpdf
         $this->cell(10, 3, '', '0', 0, 'R');
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
         //$this->cell(75, 3, strtolower(utf8_decode($this->data['patient_detail']->lastname)).', '.ucfirst(utf8_decode($this->data['patient_detail']->firstname)).' '.ucfirst(utf8_decode($this->data['patient_detail']->middlename)).'.', 'B', 0, 'L');
+
         $name = utf8_decode(
-            ucfirst(strtolower($this->data['patient_detail']->lastname)) . ', ' .
-            ucfirst(strtolower($this->data['patient_detail']->firstname)) . ' ' .
-            ucfirst(substr($this->data['patient_detail']->middlename, 0, 1)) . '.'
+            ucwords(strtolower($this->data['patient_detail']->lastname)) . ', ' .
+            ucwords(strtolower($this->data['patient_detail']->firstname)) . ' ' .
+            strtoupper(substr($this->data['patient_detail']->middlename, 0, 1)) . '.'
         );
-        
+
         $this->Cell(
             75,
             3,
-            $name ,
+            $name,
             'B',
             0,
             'L'
         );
 
-        
-       
+
+
         /* $this->Cell(
             75,
             3,
-            
+
             mb_strtoupper(mb_substr(mb_strtolower($this->data['patient_detail']->lastname, 'UTF-8'), 0, 1, 'UTF-8'), 'UTF-8') .
             mb_substr(mb_strtolower($this->data['patient_detail']->lastname, 'UTF-8'), 1, null, 'UTF-8').', '.
             mb_strtoupper(mb_substr(mb_strtolower($this->data['patient_detail']->firstname, 'UTF-8'), 0, 1, 'UTF-8'), 'UTF-8') .
@@ -127,8 +128,8 @@ class RequestprescriptionA5 extends Fpdf
             0,
             'L'
         ); */
- 
-        
+
+
         $this->SetFont('');
 
         $this->cell(-13, 3, '', 0, 0);
@@ -167,9 +168,9 @@ class RequestprescriptionA5 extends Fpdf
         $this->Image(public_path() . '/img/lim_wm.png', 32, 70, 80, 0, 'PNG');
         if ($this->PageNo() == 1) {
             $this->Ln(15);
-        }else{
+        } else {
             $this->Ln(16);
-           // $this->mealHeader();
+            // $this->mealHeader();
         }
     }
 
@@ -186,7 +187,7 @@ class RequestprescriptionA5 extends Fpdf
         foreach ($this->data['query_prescription'] as $item) {
             // Check if this is an "extra" item (child of ID 568)
             $isExtraItem = isset($item['remarks']) && $item['remarks'] == 'extra';
-            
+
             if ($isExtraItem && $inSynovialFluidGroup) {
                 // Display as sub-item with letter and indentation
                 $letter = chr(65 + $letterIndex); // A=65, B=66, C=67, D=68
@@ -206,12 +207,12 @@ class RequestprescriptionA5 extends Fpdf
                     $inSynovialFluidGroup = false;
                     $letterIndex = 0;
                 }
-                
+
                 if (($item['ancillary_id'] == 560 || $item['ancillary_id'] == 561) && isset($item['remarks'])) {
                     // ✅ with number
                     $cnt++;
                     $this->cell(15, 1, '', '', 0, 'R');
-                    $fullText = $cnt . ').'. ' ' . $item['ancillary'].' '.$item['remarks'] ;
+                    $fullText = $cnt . ').' . ' ' . $item['ancillary'] . ' ' . $item['remarks'];
                     $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
                 } else if ($item['ancillary_id'] == 568 && (isset($item['remarks']) || $item['remarks'] != 'extra')) {
                     // ✅ with number - this is the parent synovial fluid item
@@ -219,7 +220,7 @@ class RequestprescriptionA5 extends Fpdf
                     $inSynovialFluidGroup = true; // Start tracking synovial fluid group
                     $letterIndex = 0; // Reset letter counter
                     $this->cell(15, 1, '', '', 0, 'R');
-                    $fullText = $cnt . ').'. ' ' . $item['ancillary'].' '.$item['remarks'] ;
+                    $fullText = $cnt . ').' . ' ' . $item['ancillary'] . ' ' . $item['remarks'];
                     $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
                 } else if ($item['ancillary_id'] == 591 && isset($item['remarks'])) {
                     // ✅ with number
@@ -233,8 +234,7 @@ class RequestprescriptionA5 extends Fpdf
                     $this->cell(15, 1, '', '', 0, 'R');
                     $fullText = $cnt . ').' . $item['ancillary'] . ' ' . $item['remarks'];
                     $this->MultiCell(0, $lineHeight, strtoupper($fullText), 0, 'L');
-                } 
-                else {
+                } else {
                     // ✅ with number
                     $cnt++;
                     $fullText = $cnt . ').' . $item['ancillary'];
@@ -251,16 +251,16 @@ class RequestprescriptionA5 extends Fpdf
 
     }
     public function Body()
-    {       
-        $this->meal();        
+    {
+        $this->meal();
         $this->Ln(1);
-        $this->Cell(40,3,"Remarks: ",'',0,'C');
-        $this->Cell(-13,3,'','',0,'');
-        $this->MultiCell(100, 3,$this->data['appointment_detail']->lab_remarks, 'B', 'L');
+        $this->Cell(40, 3, "Remarks: ", '', 0, 'C');
+        $this->Cell(-13, 3, '', '', 0, '');
+        $this->MultiCell(100, 3, $this->data['appointment_detail']->lab_remarks, 'B', 'L');
         $this->Ln(1);
-        $this->Cell(41,3,"Diagnosis: ",'',0,'C');
-        $this->Cell(-13,3,'','',0,'');
-        $this->MultiCell(100, 3,$this->data['appointment_detail']->diagnosis, 'B', 'L');
+        $this->Cell(41, 3, "Diagnosis: ", '', 0, 'C');
+        $this->Cell(-13, 3, '', '', 0, '');
+        $this->MultiCell(100, 3, $this->data['appointment_detail']->diagnosis, 'B', 'L');
     }
 
     public function Footer()
@@ -288,27 +288,27 @@ class RequestprescriptionA5 extends Fpdf
         $getFastingMode = $this->data['appointment_detail']->fasting_mode;
         // Draw boxes + text
         $remarks = [
-            ['Fasting 8-10 hours', $getFastingMode==1?true:false], // true = checked
-            ['Fasting 10-12 hours', $getFastingMode==2?true:false],
-            ['Non-fasting', $getFastingMode==3?true:false],
+            ['Fasting 8-10 hours', $getFastingMode == 1 ? true : false], // true = checked
+            ['Fasting 10-12 hours', $getFastingMode == 2 ? true : false],
+            ['Non-fasting', $getFastingMode == 3 ? true : false],
             ['*Kindly send x-ray images to email:', $this->data['appointment_detail']->send_xray_email],
             ['jplimmd.clinic@gmail.com', false]
         ];
 
         foreach ($remarks as $i => [$text, $checked]) {
             if ($i < 4) { // first 3 have checkboxes
-                $x = 10; 
+                $x = 10;
                 $y = $this->GetY();
-        
+
                 // Draw square
                 $this->Rect($x, $y, 4, 4);
-        
+
                 // Add X if checked
                 if ($checked) {
                     $this->SetXY($x, $y - 0.5); // slight up adjust
                     $this->Cell(4, 5, 'X', 0, 0, 'C');
                 }
-        
+
                 // Text beside box
                 $this->SetXY($x + 6, $y);
                 $this->Cell(0, 4, $text, 0, 1, 'L');

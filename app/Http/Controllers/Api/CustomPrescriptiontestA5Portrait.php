@@ -98,10 +98,11 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->cell(10, 3, '', '0', 0, 'R');
         $this->cell(-3, 3, 'Name:', 0, 0, 'R');
         $name = utf8_decode(
-            ucfirst(strtolower($this->data['patient_detail']->lastname)) . ', ' .
-            ucfirst(strtolower($this->data['patient_detail']->firstname)) . ' ' .
-            ucfirst(substr($this->data['patient_detail']->middlename, 0, 1)) . '.'
+            ucwords(strtolower($this->data['patient_detail']->lastname)) . ', ' .
+            ucwords(strtolower($this->data['patient_detail']->firstname)) . ' ' .
+            strtoupper(substr($this->data['patient_detail']->middlename, 0, 1)) . '.'
         );
+
         $this->cell(75, 3, $name, 'B', 0, 'L');
         //$this->cell(75, 3, mb_strtoupper($this->data['patient_detail']->patientname, 'UTF-8'), 'B', 0, 'L');
 
@@ -236,7 +237,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
     public function meal()
     {
         $this->mealHeader();
-        
+
         $this->SetFont('Arial', '', 8.5);
         foreach ($this->data['query_prescription'] as $key => $item) {
             //$checkGenericname = Generics::where(['id' => $item['generic_id']])->first();
@@ -263,9 +264,9 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
     public function Body()
     {
-        if ($this->PageNo() ==1) {
+        if ($this->PageNo() == 1) {
             $this->Ln(9);
-        }        
+        }
         $this->meal();
         $this->Ln(3);
         $this->Cell(41, 3, "Diagnosis: ", '', 0, 'C');

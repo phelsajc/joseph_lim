@@ -31,14 +31,14 @@ class MedCertA5 extends Fpdf
         $this->Cell(52, 4, 'JOSEPH PETER T. LIM, MD', 0, 0, 'R');
         $this->SetFont('helvetica', 'B', 9);
         $this->Ln(1);
-        $this->Cell(60, 10, strtoupper($this->data['profile']->specialization1.' - '.$this->data['profile']->specialization2), 0, 0, 'R');
+        $this->Cell(60, 10, strtoupper($this->data['profile']->specialization1 . ' - ' . $this->data['profile']->specialization2), 0, 0, 'R');
         $this->Ln(5);
         $this->SetFont('Arial', '', 8);
         $this->Cell(48, 11, 'Fellow, Philippine College of Physicians', 0, 0, 'R');
         $this->Ln(1);
         $this->Cell(59, 15, 'Diplomate, Philippine Rheumatology Association', 0, 0, 'R');
         $this->Ln(1);
-        $this->Cell(39.5, 19, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');     
+        $this->Cell(39.5, 19, 'Email: jplimmd.clinic@gmail.com', 0, 0, 'R');
         $this->SetLineWidth(0.5);
         $this->SetFont('Arial', 'B', 7);
         $this->Ln(0.05);
@@ -68,7 +68,7 @@ class MedCertA5 extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Tue-Thu: 9:00 AM - 12:00 PM ", 0, 'L');
         $this->SetXY(110.2, 23);
         $this->MultiCell(62, 3, "For appointment: 0968-418-7873", 0, 'L');
-        
+
         $this->SetXY(75.5, 26);
         $this->MultiCell(62, 3, "VitalRx Pharmacy and Arthritis Clinic, JTL", 0, 'L');
         $this->SetXY(75.5, 28);
@@ -77,7 +77,7 @@ class MedCertA5 extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 9:00 AM - 12:00 PM ", 0, 'L');
         $this->SetXY(75.5, 32);
         $this->MultiCell(62, 3, "For appointment.: 0966-073-6942", 0, 'L');
-        
+
         $this->SetXY(110, 26);
         $this->MultiCell(62, 3, "Agustin Medical Clinic ", 0, 'L');
         $this->SetXY(110, 28);
@@ -180,6 +180,11 @@ class MedCertA5 extends Fpdf
         $this->Cell(5);
         $this->Cell(5, 5, '', 1, 0, 'C');
         $this->Cell(0, 5, ' ______________________________________________________', 0, 1);
+
+
+        $this->Cell(5);
+        $this->Cell(5, 5, '', 0, 0, 'C');
+        $this->Cell(0, 5, ' ______________________________________________________', 0, 1);
         /* $this->Cell(10, 5, '', 0, 0);
         $this->Cell(0, 5, ' his/her ______________________ on ______________________', 0, 0);
         $this->Ln(3); */
@@ -189,7 +194,7 @@ class MedCertA5 extends Fpdf
         $this->Cell(0, 6, 'Remarks:', 0, 1, 'L');
         $this->SetFont('Arial', '', 7);
         $this->MultiCell(0, 5, $remarks); */
-        $this->Ln(3);
+        $this->Ln(7);
 
         // Disclaimer
         $this->SetFont('Arial', 'I', 7);
