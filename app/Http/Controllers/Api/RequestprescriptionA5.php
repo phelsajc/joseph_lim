@@ -208,7 +208,8 @@ class RequestprescriptionA5 extends Fpdf
                     $letterIndex = 0;
                 }
 
-                if (($item['ancillary_id'] == 560 || $item['ancillary_id'] == 561) && isset($item['remarks'])) {
+                //if (($item['ancillary_id'] == 560 || $item['ancillary_id'] == 561) && isset($item['remarks'])) {
+                if (isset($item['remarks'])) {
                     // ✅ with number
                     $cnt++;
                     $this->cell(15, 1, '', '', 0, 'R');

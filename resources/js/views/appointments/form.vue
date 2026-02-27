@@ -132,7 +132,7 @@
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedXray" :key="item.lab_test_id" :label="item.lab_test"
                   @change="addNewProcedure(item)">
-                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.lab_test_id == 591"
+                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
                     v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
                     style="width: 400px" />
                   {{ item.lab_test.toUpperCase() }}
@@ -182,7 +182,7 @@
                   :key="item.lab_test" :label="item.lab_test">
                   {{ item.lab_test.toUpperCase() }}
                   <el-input
-                    v-if="diagnosticsRenderedModel.includes(item.lab_test) && (item.lab_test_id == 560 || item.lab_test_id == 561)"
+                    v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
                     v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
                     style="width: 400px" />
                 </el-checkbox>
@@ -204,7 +204,7 @@
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedCt" @change="addNewProcedure(item)"
                   :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
-                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.lab_test_id == 593"
+                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
                     v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
                     style="width: 400px" />
                 </el-checkbox>
@@ -222,7 +222,7 @@
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedMri" @change="addNewProcedure(item)"
                   :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
-                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.lab_test_id == 594"
+                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
                     v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
                     style="width: 400px" />
                 </el-checkbox>
@@ -259,7 +259,7 @@
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedCrystal" @change="addNewProcedure(item)"
                   :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
-                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.lab_test_id == 568"
+                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) &&  item.with_remarks == 1"
                     v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
                     style="width: 400px" /></el-checkbox>
               </el-checkbox-group>
