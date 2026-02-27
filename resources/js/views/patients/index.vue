@@ -148,7 +148,7 @@
               class="action-btn delete-btn"
               @click="handleDelete(patient)"
             >
-              Delete
+              Delete 1
             </el-button>
           </div>
         </div>
@@ -368,13 +368,20 @@ export default {
           cancelButtonText: 'Cancel',
           type: 'warning',
         }
-      ).then(() => {
-        // Add delete API call here
-        this.$message.success('Patient deleted successfully');
-        this.getPatients();
-      }).catch(() => {
-        this.$message.info('Delete cancelled');
-      });
+      )
+        .then(async () => {
+          try {
+            await Patients.delete(patient.id);
+            this.$message.success('Patient deleted successfully');
+            this.getPatients();
+          } catch (error) {
+            this.$message.error('Failed to delete patient');
+            console.error('Error deleting patient:', error);
+          }
+        })
+        .catch(() => {
+          this.$message.info('Delete cancelled');
+        });
     },
     getPatientPhoto(patient) {
       try {

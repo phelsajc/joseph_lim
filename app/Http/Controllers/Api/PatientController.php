@@ -82,7 +82,7 @@ class PatientController extends BaseController
 
     function deletePatient($id)
     {
-        Patients::where(['patientid' => $id])->update([
+        Patients::where(['id' => $id])->update([
             'isdeleted' => 1
         ]);
         return response()->json(true);

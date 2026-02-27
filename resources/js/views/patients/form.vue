@@ -10,7 +10,11 @@
         @cancel="cancelEvent"
       >
         <template #reference>
-          <el-button type="primary">
+          <el-button
+            type="primary"
+            :loading="saving"
+            :disabled="saving"
+          >
             Save
           </el-button>
         </template>
@@ -215,6 +219,7 @@ export default {
     return {
       url: '',
       tab: 'first',
+      saving: false,
       form: {
         pmh: [],
         pmh_others: '',
@@ -265,18 +270,22 @@ export default {
         reader.onerror = error => reject(error);
       });
     },
-    onSubmit() {
-      Patients.add(this.form).then((response) => {
+    async onSubmit() {
+      if (this.saving) return;
+      this.saving = true;
+      try {
+        const response = await Patients.add(this.form);
         this.$message({
           message: 'Patient information has been created successfully.',
           type: 'success',
           duration: 5 * 1000,
         });
         this.$router.push({ path: '/masterfile/profile/' + response.id + '/' + response.patientid });
-      })
-        .catch((err) => {
-          console.error('Error adding suggestions:', err);
-        });
+      } catch (err) {
+        console.error('Error adding suggestions:', err);
+      } finally {
+        this.saving = false;
+      }
     },
   },
 };
