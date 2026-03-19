@@ -149,7 +149,12 @@
             <el-col :span="24">
               <el-checkbox-group v-model="diagnosticsRenderedModel">
                 <el-checkbox v-for="item in getAllDiagnosticsOfferedUtz" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
+                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
+                  <el-input
+                    v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
+                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                    style="width: 400px" />
+                </el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-row>
@@ -1035,7 +1040,7 @@
           <el-divider />
         </el-card>
       </el-tab-pane>
-      <el-tab-pane name="sixth" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane name="sixth"">
         <span slot="label" class="tab-label">
           <i class="el-icon-service"></i>
           Services
