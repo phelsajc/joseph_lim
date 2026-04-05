@@ -115,7 +115,7 @@ class MYPDF extends TCPDF
             file_put_contents($tempFile, $imgData);
         
             // insert the image into PDF
-            //$this->Image($tempFile, 85, 180, 110, 20, 'PNG');
+            $this->Image($tempFile, 85, 180, 110, 20, 'PNG');
         
             // remove the temp file after
             unlink($tempFile);
