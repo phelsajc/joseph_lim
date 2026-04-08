@@ -115,12 +115,12 @@ class MYPDF extends TCPDF
             file_put_contents($tempFile, $imgData);
         
             // insert the image into PDF
-            $this->Image($tempFile, 85, 180, 110, 20, 'PNG');
+            //$this->Image($tempFile, 85, 180, 110, 20, 'PNG');
         
             // remove the temp file after
             unlink($tempFile);
         }
-        
+        $this->Image(public_path() . '/img/lim_wm.jpg', 95, 153, 40, 0, 'JPG');
         $this->Cell(35, 10, '', '', 0, '');
         $this->cell(85, -3, strtoupper($this->Getdata['profile']->name), '', 0, 'R');
         $this->Ln(3);
@@ -215,28 +215,9 @@ class PdfService extends TCPDF
         // - Collapse repeated spaces/newlines inside text
         $txt = str_replace(["\r\n", "\r"], "\n", $txt);
         $txt = str_replace('&nbsp;', ' ', $txt);
-        // Replace empty Quill paragraphs (e.g. <p><br></p>, <p><br /></p>, <p>\n<br></p>)
-        // with a single <br/> so we keep the "spacing" but avoid TCPDF adding blank paragraph gaps.
-        $txt = preg_replace('/<p[^>]*>\s*<br\s*\/?>\s*<\/p>/i', '<br/>', $txt);
-        // Collapse repeated breaks to one break.
-        $txt = preg_replace('/(<br\s*\/?>\s*){2,}/i', '<br/>', $txt);
-        // Remove truly empty paragraphs too (e.g. <p></p> or <p> </p>)
-        $txt = preg_replace('/<p[^>]*>\s*<\/p>/i', '', $txt);
+        $txt = preg_replace('/<p[^>]*><br\s*\/?><\/p>/', '', $txt);
         $txt = preg_replace('/>\s+</', '><', $txt);
         $txt = preg_replace('/\s+/', ' ', $txt);
-
-        // TCPDF doesn't apply Quill's alignment classes (e.g. `ql-align-right`)
-        // because it doesn't load Quill's CSS. Convert them to inline styles.
-        $txt = str_replace('class="ql-align-right"', 'align="right" style="text-align:right;"', $txt);
-        $txt = str_replace('class="ql-align-center"', 'align="center" style="text-align:center;"', $txt);
-        $txt = str_replace('class="ql-align-left"', 'align="left" style="text-align:left;"', $txt);
-        $txt = str_replace('class="ql-align-justify"', 'align="justify" style="text-align:justify;"', $txt);
-
-        // Fallback for cases where Quill outputs multiple classes on the same tag.
-        $txt = preg_replace('/\sclass="([^"]*\b)?ql-align-right\b([^"]*)?"/i', ' align="right" style="text-align:right;"', $txt);
-        $txt = preg_replace('/\sclass="([^"]*\b)?ql-align-center\b([^"]*)?"/i', ' align="center" style="text-align:center;"', $txt);
-        $txt = preg_replace('/\sclass="([^"]*\b)?ql-align-left\b([^"]*)?"/i', ' align="left" style="text-align:left;"', $txt);
-        $txt = preg_replace('/\sclass="([^"]*\b)?ql-align-justify\b([^"]*)?"/i', ' align="justify" style="text-align:justify;"', $txt);
 
         // print a block of text using Write()
         //$pdf->Write(0, $txt, '', 0, 'C', true, 0, false, false, 0);
@@ -245,15 +226,14 @@ class PdfService extends TCPDF
         // Reduce extra blank lines TCPDF may introduce for common block tags.
         // (Your form_content already includes explicit HTML spacing, so we keep TCPDF spacing minimal.)
         $pdf->setHtmlVSpace(array(
-            // Tune paragraph spacing: fully removing it (h=0) can make text too tight.
-             'p' => array(0 => array('h' => 0.2, 'n' => 0), 1 => array('h' => 0.2, 'n' => 0)),
-           /* 'br' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
+            //'p' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
+            'br' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
             'h1' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
-            'h2' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)), */
+            'h2' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
             //'h3' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
-            'ul' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
+             'ul' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
             'ol' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
-            'li' => array(0 => array('h' => 0, 'n' => 0.1), 1 => array('h' => 0, 'n' => 0)),
+            'li' => array(0 => array('h' => 0, 'n' => 0.2), 1 => array('h' => 0, 'n' => 0)),
         ));
         
         // Use writeHTMLCell with proper positioning to avoid header overlap

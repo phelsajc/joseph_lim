@@ -144,6 +144,7 @@ class Referral extends Fpdf
             ['text' => " for ", 'style' => '', 'iscell' => 1],
             ['text' => iconv("UTF-8", "windows-1252//TRANSLIT", $this->data['appointment_detail']->referral_remarks), 'style' => 'B', 'iscell' => 1],
         ];
+        $this->Image(public_path() . '/img/lim_wm.png', 95, 153, 40, 0, 'PNG');
         $this->TextWithStyles($x, $y, $parts);
         $this->Ln(12);
         $this->SetFont('Arial', '', 10);

@@ -196,6 +196,7 @@ class MedCertA5 extends Fpdf
         $this->MultiCell(0, 5, $remarks); */
         $this->Ln(7);
 
+        $this->Image(public_path() . '/img/lim_wm.png', 95, 150, 40, 0, 'PNG');
         // Disclaimer
         $this->SetFont('Arial', 'I', 7);
         $this->MultiCell(0, 4, "This certificate is issued upon the request of the patient for whatever purpose it may serve excluding medico-legal matters and is not admissible in court. \n\n\n Thank you.");

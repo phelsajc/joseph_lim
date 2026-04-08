@@ -165,7 +165,7 @@ class RequestprescriptionA5 extends Fpdf
         $this->Image(public_path() . '/img/rx.png', 12, 53, 9, 9, 'PNG');
 
 
-        $this->Image(public_path() . '/img/lim_wm.png', 32, 70, 80, 0, 'PNG');
+        $this->Image(public_path() . '/img/lim_wm.png', 100, 153, 40, 0, 'PNG');
         if ($this->PageNo() == 1) {
             $this->Ln(15);
         } else {
