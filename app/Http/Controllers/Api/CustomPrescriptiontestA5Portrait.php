@@ -25,7 +25,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
     public function Header()
     {
-        $this->Image(public_path() . '/img/lim_fb.png', 132, 6, 11, 11, 'PNG');
+        $this->Image(public_path() . '/img/lim_fb.png', 128, 6, 20, 11, 'PNG');
         $this->Image(public_path() . '/img/lim_rhuema.jpg', 120, 6, 11, 11, 'JPG');
         $this->Image(public_path() . '/img/cp.jpg', 108, 6, 11, 11, 'JPG');
         $this->Ln(1);

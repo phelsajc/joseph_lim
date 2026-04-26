@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Events\NewAppointments;
 use App\Mail\PrescriptionPdfMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Carbon;
 
 /**
  * Class LaravueController
@@ -944,23 +945,25 @@ class PatientController extends BaseController
         $getidno = explode("-0", $id);
         if (sizeof($getidno) > 1) {
             $data = Attachments::where(['patientid' => $getidno[1]])->get();
+            $getPatientId = Patients::where('id', $getidno[1])->first();
         } else {
             $data = Attachments::where(['patientid' => $id])->get();
+            $getPatientId = Patients::where('patientid', $id)->first();
         }
-        // select * from patients_attachments pa where '03182'  = pa.patientid
-        // ('name', 'like', '%' . Input::get('name') . '%')->get();
         $array = array();
         foreach ($data as $key => $value) {
             $arr = array();
-            $fileName = $value->filename;
-            $fileUrl = url('public/storage/uploads/' . $fileName);
-            //$fileUrl = url('/storage/uploads/' . $fileName);
-            $fileExt = explode(".", $fileName);
-            $arr['newfile'] = $fileUrl;//$value->isold_record==0?$value->file:null;
-            $arr['oldfile'] = $fileUrl;//$value->isold_record==1?$value->file:null;
-            $arr['extension'] = $fileExt[1];
+            $path =
+                Storage::disk('s3')->temporaryUrl(
+                    $getPatientId->id."/".$value->filename,
+                    Carbon::now()->addMinutes(180)
+                );            
+            $arr['newfile'] = $path;
+            $arr['oldfile'] = $path;
+            $arr['extension'] = 'pdf';
             $arr['id'] = $value->AttachmentID;
-            $arr['fname'] = $fileName;
+            $arr['patientid'] = $getPatientId->id;
+            $arr['fname'] = $value->filename;
             $arr['description'] = $value->description;
             $arr['created_dt'] = date_format(date_create($value->created_dt), "F d, Y");
             $array[] = $arr;
@@ -968,52 +971,118 @@ class PatientController extends BaseController
         return response()->json(['data' => $array]);
     }
 
-
     public function addpatientAttachments(Request $request)
     {
         try {
             date_default_timezone_set('Asia/Manila');
-
-            if (!$request->hasFile('files')) {
-                return response()->json(['error' => 'No files uploaded'], 400);
-            }
+            $getPatientId = Patients::where('patientid', $request->patientid)->first();
 
             // Validate file size (10MB limit)
             $maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
+            $resizeThreshold = 1 * 1024 * 1024; // 1MB in bytes
 
             $uploadedFiles = [];
             foreach ($request->file('files') as $file) {
-                // Check file size
-                if ($file->getSize() > $maxFileSize) {
-                    return response()->json(['error' => 'File too large. Maximum size is 10MB.'], 413);
-                }
-
-                // Check if file is valid
-                if (!$file->isValid()) {
-                    return response()->json(['error' => 'Invalid file: ' . $file->getErrorMessage()], 400);
-                }
-
                 $att = new Attachments();
                 $getidno = explode("-0", $request->patientid);
 
-                // Use unique filename to prevent conflicts
+                
                 $originalName = $file->getClientOriginalName();
                 $extension = $file->getClientOriginalExtension();
-                $filename = time() . '_' . uniqid() . '.' . $extension;
 
-                // Store file with unique name
-                $file->storeAs('uploads', $filename, 'public');
+                $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $ext = $file->getClientOriginalExtension();
+
+                $timestamp = time();
+                $filename = $name . '_' . $timestamp . '.' . $ext;
+
+                $tmpPathToDelete = null;
+                $fileToUpload = $file;
+                $finalFilename = $filename;
+
+                // If image > 1MB, resize/compress before uploading
+                $mime = (string) $file->getMimeType();
+                $isImage = str_starts_with($mime, 'image/');
+                if ($isImage && $file->getSize() > $resizeThreshold) {
+                    try {
+                        if (
+                            function_exists('imagecreatefromstring') &&
+                            function_exists('imagecreatetruecolor') &&
+                            function_exists('imagecopyresampled') &&
+                            function_exists('imagejpeg')
+                        ) {
+                            $raw = @file_get_contents($file->getRealPath());
+                            $src = $raw !== false ? @imagecreatefromstring($raw) : false;
+
+                            if ($src !== false) {
+                                $srcW = imagesx($src);
+                                $srcH = imagesy($src);
+
+                                // Resize down to a reasonable max dimension
+                                $maxDim = 1920;
+                                $scale = 1.0;
+                                if ($srcW > $maxDim || $srcH > $maxDim) {
+                                    $scale = min($maxDim / max($srcW, 1), $maxDim / max($srcH, 1));
+                                }
+                                $dstW = max(1, (int) round($srcW * $scale));
+                                $dstH = max(1, (int) round($srcH * $scale));
+
+                                $dst = imagecreatetruecolor($dstW, $dstH);
+                                // White background (in case source has transparency)
+                                $white = imagecolorallocate($dst, 255, 255, 255);
+                                imagefilledrectangle($dst, 0, 0, $dstW, $dstH, $white);
+
+                                imagecopyresampled($dst, $src, 0, 0, 0, 0, $dstW, $dstH, $srcW, $srcH);
+
+                                // Save as JPEG (best chance to get under 1MB reliably)
+                                $tmpBase = tempnam(sys_get_temp_dir(), 'att_');
+                                if ($tmpBase !== false) {
+                                    $tmpPath = $tmpBase . '.jpg';
+                                    @rename($tmpBase, $tmpPath);
+
+                                    $quality = 85;
+                                    $minQuality = 45;
+                                    do {
+                                        imagejpeg($dst, $tmpPath, $quality);
+                                        clearstatcache(true, $tmpPath);
+                                        $size = @filesize($tmpPath);
+                                        $quality -= 10;
+                                    } while ($size !== false && $size > $resizeThreshold && $quality >= $minQuality);
+
+                                    if (is_file($tmpPath) && filesize($tmpPath) !== false) {
+                                        $tmpPathToDelete = $tmpPath;
+                                        $fileToUpload = new \Illuminate\Http\File($tmpPath);
+                                        $finalFilename = $name . '_' . $timestamp . '.jpg';
+                                    }
+                                }
+
+                                imagedestroy($dst);
+                                imagedestroy($src);
+                            }
+                        }
+                    } catch (\Throwable $t) {
+                        // If resizing fails for any reason, fall back to original file upload
+                    }
+                }
+
+                Storage::disk('s3')->putFileAs($getPatientId->id, $fileToUpload, $finalFilename);
 
                 $att->patientid = sizeof($getidno) > 1 ? $getidno[1] : $request->patientid;
-                $att->filename = $filename;
+                $att->filename = $finalFilename;
                 $att->created_dt = date("Y-m-d H:i:s");
                 $att->isold_record = false;
                 $att->save();
 
+                if ($tmpPathToDelete && is_file($tmpPathToDelete)) {
+                    @unlink($tmpPathToDelete);
+                }
+
                 $uploadedFiles[] = [
-                    'filename' => $filename,
+                    'filename' => $finalFilename,
                     'original_name' => $originalName,
-                    'size' => $file->getSize()
+                    'size' => $file->getSize(),
+                    'mime' => $mime,
+                    'resized' => ($finalFilename !== $filename),
                 ];
             }
 
@@ -1032,11 +1101,31 @@ class PatientController extends BaseController
             return response()->json(['error' => 'Upload failed: ' . $e->getMessage()], 500);
         }
     }
-
-    function deleteAttachment($id)
+    
+    public function deleteAttachment($id)
     {
-        Attachments::where('AttachmentID', $id)->delete();
-        return response()->json(true);
+        $attachment = Attachments::find($id);
+
+        if (!$attachment) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        $filePath = $attachment->patientid."/".$attachment->filename;
+
+        try {
+            if ($filePath && Storage::disk('s3')->exists($filePath)) {
+                Storage::disk('s3')->delete($filePath);
+            }
+
+            $attachment->delete();
+
+            return response()->json($filePath);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function dashboard()

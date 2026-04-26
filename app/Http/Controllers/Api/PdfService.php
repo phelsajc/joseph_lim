@@ -16,7 +16,7 @@ class MYPDF extends TCPDF
 
     public function Header()
     {
-        $this->Image(public_path() . '/img/lim_fb.png', 132, 6, 11, 11, 'PNG');
+        $this->Image(public_path() . '/img/lim_fb.png', 128, 6, 20, 11, 'PNG');
         $this->Image(public_path() . '/img/lim_rhuema.jpg', 120, 6, 11, 11, 'JPG');
         $this->Image(public_path() . '/img/cp.jpg', 108, 6, 11, 11, 'JPG');
         $this->Ln(1);
@@ -226,7 +226,7 @@ class PdfService extends TCPDF
         // Reduce extra blank lines TCPDF may introduce for common block tags.
         // (Your form_content already includes explicit HTML spacing, so we keep TCPDF spacing minimal.)
         $pdf->setHtmlVSpace(array(
-            //'p' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
+            'p' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
             'br' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
             'h1' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),
             'h2' => array(0 => array('h' => 0, 'n' => 0), 1 => array('h' => 0, 'n' => 0)),

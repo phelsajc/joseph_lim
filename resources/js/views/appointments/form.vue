@@ -1040,7 +1040,7 @@
           <el-divider />
         </el-card>
       </el-tab-pane>
-      <el-tab-pane name="sixth"">
+      <el-tab-pane name="services">
         <span slot="label" class="tab-label">
           <i class="el-icon-service"></i>
           Services
@@ -1654,6 +1654,64 @@
         </el-card>
       </div>
 
+      <!-- Services Section -->
+      <div v-if="tab === 'services'" class="mobile-section">
+        <h3>Services</h3>
+        <el-card class="services-card">
+          <div slot="header" class="section-header">
+            <i class="el-icon-service"></i>
+            <span>Services & Billing</span>
+            <div class="header-actions">
+              <el-button type="primary" size="small" @click="viewServicesTbl = true">
+                <i class="el-icon-plus"></i>
+                Add Services
+              </el-button>
+            </div>
+          </div>
+          <div class="services-form-section">
+            <el-form label-position="top" class="enhanced-form">
+              <el-row :gutter="20">
+                <el-col :span="24">
+                  <el-form-item label="Discount" class="form-item-enhanced">
+                    <el-input v-model="form.discount" placeholder="Discount amount" class="enhanced-input" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-form>
+          </div>
+          <div class="services-list-section">
+            <el-table :data="services_list" class="enhanced-table" v-if="services_list.length > 0">
+              <el-table-column prop="service" label="Service" min-width="200">
+                <template slot-scope="scope">
+                  <div class="service-cell">
+                    <i class="el-icon-service"></i>
+                    <span>{{ scope.row.service }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column prop="fee" label="Fee" width="120" align="right">
+                <template slot-scope="scope">
+                  <span class="fee-amount">₱{{ scope.row.fee }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column align="center" label="Actions" width="200">
+                <template slot-scope="scope">
+                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
+                    @click="removeService(scope.row.id)" class="delete-btn">
+                    Delete
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div v-else class="empty-state">
+              <i class="el-icon-service"></i>
+              <p>No services added yet</p>
+              <p class="empty-subtitle">Click "Add Services" to add procedures</p>
+            </div>
+          </div>
+        </el-card>
+      </div>
+
       <!-- Medical Certificate Section -->
       <div v-if="tab === 'medcert'" class="mobile-section">
         <h3>Medical Certificate</h3>
@@ -2218,6 +2276,12 @@ export default {
           label: 'Diagnostics',
           available: this.checkRole(['admin', 'doctor']),
           hasContent: this.diagnostic_list && this.diagnostic_list.length > 0
+        },
+        {
+          name: 'services',
+          label: 'Services',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.services_list && this.services_list.length > 0
         },
         {
           name: 'medcert',
