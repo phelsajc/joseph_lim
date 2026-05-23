@@ -1023,8 +1023,14 @@
           <br />
           <br />
           <el-button type="primary" @click="viewDiagnosticsTbl = true">View Diagnostics</el-button>
+          <el-button v-role="['doctor', 'admin']" type="danger" size="small" icon="el-icon-delete"
+            :disabled="selectedDiagnostics.length === 0" style="margin-left: 10px"
+            @click="removeSelectedDiagnostics">
+            Delete Selected ({{ selectedDiagnostics.length }})
+          </el-button>
           <el-row :gutter="20">
-            <el-table :data="diagnostic_list" style="width: 100%">
+            <el-table :data="diagnostic_list" style="width: 100%" @selection-change="handleDiagnosticSelectionChange">
+              <el-table-column type="selection" width="55" />
               <el-table-column prop="diagnostic" label="Procedure" />
               <el-table-column prop="remarks" label="Remarks" />
               <el-table-column align="center" label="Actions" width="350">
@@ -1636,8 +1642,14 @@
           </el-row>
           <br />
           <el-button type="primary" @click="viewDiagnosticsTbl = true">View Diagnostics</el-button>
+          <el-button v-role="['doctor', 'admin']" type="danger" size="small" icon="el-icon-delete"
+            :disabled="selectedDiagnostics.length === 0" style="margin-left: 10px"
+            @click="removeSelectedDiagnostics">
+            Delete Selected ({{ selectedDiagnostics.length }})
+          </el-button>
           <el-row :gutter="20">
-            <el-table :data="diagnostic_list" style="width: 100%">
+            <el-table :data="diagnostic_list" style="width: 100%" @selection-change="handleDiagnosticSelectionChange">
+              <el-table-column type="selection" width="55" />
               <el-table-column prop="diagnostic" label="Procedure" />
               <el-table-column prop="remarks" label="Remarks" />
               <el-table-column align="center" label="Actions" width="200">
@@ -1929,6 +1941,7 @@ export default {
       tab: "first",
       rx_list: [],
       diagnostic_list: [],
+      selectedDiagnostics: [],
       services_list: [],
       form: {
         lab_others: null,
@@ -2713,6 +2726,9 @@ export default {
       this.procedure.type = ev.type;
       this.procedure.procedure_id = ev.id;
     },
+    handleDiagnosticSelectionChange(selection) {
+      this.selectedDiagnostics = selection;
+    },
     removeProcedure(index) {
       this.$confirm("Are you sure you want to delete this item?", "Warning", {
         confirmButtonText: "OK",
@@ -2726,6 +2742,43 @@ export default {
             })
             .catch((err) => {
               console.error("Error adding suggestions:", err);
+            });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "Delete canceled",
+          });
+        });
+    },
+    removeSelectedDiagnostics() {
+      const count = this.selectedDiagnostics.length;
+      if (count === 0) {
+        return;
+      }
+      this.$confirm(
+        `Are you sure you want to delete ${count} selected diagnostic(s)?`,
+        "Warning",
+        {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+          type: "warning",
+        }
+      )
+        .then(() => {
+          const ids = this.selectedDiagnostics.map((row) => row.id);
+          Promise.all(ids.map((id) => Procedure.remove_diagnostic(id)))
+            .then(() => {
+              this.selectedDiagnostics = [];
+              this.getdiagnostics();
+              this.$message({
+                type: "success",
+                message: `${count} diagnostic(s) deleted`,
+              });
+            })
+            .catch((err) => {
+              console.error("Error deleting diagnostics:", err);
+              this.getdiagnostics();
             });
         })
         .catch(() => {
@@ -3133,6 +3186,7 @@ export default {
     },
     getdiagnostics() {
       this.diagnostic_list = [];
+      this.selectedDiagnostics = [];
       Procedure.getAppointmentDiagnostics(this.$route.params.id)
         .then((response) => {
           this.diagnostic_list = response.data;
