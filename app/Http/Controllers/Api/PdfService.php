@@ -84,6 +84,13 @@ class MYPDF extends TCPDF
         $this->SetLineWidth(0.5);
         $this->Line(2, 38, 146, 38);
         $this->Ln(5);
+
+        $this->drawWatermark();
+    }
+
+    protected function drawWatermark()
+    {
+        $this->Image(public_path() . '/img/lim_wm.jpg', 95, 153, 40, 0, 'JPG');
     }
 
     // Page footer
@@ -120,7 +127,6 @@ class MYPDF extends TCPDF
             // remove the temp file after
             unlink($tempFile);
         }
-        $this->Image(public_path() . '/img/lim_wm.jpg', 95, 153, 40, 0, 'JPG');
         $this->Cell(35, 10, '', '', 0, '');
         $this->cell(85, -3, strtoupper($this->Getdata['profile']->name), '', 0, 'R');
         $this->Ln(3);
