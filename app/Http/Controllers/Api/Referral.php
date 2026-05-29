@@ -13,6 +13,23 @@ class Referral extends Fpdf
     private $topMargin = 10;
     private $bottomMargin = 10;
     private $lineHeight = 5;
+
+    /**
+     * FPDF core fonts expect Windows-1252; database strings are UTF-8.
+     */
+    private function pdfText(?string $text): string
+    {
+        if ($text === null || $text === '') {
+            return '';
+        }
+        if (!mb_check_encoding($text, 'UTF-8')) {
+            return $text;
+        }
+        $encoded = @iconv('UTF-8', 'Windows-1252//IGNORE', $text);
+
+        return $encoded !== false ? $encoded : utf8_decode($text);
+    }
+
     public function __construct($data)
     {
         $this->data = $data;
@@ -112,21 +129,21 @@ class Referral extends Fpdf
         $this->Ln(35);
         $this->SetFont('Arial', 'B', 10);
         $this->SetY(65);
-        $this->MultiCell(115, 5, $this->data['appointment_detail']->referral_doctor, '', 'L');
+        $this->MultiCell(115, 5, $this->pdfText($this->data['appointment_detail']->referral_doctor), '', 'L');
         $this->Ln(1);
         $this->SetFont('Arial', '', 10);
-        $this->MultiCell(115, 5, $this->data['appointment_detail']->referral_addr1, '', 'L');
+        $this->MultiCell(115, 5, $this->pdfText($this->data['appointment_detail']->referral_addr1), '', 'L');
         $this->Ln(1);
-        $this->MultiCell(115, 5, $this->data['appointment_detail']->referral_addr2, '', 'L');
+        $this->MultiCell(115, 5, $this->pdfText($this->data['appointment_detail']->referral_addr2), '', 'L');
         $this->SetY(90);
         $this->Cell(0.1, 5, '', '', 0, '');
         $this->SetFont('Arial', 'B', 10);
-        $this->MultiCell(115, 7, "Dear " . $this->data['appointment_detail']->referral_doctor . ",", '', 'L');
+        $this->MultiCell(115, 7, "Dear " . $this->pdfText($this->data['appointment_detail']->referral_doctor) . ",", '', 'L');
         $this->Ln(4);
         $this->SetFont('Arial', '', 10);
         $this->Cell(2, 5, '', '', 0, '');
         $this->SetFont('Arial', '', 10);
-        $px = utf8_decode($this->data['patient_detail']->patientname);
+        $px = $this->pdfText($this->data['patient_detail']->patientname);
         $x = 10;
         $y = 96;
 
@@ -140,9 +157,9 @@ class Referral extends Fpdf
             ['text' => " who was seen and examined on ", 'style' => '', 'iscell' => 1],
             ['text' => date_format(date_create($this->data['appointment_detail']->appointment_dt), 'F d, Y'), 'style' => 'B', 'iscell' => 1],
             ['text' => " and was diagnosed to have ", 'style' => '', 'iscell' => 1],
-            ['text' => iconv("UTF-8", "windows-1252//TRANSLIT", $this->data['appointment_detail']->referral_diagnosis), 'style' => 'B', 'iscell' => 1],
+            ['text' => $this->pdfText($this->data['appointment_detail']->referral_diagnosis), 'style' => 'B', 'iscell' => 1],
             ['text' => " for ", 'style' => '', 'iscell' => 1],
-            ['text' => iconv("UTF-8", "windows-1252//TRANSLIT", $this->data['appointment_detail']->referral_remarks), 'style' => 'B', 'iscell' => 1],
+            ['text' => $this->pdfText($this->data['appointment_detail']->referral_remarks), 'style' => 'B', 'iscell' => 1],
         ];
         $this->Image(public_path() . '/img/lim_wm.png', 95, 153, 40, 0, 'PNG');
         $this->TextWithStyles($x, $y, $parts);
