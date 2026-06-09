@@ -3,7 +3,9 @@ namespace App\Http\Controllers\Api;
 
 //use TJGazel\LaraFpdf\LaraFpdf;
 use Codedge\Fpdf\Fpdf\Fpdf;
+use App\Model\Appointments;
 use App\Model\Generics;
+use Illuminate\Support\Facades\DB;
 
 class MedCertA5 extends Fpdf
 {
@@ -201,6 +203,45 @@ class MedCertA5 extends Fpdf
         $this->SetFont('Arial', 'I', 7);
         $this->MultiCell(0, 4, "This certificate is issued upon the request of the patient for whatever purpose it may serve excluding medico-legal matters and is not admissible in court. \n\n\n Thank you.");
 
+        $this->Ln(2);
+        $this->SetFont('Arial', 'B', 9);
+        $this->Cell(0, 5, 'Control No. ' . $this->getControlNo(), 0, 1, 'L');
+    }
+
+    private function getControlNo()
+    {
+        $appointment = $this->data['appointment_detail'];
+
+        if (!empty($appointment->medcert_control_no)) {
+            return $appointment->medcert_control_no;
+        }
+
+        return DB::transaction(function () use ($appointment) {
+            $locked = Appointments::where('id', $appointment->id)->lockForUpdate()->first();
+
+            if (!empty($locked->medcert_control_no)) {
+                return $locked->medcert_control_no;
+            }
+
+            $date = $locked->medcert_undersigned ?? $locked->appointment_dt ?? date('Y-m-d');
+            $yearMonth = date('Ym', strtotime($date));
+            $prefix = $yearMonth . '-JTL';
+
+            $maxSeq = Appointments::where('medcert_control_no', 'like', $prefix . '%')
+                ->lockForUpdate()
+                ->pluck('medcert_control_no')
+                ->map(function ($controlNo) use ($prefix) {
+                    return (int) substr($controlNo, strlen($prefix));
+                })
+                ->max();
+
+            $controlNo = $prefix . (($maxSeq ?? 0) + 1);
+
+            Appointments::where('id', $locked->id)->update(['medcert_control_no' => $controlNo]);
+            $this->data['appointment_detail']->medcert_control_no = $controlNo;
+
+            return $controlNo;
+        }, 3);
     }
 
     function WriteStyledText($lines, $lineHeight = 6, $indent = 10, $width = 190)
