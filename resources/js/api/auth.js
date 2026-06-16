@@ -22,6 +22,19 @@ export function logout() {
   });
 }
 
+/**
+ * Change password for the authenticated user.
+ * Expects: current_password, password, password_confirmation
+ */
+export function updatePassword(data) {
+  return request({
+    url: '/auth/password',
+    method: 'patch',
+    data,
+    skipGlobalErrorMessage: true,
+  });
+}
+
 export function csrf() {
   return request({
     url: '/sanctum/csrf-cookie',

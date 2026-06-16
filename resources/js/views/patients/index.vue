@@ -99,8 +99,9 @@
           v-for="patient in patients" 
           :key="patient.id" 
           class="patient-card"
+          @click="selectRow(patient)"
         >
-          <div class="patient-photo">
+          <div class="patient-photo" @click.stop>
             <el-image
               :src="getPatientPhoto(patient)"
               :preview-src-list="[getPatientPhoto(patient)]"
@@ -131,7 +132,7 @@
             </div>
           </div>
           
-          <div class="patient-actions">
+          <div class="patient-actions" @click.stop>
             <el-button 
               type="primary" 
               size="small"
@@ -909,6 +910,7 @@ export default {
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
 }
 
 .patient-card:hover {

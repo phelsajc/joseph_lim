@@ -13,6 +13,9 @@ export default {
   apt_list(params) {
     return request.get('apt_list', params);
   },
+  apt_report(params) {
+    return request.get('apt_report', params);
+  },
   update(announcements) {
     return request.post('update-patients', announcements);
   },
@@ -21,6 +24,11 @@ export default {
   },
   emailPrescription(params) {
     return request.get('email-prescription/'+ params);
+  },
+  getPublicPdfLink(appointmentId, doc, type) {
+    const url = 'public-pdf-link/' + appointmentId + '/' + doc;
+    const config = type ? { params: { type } } : undefined;
+    return request.get(url, config);
   },
   generate_att(params) {
     return request.get('generateAtt', params);
@@ -48,6 +56,15 @@ export default {
   },
   getpatientpastconsult(params) {
     return request.get('get-patient-past-consult/' + params);
+  },
+  getPatientConsultationHistory(patientId, params = {}) {
+    return request.get('patient-consultation-history/' + patientId, { params });
+  },
+  getPatientVitalsHistory(patientId) {
+    return request.get('patient-vitals-history/' + patientId);
+  },
+  recordPatientVitals(data) {
+    return request.post('patient-vitals', data);
   },
   doneConsult(id){
     return request.get('done-consult/' + id);
@@ -114,6 +131,9 @@ export default {
   },
   ImportMedicine(id,appid){
     return request.get('import-medicine/' + id+"/"+appid);
+  },
+  getPatientPastPrescriptions(patientId, appointmentId) {
+    return request.get('patient-past-prescriptions/' + patientId + '/' + appointmentId);
   },
   GetService(id){
     return request.get('get-service/' + id);

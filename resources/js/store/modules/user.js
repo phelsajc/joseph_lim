@@ -41,14 +41,20 @@ const mutations = {
 const actions = {
   // user login
   login({ commit }, userInfo) {
-    // const { email, password } = userInfo;
-    const { username, password } = userInfo;
+    const { username, password, otp } = userInfo;
     return new Promise((resolve, reject) => {
-      // login({ email: email.trim(), password: password })
-      login({ username: username.trim(), password: password })
+      const payload = { username: username.trim(), password: password };
+      if (otp) {
+        payload.otp = otp;
+      }
+
+      login(payload)
         .then(response => {
-          setLogged('1');
-          resolve();
+          const needsOtp = response && response.data && response.data.otp_required;
+          if (!needsOtp) {
+            setLogged('1');
+          }
+          resolve(response);
         })
         .catch(error => {
           console.log(error);

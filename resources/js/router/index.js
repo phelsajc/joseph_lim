@@ -57,7 +57,7 @@ export const constantRoutes = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
-        meta: { title: 'dashboard', icon: 'table', noCache: false, affix: true, },
+        meta: { title: 'dashboard', icon: 'table', noCache: false, affix: true },
       },
     ],
   },
@@ -102,28 +102,43 @@ export const constantRoutes = [
         component: () => import('@/views/patients/SelfProfile'),
         meta: { title: 'userProfile', icon: 'user', noCache: true },
       },
+      {
+        path: 'profile/:id/:pid/consultation/:appointmentId',
+        hidden: true,
+        component: () => import('@/views/patients/ConsultationRecordDetail'),
+        meta: { title: 'Visit Summary', noCache: true },
+      },
     ],
   },
   {
     path: '/appointments',
     component: Layout,
-    redirect: 'appointments',
+    redirect: '/appointments/appointments',
+    alwaysShow: true,
     meta: {
-      affix: false, 
+      title: 'Appointments',
+      icon: 'appointments',
+      affix: false,
     },
     children: [
       {
         path: 'appointments',
         component: () => import('@/views/appointments/index'),
         name: 'Appointments',
-        meta: { title: 'Appointments', icon: 'appointments', noCache: false, affix: false,  },
+        meta: { title: 'Appointments', icon: 'appointments', noCache: false, affix: false },
+      },
+      {
+        path: 'report',
+        component: () => import('@/views/appointments/report'),
+        name: 'AppointmentReport',
+        meta: { title: 'Reports', icon: 'chart', affix: false },
       },
       {
         path: 'form/:id',
         component: () => import('@/views/appointments/form'),
         name: 'Form',
         hidden: true,
-        meta: { title: 'Diagnosis', icon: 'theme', affix: false, },
+        meta: { title: 'Diagnosis', icon: 'theme', affix: false },
       },
     ],
   },
@@ -140,7 +155,7 @@ export const constantRoutes = [
         meta: { title: 'userProfile', icon: 'user', noCache: true },
       },
     ],
-  }
+  },
 ];
 
 export const asyncRoutes = [
@@ -167,6 +182,149 @@ export const asyncRoutes = [
     ],
   }, */
   {
+    path: '/template',
+    component: Layout,
+    redirect: '/template/prescription-diagnosis-templates',
+    name: 'Template',
+    alwaysShow: true,
+    meta: {
+      title: 'Template',
+      icon: 'documentation',
+      roles: ['admin', 'doctor'],
+    },
+    children: [
+      {
+        path: 'prescription-diagnosis-templates',
+        component: () => import('@/views/templates/prescription-diagnosis/index'),
+        name: 'PrescriptionDiagnosisTemplates',
+        meta: {
+          title: 'Prescription Templates by Diagnosis',
+          icon: 'clipboard',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'prescription-diagnosis-templates/create',
+        component: () => import('@/views/templates/prescription-diagnosis/form'),
+        name: 'PrescriptionDiagnosisTemplateCreate',
+        hidden: true,
+        meta: {
+          title: 'New Prescription Template',
+          activeMenu: '/template/prescription-diagnosis-templates',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'prescription-diagnosis-templates/:id/edit',
+        component: () => import('@/views/templates/prescription-diagnosis/form'),
+        name: 'PrescriptionDiagnosisTemplateEdit',
+        hidden: true,
+        meta: {
+          title: 'Edit Prescription Template',
+          activeMenu: '/template/prescription-diagnosis-templates',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'diagnostic-templates',
+        component: () => import('@/views/templates/diagnostics/index'),
+        name: 'DiagnosticTemplates',
+        meta: {
+          title: 'Diagnostics',
+          icon: 'clipboard',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'diagnostic-templates/create',
+        component: () => import('@/views/templates/diagnostics/form'),
+        name: 'DiagnosticTemplateCreate',
+        hidden: true,
+        meta: {
+          title: 'New Diagnostic Template',
+          activeMenu: '/template/diagnostic-templates',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'diagnostic-templates/:id/view',
+        component: () => import('@/views/templates/diagnostics/view'),
+        name: 'DiagnosticTemplateView',
+        hidden: true,
+        meta: {
+          title: 'View Diagnostic Template',
+          activeMenu: '/template/diagnostic-templates',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'diagnostic-templates/:id/edit',
+        component: () => import('@/views/templates/diagnostics/form'),
+        name: 'DiagnosticTemplateEdit',
+        hidden: true,
+        meta: {
+          title: 'Edit Diagnostic Template',
+          activeMenu: '/template/diagnostic-templates',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'form-templates',
+        component: () => import('@/views/templates/form-templates/index'),
+        name: 'FormTemplates',
+        meta: {
+          title: 'Form Templates',
+          icon: 'form',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'form-templates/create',
+        component: () => import('@/views/templates/form-templates/form'),
+        name: 'FormTemplateCreate',
+        hidden: true,
+        meta: {
+          title: 'New Form Template',
+          activeMenu: '/template/form-templates',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'form-templates/:id/view',
+        component: () => import('@/views/templates/form-templates/view'),
+        name: 'FormTemplateView',
+        hidden: true,
+        meta: {
+          title: 'View Form Template',
+          activeMenu: '/template/form-templates',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'form-templates/:id/preview',
+        component: () => import('@/views/templates/form-templates/preview'),
+        name: 'FormTemplatePreview',
+        hidden: true,
+        meta: {
+          title: 'Preview Form Template',
+          activeMenu: '/template/form-templates',
+          roles: ['admin', 'doctor'],
+        },
+      },
+      {
+        path: 'form-templates/:id/edit',
+        component: () => import('@/views/templates/form-templates/form'),
+        name: 'FormTemplateEdit',
+        hidden: true,
+        meta: {
+          title: 'Edit Form Template',
+          activeMenu: '/template/form-templates',
+          roles: ['admin', 'doctor'],
+        },
+      },
+    ],
+  },
+  {
     path: '/services',
     component: Layout,
     redirect: 'services',
@@ -191,7 +349,7 @@ export const asyncRoutes = [
         meta: { title: 'Medicines', icon: 'capsule', noCache: false, roles: ['admin', 'doctor'], affix: true },
       },
     ],
-  },  
+  },
   {
     path: '/user-profile',
     component: Layout,
