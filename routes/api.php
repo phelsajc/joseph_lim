@@ -24,10 +24,17 @@ use App\Http\Controllers\Api\DiagnosticsController;
 Route::
         namespace('Api')->group(function () {
             Route::post('auth/login', 'AuthController@login');
+
+            // Public (no-login) signed PDF links (used for sharing)
+            Route::get('public/pdf/{doc}/{id}/{type?}', 'PublicPdfController@show')
+                ->middleware('signed')
+                ->name('public.pdf');
+
             Route::group(['middleware' => 'auth:sanctum'], function () {
                 // Auth routes
                 Route::get('auth/user', 'AuthController@user');
                 Route::post('auth/logout', 'AuthController@logout');
+                Route::patch('auth/password', 'AuthController@updatePassword');
 
                 Route::get('/user', function (Request $request) {
                     return new UserResource($request->user());
@@ -41,6 +48,7 @@ Route::
                 Route::get('/medicines', [MedicineController::class, 'index']);
                 Route::get('/diagnostics', [DiagnosticsController::class, 'index']);
                 Route::get('/apt_list', [PatientController::class, 'appointmentList']);
+                Route::get('/apt_report', [PatientController::class, 'appointmentReport']);
 
                 // Api resource routes
                 Route::apiResource('roles', 'RoleController')->middleware('permission:' . Acl::PERMISSION_PERMISSION_MANAGE);
@@ -48,7 +56,7 @@ Route::
                 Route::apiResource('permissions', 'PermissionController')->middleware('permission:' . Acl::PERMISSION_PERMISSION_MANAGE);
 
                 // Custom routes
-                Route::put('users/{user}', 'UserController@update');
+                Route::post('users/{user}/reset-password', 'UserController@resetPassword')->middleware('permission:' . Acl::PERMISSION_USER_MANAGE);
                 Route::get('users/{user}/permissions', 'UserController@permissions')->middleware('permission:' . Acl::PERMISSION_PERMISSION_MANAGE);
                 Route::put('users/{user}/permissions', 'UserController@updatePermissions')->middleware('permission:' . Acl::PERMISSION_PERMISSION_MANAGE);
                 Route::get('roles/{role}/permissions', 'RoleController@permissions')->middleware('permission:' . Acl::PERMISSION_PERMISSION_MANAGE);
@@ -63,16 +71,21 @@ Route::
                 Route::get('printpdf/{id}', 'PatientController@printpdf');
                 Route::get('printpdf2/{id}', 'PatientController@printpdf2');
                 Route::get('printmedcert/{id}', 'PatientController@printmedcert');
+                Route::get('printfees/{id}', 'PatientController@printfees');
                 Route::get('printreferral/{id}', 'PatientController@printreferral');
                 Route::get('printform/{id}', 'PatientController@printform');
                 Route::get('printriskstrat/{id}', 'PatientController@printriskstrat');
                 Route::get('printrequest/{id}/{type}', 'PatientController@printrequest');
                 Route::get('printclearance/{id}', 'PatientController@printclearance');
                 Route::get('printfittowork/{id}', 'PatientController@printfittowork');
+                Route::get('public-pdf-link/{id}/{doc}', 'PatientController@publicPdfLink');
                 Route::post('add-patients', 'PatientController@storePatient');
                 Route::get('get-patient/{id}', 'PatientController@getPatient');
                 Route::post('update-patients', 'PatientController@updatePatient');
                 Route::get('get-patient-past-consult/{id}', 'PatientController@getpastConsultationList');
+                Route::get('patient-consultation-history/{id}', 'PatientController@getPatientConsultationHistory');
+                Route::get('patient-vitals-history/{id}', 'PatientController@getPatientVitalsHistory');
+                Route::post('patient-vitals', 'PatientController@recordPatientVitals');
                 Route::delete('remove-meds/{id}', 'PatientController@deleteMed');
                 Route::post('add-meds', 'PatientController@addMed');
                 Route::patch('update-meds/{id}', 'PatientController@updateMed');
@@ -85,13 +98,70 @@ Route::
                     Route::put('pe-templates/{id}', 'PeTemplateController@update');
                     Route::delete('pe-templates/{id}', 'PeTemplateController@destroy');
                     Route::patch('pe-templates/{id}/toggle-status', 'PeTemplateController@toggleStatus');
+
+                    Route::get('diagnosis-templates', 'DiagnosisTemplateController@index');
+                    Route::get('diagnosis-templates/type/{type}', 'DiagnosisTemplateController@getByType');
+                    Route::post('diagnosis-templates', 'DiagnosisTemplateController@store');
+                    Route::put('diagnosis-templates/{id}', 'DiagnosisTemplateController@update');
+                    Route::delete('diagnosis-templates/{id}', 'DiagnosisTemplateController@destroy');
+                    Route::patch('diagnosis-templates/{id}/toggle-status', 'DiagnosisTemplateController@toggleStatus');
+
+                    Route::get('plans-templates', 'PlansTemplateController@index');
+                    Route::get('plans-templates/type/{type}', 'PlansTemplateController@getByType');
+                    Route::post('plans-templates', 'PlansTemplateController@store');
+                    Route::put('plans-templates/{id}', 'PlansTemplateController@update');
+                    Route::delete('plans-templates/{id}', 'PlansTemplateController@destroy');
+                    Route::patch('plans-templates/{id}/toggle-status', 'PlansTemplateController@toggleStatus');
+
+                    Route::get('medcert-remarks-templates', 'MedcertRemarksTemplateController@index');
+                    Route::get('medcert-remarks-templates/type/{type}', 'MedcertRemarksTemplateController@getByType');
+                    Route::post('medcert-remarks-templates', 'MedcertRemarksTemplateController@store');
+                    Route::put('medcert-remarks-templates/{id}', 'MedcertRemarksTemplateController@update');
+                    Route::delete('medcert-remarks-templates/{id}', 'MedcertRemarksTemplateController@destroy');
+                    Route::patch('medcert-remarks-templates/{id}/toggle-status', 'MedcertRemarksTemplateController@toggleStatus');
                 });
+
+                Route::get('prescription-diagnosis-templates/diagnosis-suggestions', 'PrescriptionDiagnosisTemplateController@diagnosisSuggestions');
+                Route::get('prescription-diagnosis-templates', 'PrescriptionDiagnosisTemplateController@index');
+                Route::post('prescription-diagnosis-templates', 'PrescriptionDiagnosisTemplateController@store');
+                Route::get('prescription-diagnosis-templates/{id}', 'PrescriptionDiagnosisTemplateController@show');
+                Route::put('prescription-diagnosis-templates/{id}', 'PrescriptionDiagnosisTemplateController@update');
+                Route::delete('prescription-diagnosis-templates/{id}', 'PrescriptionDiagnosisTemplateController@destroy');
+
+                Route::get('diagnostic-templates/diagnosis-suggestions', 'DiagnosticTemplateController@diagnosisSuggestions');
+                Route::get('diagnostic-templates', 'DiagnosticTemplateController@index');
+                Route::post('diagnostic-templates', 'DiagnosticTemplateController@store');
+                Route::get('diagnostic-templates/{id}', 'DiagnosticTemplateController@show');
+                Route::put('diagnostic-templates/{id}', 'DiagnosticTemplateController@update');
+                Route::delete('diagnostic-templates/{id}', 'DiagnosticTemplateController@destroy');
+
+                Route::get('form-templates/meta/categories', 'FormTemplateController@categories');
+                Route::post('form-templates/{id}/duplicate', 'FormTemplateController@duplicate');
+                Route::get('form-templates', 'FormTemplateController@index');
+                Route::post('form-templates', 'FormTemplateController@store');
+                Route::get('form-templates/{id}', 'FormTemplateController@show');
+                Route::put('form-templates/{id}', 'FormTemplateController@update');
+                Route::delete('form-templates/{id}', 'FormTemplateController@destroy');
+
+                Route::get('favorite-medicines', 'FavoriteMedicineController@index');
+                Route::post('favorite-medicines', 'FavoriteMedicineController@store');
+                Route::put('favorite-medicines/{id}', 'FavoriteMedicineController@update');
+                Route::delete('favorite-medicines/{id}', 'FavoriteMedicineController@destroy');
                 Route::delete('remove-diagnostic/{id}', 'PatientController@deleteDiagnostic');
                 Route::post('add-diagnostic', 'PatientController@addDiagnostic');
                 Route::delete('remove-service/{id}', 'PatientController@deleteService');
                 Route::post('add-service', 'PatientController@addService');
                 Route::get('get-appointment-meds/{id}', 'PatientController@getAppointmentMedicine');
+                Route::post('reorder-appointment-meds', 'PatientController@reorderAppointmentMeds');
+                Route::post('prescription-groups', 'PatientController@createPrescriptionGroup');
+                Route::patch('prescription-groups/{id}', 'PatientController@updatePrescriptionGroup');
+                Route::delete('prescription-groups/{id}', 'PatientController@deletePrescriptionGroup');
+                Route::post('diagnostic-groups', 'PatientController@createDiagnosticGroup');
+                Route::patch('diagnostic-groups/{id}', 'PatientController@updateDiagnosticGroup');
+                Route::delete('diagnostic-groups/{id}', 'PatientController@deleteDiagnosticGroup');
+                Route::get('patient-past-prescriptions/{patientId}/{appointmentId}', 'PatientController@getPatientPastPrescriptions');
                 Route::get('get-appointment-diagnostics/{id}', 'PatientController@getAppointmentDiagnostics');
+                Route::post('reorder-appointment-diagnostics', 'PatientController@reorderAppointmentDiagnostics');
                 Route::get('get-appointment-service/{id}', 'PatientController@getAppointmentService');
                 Route::get('done-consult/{id}', 'PatientController@doneConsult');
                 Route::get('import-medicine/{id}/{appid}', 'PatientController@ImportLastPrescription');

@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PatientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,5 +20,3 @@ Route::get('/', function () {
 Route::group(['middleware' => 'web'], function () {
     Route::get(env('LARAVUE_PATH'), 'LaravueController@index')->where('any', '.*')->name('laravue');
 });
-
-Route::get('/generatex-pdf', [PatientController::class, 'generatePDF']);
