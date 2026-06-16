@@ -4,16 +4,23 @@ namespace App\Http\Controllers\Api;
 //use TJGazel\LaraFpdf\LaraFpdf;
 use Codedge\Fpdf\Fpdf\Fpdf;
 use App\Model\Generics;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 class CustomPrescriptiontestA5Portrait extends Fpdf
 {
     private $data;
     private $widths;
     private $aligns;
+    private $rotateAngle = 0;
+    private $printingMealTable = false;
+    private $mealHeaderDrawnOnPage = 0;
+    private $patientProfileImagePath;
+    private $patientProfileImageType;
 
     public function __construct($data)
     {
         $this->data = $data;
+        $this->preparePatientProfileImage();
         parent::__construct('P', 'mm', 'A5');
         $this->SetTitle('My pdf title', true);
         $this->SetAuthor('TJGazel', true);
@@ -23,8 +30,72 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Body();
     }
 
+    public function __destruct()
+    {
+        if ($this->patientProfileImagePath && is_file($this->patientProfileImagePath)) {
+            @unlink($this->patientProfileImagePath);
+        }
+    }
+
+    private function preparePatientProfileImage(): void
+    {
+        $profileName = $this->data['patient_detail']->profile_name ?? null;
+        if (!$profileName) {
+            return;
+        }
+
+        $s3Path = $this->data['patient_detail']->id . '/' . $profileName;
+        try {
+            if (!Storage::disk('s3')->exists($s3Path)) {
+                return;
+            }
+            $contents = Storage::disk('s3')->get($s3Path);
+        } catch (\Throwable $e) {
+            return;
+        }
+
+        if ($contents === null || $contents === '') {
+            return;
+        }
+
+        $ext = strtolower(pathinfo($profileName, PATHINFO_EXTENSION));
+        $this->patientProfileImageType = in_array($ext, ['jpg', 'jpeg'], true) ? 'JPG' : 'PNG';
+        $suffix = $this->patientProfileImageType === 'JPG' ? '.jpg' : '.png';
+
+        $tmpBase = tempnam(sys_get_temp_dir(), 'px_profile_');
+        if ($tmpBase === false) {
+            return;
+        }
+        $path = $tmpBase . $suffix;
+        if (@rename($tmpBase, $path) === false) {
+            @unlink($tmpBase);
+            return;
+        }
+        if (file_put_contents($path, $contents) === false) {
+            @unlink($path);
+            return;
+        }
+
+        $this->patientProfileImagePath = $path;
+    }
+
+    public function AddPage($orientation = '', $size = '', $rotation = 0)
+    {
+        parent::AddPage($orientation, $size, $rotation);
+
+        if (
+            $this->printingMealTable
+            && $this->PageNo() > 1
+            && $this->mealHeaderDrawnOnPage !== $this->PageNo()
+        ) {
+            $this->mealHeader();
+            $this->mealHeaderDrawnOnPage = $this->PageNo();
+        }
+    }
+
     public function Header()
     {
+        $this->drawTextWatermark();
         $this->Image(public_path() . '/img/lim_fb.png', 128, 6, 20, 11, 'PNG');
         $this->Image(public_path() . '/img/lim_rhuema.jpg', 120, 6, 11, 11, 'JPG');
         $this->Image(public_path() . '/img/cp.jpg', 108, 6, 11, 11, 'JPG');
@@ -60,7 +131,6 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->SetXY(1, 34);
         $this->SetFont('Arial', 'B', 5);
         $this->MultiCell(150, 5, "Hospital Affiliations: Dr. Pablo O. Torre Memorial Hospital, Metro Bacolod Hospital and Medical Center, Bacolod Queen of Mercy Hospital, Adventist Medical Center-Bacolod", 0, 'L');
-
         $this->SetFont('Arial', 'B', 4.5);
         $this->SetXY(110, 17);
         $this->MultiCell(62, 3, "Room 415. Metro Bacolod Hospital and Medical", 0, 'L');
@@ -70,7 +140,6 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Tue-Thu: 9:00 AM - 12:00 PM ", 0, 'L');
         $this->SetXY(110.2, 23);
         $this->MultiCell(62, 3, "For appointment: 0968-418-7873", 0, 'L');
-
         $this->SetXY(75.5, 26);
         $this->MultiCell(62, 3, "VitalRx Pharmacy and Arthritis Clinic, JTL", 0, 'L');
         $this->SetXY(75.5, 28);
@@ -79,7 +148,6 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Mon-Wed-Fri: 9:00 AM - 12:00 PM ", 0, 'L');
         $this->SetXY(75.5, 32);
         $this->MultiCell(62, 3, "For appointment.: 0966-073-6942", 0, 'L');
-
         $this->SetXY(110, 26);
         $this->MultiCell(62, 3, "Agustin Medical Clinic ", 0, 'L');
         $this->SetXY(110, 28);
@@ -88,29 +156,23 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->MultiCell(61.5, 3, "Schedule: Thursday 1:30 PM - 4:30 PM", 0, 'L');
         $this->SetXY(110.2, 32);
         $this->MultiCell(62, 3, "For appointment: 0928-259-8495", 0, 'L');
-
         $this->Ln(1);
         $this->SetLineWidth(0.5);
         $this->Line(2, 38, 146, 38);
         $this->Ln(5);
-        $this->SetFont('Arial', '', 8);
+        $this->SetFont('Arial', '', 11);
         $this->AliasNbPages();
-        $this->cell(10, 3, '', '0', 0, 'R');
-        $this->cell(-3, 3, 'Name:', 0, 0, 'R');
-        $name = utf8_decode(
-            ucwords(strtolower($this->data['patient_detail']->lastname)) . ', ' .
-            ucwords(strtolower($this->data['patient_detail']->firstname)) . ' ' .
-            strtoupper(substr($this->data['patient_detail']->middlename, 0, 1)) . '.'
-        );
-
+        $this->cell(12, 3, '', '0', 0, 'R');
+        $this->cell(-5, 3, 'Name:', 0, 0, 'R');
+        $name = $this->getPatientDisplayName();
+        $this->getPatientDisplayAptDate();
         $this->cell(75, 3, $name, 'B', 0, 'L');
-        //$this->cell(75, 3, mb_strtoupper($this->data['patient_detail']->patientname, 'UTF-8'), 'B', 0, 'L');
 
         $this->SetFont('');
 
         $this->cell(-13, 3, '', 0, 0);
-        $this->cell(22, 3, 'Sex :', 0, 0, 'R');
-        $this->cell(12, 3, strtoupper(utf8_decode($this->data['patient_detail']->sex == 2 ? 'Female' : 'Male')), 'B', 0, 'R');
+        $this->cell(22, 3, 'Sex:', 0, 0, 'R');
+        $this->cell(17, 3, strtoupper(utf8_decode($this->data['patient_detail']->sex == 2 ? 'Female' : 'Male')), 'B', 0, 'R');
         $this->SetFont('');
         $this->cell(2, 3, '', 0, 0);
         $this->cell(8, 3, 'Age:', 0, 0);
@@ -119,8 +181,8 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
         $this->Ln(5);
         $this->cell(-5, 3, '', '0', 0, 'R');
-        $this->cell(5, 4, 'Address :', 0, 0);
-        $this->cell(8, 3, '', '', 0, 0);
+        $this->cell(5, 4, 'Address:', 0, 0);
+        $this->cell(14, 3, '', '', 0, 0);
         $x = $this->GetX();
         $y = $this->GetY();
         $w = 85;
@@ -135,13 +197,16 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         }
 
         $this->SetXY($x + $w + 5, $y);
-        $this->SetFont('Arial', '', 8);
-        $this->Cell(8, 4, 'Date:', 0, 0);
-        $this->Cell(20, 4, date("m/d/Y"), 'B', 1);
+        $this->SetFont('Arial', '', 11);
+        $this->cell(-2, 3, '', 0, 0);
+        $this->Cell(11, 4, 'Date:', 0, 0);
+        $this->Cell(20, 4, $this->getPatientDisplayAptDate(), 'B', 1);
+        
         $this->Image(public_path() . '/img/rx.png', 12, 53, 9, 9, 'PNG');
+        if ($this->patientProfileImagePath) {
+            $this->Image($this->patientProfileImagePath, 120, 45, 18.5, 18.5, $this->patientProfileImageType);
+        }       
 
-
-        $this->Image(public_path() . '/img/lim_wm.png', 95, 148, 40, 0, 'PNG');
         /* if ($this->PageNo() == 1) {
             $this->Ln(15);
         }else{
@@ -149,7 +214,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         } */
 
         if ($this->PageNo() > 1) {
-            $this->Ln(17);
+            $this->Ln(21);
         }
 
         if ($this->PageNo() == 1) {
@@ -157,34 +222,127 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         }
     }
 
+    private function getPatientDisplayName(): string
+    {
+        return utf8_decode(
+            ucwords(strtolower($this->data['patient_detail']->lastname)) . ', ' .
+            ucwords(strtolower($this->data['patient_detail']->firstname)) . ' ' .
+            strtoupper(substr($this->data['patient_detail']->middlename, 0, 1)) . '.'
+        );
+    }
+
+    private function getPatientDisplayAptDate(): string
+    {
+        return date('m/d/Y', strtotime($this->data['appointment_detail']->appointment_dt));
+    }
+
+    private function drawTextWatermark(): void
+    {
+        $savedX = $this->GetX();
+        $savedY = $this->GetY();
+
+        $name = $this->getPatientDisplayName();
+        $date = $this->getPatientDisplayAptDate();//date('m/d/Y');
+
+        $this->SetFont('Arial', 'B', 9);
+        $this->SetTextColor(220, 220, 220);
+
+        $angle = 45;
+        $lineGap = 5;
+        $tileWidth = max($this->GetStringWidth($name), $this->GetStringWidth($date)) + 15;
+        $stepX = $tileWidth + 10;
+        $stepY = 10;
+
+        for ($y = -10; $y < $this->h + 30; $y += $stepY) {
+            $row = (int) (($y + 10) / $stepY);
+            $offsetX = ($row % 2) * ($stepX / 2);
+            for ($x = -10 + $offsetX; $x < $this->w + 30; $x += $stepX) {
+                $this->Rotate($angle, $x, $y);
+                $this->Text($x, $y, $name);
+                $this->Text($x, $y + $lineGap, $date);
+                $this->Rotate(0);
+            }
+        }
+
+        $this->SetTextColor(0, 0, 0);
+        $this->SetFont('Arial', '', 8);
+        $this->SetXY($savedX, $savedY);
+    }
+
+    private function Rotate(float $angle, float $x = -1, float $y = -1): void
+    {
+        if ($x === -1.0) {
+            $x = $this->x;
+        }
+        if ($y === -1.0) {
+            $y = $this->y;
+        }
+        if ($this->rotateAngle != 0) {
+            $this->_out('Q');
+        }
+        $this->rotateAngle = $angle;
+        if ($angle != 0) {
+            $angle *= M_PI / 180;
+            $c = cos($angle);
+            $s = sin($angle);
+            $cx = $x * $this->k;
+            $cy = ($this->h - $y) * $this->k;
+            $this->_out(sprintf(
+                'q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm',
+                $c,
+                $s,
+                -$s,
+                $c,
+                $cx,
+                $cy,
+                -$cx,
+                -$cy
+            ));
+        }
+    }
+
+    protected function _endpage()
+    {
+        if ($this->rotateAngle != 0) {
+            $this->rotateAngle = 0;
+            $this->_out('Q');
+        }
+        parent::_endpage();
+    }
+
     public function mealHeader()
     {
-        $this->SetFont('Arial', '', 8);
+        $this->SetAutoPageBreak(false);
+
+        if ($this->PageNo() > 1) {
+            $this->SetX(10);
+        }
+        $this->SetFont('Arial', '', 10);
         $this->cell(-3, 3, '', '0', 0, 'R');
 
-        $this->Cell(40, 5, "Medicine Name", 'LTR', 0, 'C');
-        $this->Cell(8, 5, "QTY", "TR", 0, 'C');
+        $this->Cell(57, 5, "Medicine Name", 'LTR', 0, 'C');
+        $this->Cell(15, 5, "Quantity", "TR", 0, 'C');
 
-        $this->Cell(16, 5, "Breakfast", 'T', 0, 'C');
+        /* $this->Cell(16, 5, "Breakfast", 'T', 0, 'C');
         $this->Cell(16, 5, "Lunch", 1, 0, 'C');
 
 
-        $this->Cell(16, 5, "Supper", 1, 0, 'C');
+        $this->Cell(16, 5, "Dinner", 1, 0, 'C');
 
-        $this->Cell(10.5, 5, "Bedtime", "TR", 0, 'C');
+        $this->Cell(10.5, 5, "Bedtime", "TR", 0, 'C'); */
 
 
-        $this->Cell(30, 5, "Remarks", "TR", 0, 'C');
+        $this->Cell(63, 5, "Remarks", "TR", 0, 'C');
 
         $this->Ln(5);
         $this->cell(-3, 3, '', '0', 0, 'R');
 
         $this->SetFont('Arial', '', 9);
-        $this->Cell(40, 5, "", 'LBR', 0, 'C');
+        $this->Cell(57, 5, "", 'LBR', 0, 'C');
 
-        $this->Cell(8, 5, "", "RB", 0, 'C');
+        $this->Cell(15, 5, "", "RB", 0, 'C');
 
-        $this->Cell(8, 5, "B", 1, 0, 'C');//bf
+        /* $this->Cell(8, 5, "B", 1, 0, 'C');//bf
         $this->Cell(8, 5, "A", 1, 0, 'C');
 
 
@@ -195,34 +353,35 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Cell(8, 5, "A", 1, 0, 'C');
 
 
-        $this->Cell(10.5, 5, "", "RB", 0, 'C');
+        $this->Cell(10.5, 5, "", "RB", 0, 'C'); */
 
 
-        $this->Cell(30, 5, "", "RB", 0, 'C');
+        $this->Cell(63, 5, "", "RB", 0, 'C');
         $this->Ln(5);
 
         $this->SetWidths(
             array(
-                40,
+                57,
+                15,
+                /* 8,
                 8,
                 8,
                 8,
                 8,
                 8,
-                8,
-                8,
-                10.5,
-                30
+                10.5, */
+                63
             )
         );
+
+        $this->SetAutoPageBreak(true, 30);
     }
 
     private function formatMedicineName($genericName, $medicine, $medicineId)
     {
-        // If medicine_id is not 0, show generic_name + medicine with space
-        /* if ($medicineId != 0) {
-            return $genericName . ' ' . $medicine . ' ';
-        } */
+        if (empty($medicine)) {
+            return Str::title(iconv("UTF-8", "windows-1252//TRANSLIT", $genericName . ' '));
+        }
 
         // If medicine_id is 0, check if generic_name already contains parentheses
         if (strpos($medicine, '(') !== false) {
@@ -236,30 +395,61 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
     public function meal()
     {
-        $this->mealHeader();
+        if (!empty($this->data['prescription_sections']) && is_array($this->data['prescription_sections'])) {
+            $this->mealWithSections();
+            return;
+        }
 
-        $this->SetFont('Arial', '', 8.5);
-        foreach ($this->data['query_prescription'] as $key => $item) {
-            //$checkGenericname = Generics::where(['id' => $item['generic_id']])->first();
-            //$this->cell(-8, 3, '', '0', 0, 'R');
+        $this->renderMealRows($this->data['query_prescription']);
+    }
+
+    private function mealWithSections(): void
+    {
+        $sections = $this->data['prescription_sections'];
+        $first = true;
+        foreach ($sections as $section) {
+            if (!$first) {
+                $this->Ln(4);
+            }
+            if (!empty($section['title'])) {
+                $this->SetFont('Arial', 'B', 9);
+                $this->SetX(10);
+                $this->cell(-3, 3, '', '0', 0, 'R');
+                $this->Cell(130, 5, utf8_decode($section['title']), 0, 1, 'L');
+                $this->Ln(1);
+            }
+            $items = isset($section['items']) ? $section['items'] : [];
+            $this->renderMealRows($items);
+            $first = false;
+        }
+    }
+
+    private function renderMealRows($items): void
+    {
+        $this->printingMealTable = true;
+        $this->mealHeader();
+        $this->mealHeaderDrawnOnPage = $this->PageNo();
+
+        $this->SetFont('Arial', '', 10);
+        foreach ($items as $key => $item) {
             $this->SetX(10);
             $this->cell(-3, 3, '', '0', 0, 'R');
             $this->Row(
                 array(
-                    // $item['generic_name'] . ' (' . $item['medicine'] . ')',
                     $this->formatMedicineName($item['generic_name'], $item['medicine'], $item['medicine_id']),
                     $item['qty'],
-                    $item['breakfastbefore'],
+                    /* $item['breakfastbefore'],
                     $item['breakfastafter'],
                     $item['lunchbefore'],
                     $item['lunchafter'],
                     $item['supperbefore'],
                     $item['supperafter'],
-                    $item['bedtime'],
-                    $item['remarks']//10
+                    $item['bedtime'], */
+                    $item['remarks']
                 )
             );
         }
+        $this->printingMealTable = false;
     }
 
     public function Body()
@@ -277,7 +467,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
     public function Footer()
     {
         $this->SetY(-23);
-        $this->SetFont('Arial', 'B', 7);
+        $this->SetFont('Arial', 'B', 10);
         $PageNo = intval($this->PageNo());
         if ($this->data['profile']->signature) {
             $this->Image($this->data['profile']->signature, 80, 174, 110, 20, 'png');
@@ -285,7 +475,7 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Cell(35, 10, '', '', 0, '');
         $this->cell(85, -3, strtoupper($this->data['profile']->name), '', 0, 'R');
         $this->Ln(1);
-        $this->SetFont('Arial', '', 7);
+        $this->SetFont('Arial', '', 10);
         $this->cell(100, 3, "License No:", '', 0, 'R');
         $this->cell(20, 3, $this->data['profile']->prc, 'B', 1, 'R');
         $this->cell(100, 3, "PTR. No.", '', 0, 'R');
@@ -380,10 +570,8 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
 
     function CheckPageBreak($h)
     {
-        //If the height h would cause an overflow, add a new page immediately
         if ($this->GetY() + $h > $this->PageBreakTrigger) {
             $this->AddPage($this->CurOrientation);
-            $this->mealHeader(); // Add header on new page
         }
     }
 

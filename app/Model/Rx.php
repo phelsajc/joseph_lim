@@ -16,6 +16,10 @@ class Rx extends Model
     protected $primaryKey = "rx_id";
     public $timestamps = false;
 
+    public function prescriptionGroup()
+    {
+        return $this->belongsTo(PrescriptionGroup::class, 'prescription_group_id', 'id');
+    }
 }
 
 

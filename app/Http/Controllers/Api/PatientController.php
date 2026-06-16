@@ -12,7 +12,10 @@ use Mpdf\Mpdf;
 use App\Model\Patients;
 use App\Model\Profile;
 use App\Model\Appointments;
+use App\Model\AppointmentVitals;
 use App\Model\Rx;
+use App\Model\PrescriptionGroup;
+use App\Model\DiagnosticGroup;
 use App\Model\Rxb;
 use App\Model\Rx_service;
 use App\Model\Services;
@@ -30,6 +33,7 @@ use DB;
 use PDF;
 use TGazel\LaraFpdf\Facades\LaraFpdf;
 use App\Helpers\helpers;
+use App\Services\RichTextSanitizer;
 use App\Model\Medicine;
 use App\Model\Generics;
 use App\Model\OldPatients;
@@ -42,6 +46,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Events\NewAppointments;
 use App\Mail\PrescriptionPdfMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
 
 /**
@@ -92,9 +97,42 @@ class PatientController extends BaseController
     public function storePatient(Request $request)
     {
         date_default_timezone_set('Asia/Manila');
-        //$input = Request::all();
+        // Normalize birthdate for consistent duplicate checks
+        $birthdate = $request->birthdate;
+        if (!empty($birthdate)) {
+            $parsedDate = preg_replace('/\(.*\)/', '', $birthdate);
+            $timestamp = strtotime($parsedDate);
+            if ($timestamp !== false) {
+                $birthdate = date('Y-m-d', $timestamp);
+            }
+        }
+
+        // Block duplicates unless explicitly overridden
+        $forceDuplicate = filter_var($request->input('force_duplicate', false), FILTER_VALIDATE_BOOLEAN);
+        if (!$forceDuplicate) {
+            $existing = Patients::where('isdeleted', 0)
+                ->whereRaw('LOWER(firstname) = ?', [strtolower((string) $request->firstname)])
+                ->whereRaw('LOWER(lastname) = ?', [strtolower((string) $request->lastname)])
+                ->where('birthdate', $birthdate)
+                ->first();
+
+            if ($existing) {
+                return response()->json([
+                    'error' => 'Duplicate patient detected.',
+                    'duplicate' => true,
+                    'existing' => [
+                        'id' => $existing->id,
+                        'patientid' => $existing->patientid,
+                        'patientname' => $existing->patientname,
+                        'birthdate' => $existing->birthdate,
+                    ],
+                ], 409);
+            }
+        }
+
         $data = new Patients();
-        $lastinserted = Patients::latest()->value('id') + 1;//DB::connection('mysql')->getPdo()->lastInsertId();
+        $lastId = Patients::latest()->value('id');
+        $lastinserted = ($lastId ? $lastId : 0) + 1;//DB::connection('mysql')->getPdo()->lastInsertId();
         $data->patientname = ucfirst($request->firstname) . ' ' . ($request->middlename ? ucfirst(mb_substr($request->middlename, 0, 1)) . '. ' : '') . ucfirst($request->lastname);
         $data->firstname = $request->firstname;
         $data->middlename = $request->middlename;
@@ -102,7 +140,7 @@ class PatientController extends BaseController
         $data->patientid = date("Ymd") . '-0' . $lastinserted;
         $data->contactno = $request->contactno;
         $data->email = $request->email;
-        $data->birthdate = $request->birthdate;
+        $data->birthdate = $birthdate;
         $data->sex = $request->sex;
         $data->civil_status = $request->civil_status;
         $data->address = $request->address;
@@ -113,36 +151,13 @@ class PatientController extends BaseController
         $data->isold_patient = $request->isold_patient;
         $data->profile = $request->profile;
         $data->blood_type = $request->blood_type;
-        //$data->city = $request->city;
-
-        /* $fam = '';
-        if($request->fam){
-            foreach ($request->fam as $key => $value) {
-                $fam.=$value.',';
-            }
-            $data->fam = substr($fam, 0, -1);
-        }
-        $data->fam_others = $request->fam_others; 
-
-        $pmh = '';
-        if($request->pmh){
-            foreach ($request->pmh as $key => $value) {
-                $pmh.=$value.',';
-            }
-            $data->pmh = substr($pmh, 0, -1);
-        }
-
-        $soc = '';
-        if($request->soc){
-            foreach ($request->soc as $key => $value) {
-                $soc.=$value.',';
-            }
-            $data->soc = substr($soc, 0, -1);
-        }
-        $data->soc_others = $request->soc_others; */
-
         $data->save();
-        //$data  = Patients::create(request()->all());
+
+        if ($request->hasFile('profile')) {
+            $data->profile_name = $this->uploadPatientProfileToS3($data->id, $request->file('profile'));
+            $data->save();
+        }
+
         return response()->json($data);
     }
 
@@ -212,18 +227,19 @@ class PatientController extends BaseController
 
 
         if ($data->profile_name != null) {
-            $oldFilePath = public_path('profiles/' . $data->profile_name);
+            /* $oldFilePath = public_path('profiles/' . $data->profile_name);
             if (file_exists($oldFilePath)) {
                 unlink($oldFilePath);
+            } */
+
+            $filePath = $data->id . "/" . $data->profile_name;
+            if ($filePath && Storage::disk('s3')->exists($filePath)) {
+                Storage::disk('s3')->delete($filePath);
             }
         }
 
-        $fname = '';
         if ($request->hasFile('profile_pic')) {
-            $file = $request->file('profile_pic');
-            $fname = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('pp', $fname, 'public');
-            $data->profile_name = $fname;
+            $data->profile_name = $this->uploadPatientProfileToS3($data->id, $request->file('profile_pic'));
         }
 
         $fam = '';
@@ -300,9 +316,13 @@ class PatientController extends BaseController
         $fileUrl = '';
 
         if ($patient->profile_name != null) {
-            $fileName = $patient->profile_name;
-            $fileUrl = url('/storage/app/public/pp/' . $fileName);
-            //$fileUrl = url('/storage/pp/' . $fileName);
+            /* $fileName = $patient->profile_name;
+            $fileUrl = url('/storage/app/public/pp/' . $fileName); */
+            $fileUrl =
+                Storage::disk('s3')->temporaryUrl(
+                    $patient->id."/".$patient->profile_name,
+                    Carbon::now()->addMinutes(180)
+                );  
         }
 
         $patient->profile = $fileUrl;
@@ -337,6 +357,18 @@ class PatientController extends BaseController
             $fit_undersigned = date_format(date_create($request->fit_undersigned), 'Y-m-d');
         }
         $data = Appointments::find($request->id);
+        $vitalsPayload = [
+            'vit_sys' => $request->vit_sys,
+            'vit_dia' => $request->vit_dia,
+            'vit_temp' => $request->vit_temp,
+            'vit_cr' => $request->vit_cr,
+            'vit_rr' => $request->vit_rr,
+            'o2_stat' => $request->o2_stat,
+            'weight' => $request->weight,
+            'height' => $request->height,
+            'bmi' => $request->bmi,
+        ];
+        $vitalsChanged = $this->vitalsFieldsChanged($data, $vitalsPayload);
         $data->chiefcomplaints = $request->chiefcomplaints;
         $data->updated_by = Auth::user()->id;
         $data->updated_dt = date("Y-m-d H:i:s");
@@ -432,6 +464,10 @@ class PatientController extends BaseController
         $data->fit_treatment = $request->fit_treatment; */
         $data->save();
 
+        if ($vitalsChanged && $this->payloadHasVitals($vitalsPayload)) {
+            $this->recordAppointmentVitals($data, $vitalsPayload, Auth::user()->id);
+        }
+
         //assume that update is final
         /* $checkFfDt = Appointments::where(['patientid'=>$request->patientid,'followup'=>$ff_dt])->first();
         if($request->followup_dt && !$checkFfDt) { */
@@ -521,41 +557,38 @@ class PatientController extends BaseController
             ->limit(1) // Get only the most recent previous record
             ->get();
         $px_profile = Helpers::patientDetail($data->patientid);
-        $px_profile->profile_name = url('/storage/app/public/pp/' . $px_profile->profile_name);
+        //$px_profile->profile_name = url('/storage/app/public/pp/' . $px_profile->profile_name);
         $data->medcert_opt1 = $data->medcert_opt1 == 1 ? true : false;
         $data->medcert_opt2 = $data->medcert_opt2 == 1 ? true : false;
         $data->medcert_opt3 = $data->medcert_opt3 == 1 ? true : false;
         $data->medcert_opt4 = $data->medcert_opt4 == 1 ? true : false;
         /* $get_OldPatients = OldPatients::where(["Patient_id" => $px_profile->patientid])->first();
         $get_OldDiagnosis = $get_OldPatients ? OldDiagnosis::where(["PatientID" => $get_OldPatients->PatientID])->get() : []; */
-        $getVitals = Appointments::where(["patientid" => $data->patientid])->orderBy('appointment_dt', 'desc')->get();
-        //$old_data = array();
-        $vitals_data = array();
-        /* foreach ($get_OldDiagnosis as $key => $value) {
-            $arr = array();
-            $arr['hpi'] = $value->HPI;
-            $arr['pmhx'] = $value->pmHx;
-            $arr['desc'] = $value->description;
-            $arr['date'] = date_format(date_create($value->DateOfVisit), 'F d, Y');
-            $arr['cc'] = $value->CC;
-            $arr['recom'] = $value->Recom;
-            $old_data[] = $arr;
-        } */
-
-        foreach ($getVitals as $key => $value) {
-            $arr = array();
-            $arr['bp'] = $value->vit_sys . '/' . $value->vit_dia;
-            $arr['weight'] = $value->weight;
-            $arr['date'] = date_format(date_create($value->appointment_dt), ' F d,Y');
-            $vitals_data[] = $arr;
+        $this->ensureAppointmentVitalsBackfill($data);
+        $vitalsResponse = $this->buildVitalsResponse($data->patientid, (int) $id, $data->appointment_dt);
+        $vitals_data = $vitalsResponse['vitals_data'];
+        $vitals_today = $vitalsResponse['vitals_today'];
+        $vitals_by_day = $vitalsResponse['vitals_by_day'];
+        $fileUrl = '';
+        if ($px_profile->profile_name != null) {
+            /* $fileName = $patient->profile_name;
+            $fileUrl = url('/storage/app/public/pp/' . $fileName); */
+            $fileUrl =
+                Storage::disk('s3')->temporaryUrl(
+                    $px_profile->id."/".$px_profile->profile_name,
+                    Carbon::now()->addMinutes(180)
+                );  
         }
+
+        $px_profile->profile_name = $fileUrl;
+
         return response()->json([
-            //'vitals_data'=>$vitals_data,
-            //'get_OldDiagnosis'=>$old_data,
-            //'get_OldPatients'=> $get_OldPatients,
+            'vitals_data' => $vitals_data,
+            'vitals_today' => $vitals_today,
+            'vitals_by_day' => $vitals_by_day,
             'px_profile' => $px_profile,
             'data' => $data,
-            //'getPreviousRecords'=>$getPreviousRecords,
+            'data->patientid'=>$data->patientid,
             'prev_data' => $getPreviousRecords->count() > 0 ? $getPreviousRecords[0] : []
         ]);
     }
@@ -592,6 +625,58 @@ class PatientController extends BaseController
         return AppointmentResource::collection($userQuery);
     }
 
+    public function appointmentReport(Request $request)
+    {
+        date_default_timezone_set('Asia/Manila');
+        $from = $request->input('from', date('Y-m-d'));
+        $to = $request->input('to', date('Y-m-d'));
+
+        $rows = DB::table('appointments')
+            ->whereBetween('appointment_dt', [$from, $to])
+            ->selectRaw('state, COUNT(*) as total')
+            ->groupBy('state')
+            ->pluck('total', 'state');
+
+        $stateLabels = [0 => 'Current', 1 => 'Completed', 2 => 'Cancelled'];
+
+        $details = DB::table('appointments')
+            ->join('patients', 'patients.patientid', '=', 'appointments.patientid')
+            ->whereBetween('appointments.appointment_dt', [$from, $to])
+            ->select(
+                'appointments.id',
+                'patients.patientname',
+                'appointments.appointment_dt',
+                'appointments.state',
+                'appointments.chiefcomplaints',
+                'appointments.discount',
+                'appointments.cancel_reason'
+            )
+            ->orderBy('appointments.appointment_dt', 'desc')
+            ->orderBy('appointments.sequence', 'asc')
+            ->get()
+            ->map(function ($row) use ($stateLabels) {
+                $fee = (float) Rx_service::where('appointment_id', $row->id)->sum('fee');
+                return [
+                    'id' => $row->id,
+                    'patientname' => $row->patientname,
+                    'apt_dt' => $row->appointment_dt ? date_format(date_create($row->appointment_dt), 'F d, Y') : '',
+                    'state' => (int) $row->state,
+                    'status' => $stateLabels[$row->state] ?? 'Unknown',
+                    'complaints' => $row->chiefcomplaints,
+                    'cancel_reason' => $row->cancel_reason,
+                    'fee' => $fee - (float) $row->discount,
+                ];
+            });
+
+        return response()->json([
+            'current' => (int) ($rows[0] ?? 0),
+            'completed' => (int) ($rows[1] ?? 0),
+            'cancelled' => (int) ($rows[2] ?? 0),
+            'total' => (int) $rows->sum(),
+            'details' => $details,
+        ]);
+    }
+
     public function findPatient($kw)
     {
         $q = DB::connection('mysql')->select("select * from patients where patientname like '%" . $kw . "%' and isdeleted = 0 order by id desc limit 100");
@@ -610,10 +695,10 @@ class PatientController extends BaseController
         return response()->json(['suggestions' => $data]);
     }
 
-    public function printpdf($id)
+    public function printpdf(Request $request, $id)
     {
         $data = array();
-        $data['query_prescription'] = Rx::where(['appointment_id' => $id])->get();
+        $data = array_merge($data, $this->buildPrescriptionPdfPayload((int) $id, $request->query('group_id', 'all')));
         $data['appointment_detail'] = Appointments::where(['id' => $id])->first();
         $data['profile'] = Profile::where(['id' => 1])->first();
         $data['patient_detail'] = Patients::where(['patientid' => $data['appointment_detail']->patientid])->first();
@@ -622,10 +707,10 @@ class PatientController extends BaseController
         exit;
     }
 
-    public function printpdf2($id)
+    public function printpdf2(Request $request, $id)
     {
         $data = array();
-        $data['query_prescription'] = Rx::where(['appointment_id' => $id])->orderby('rx_id', 'asc')->get();
+        $data = array_merge($data, $this->buildPrescriptionPdfPayload((int) $id, $request->query('group_id', 'all')));
         $data['appointment_detail'] = Appointments::where(['id' => $id])->first();
         $data['profile'] = Profile::where(['id' => 1])->first();
         $data['patient_detail'] = Patients::where(['patientid' => $data['appointment_detail']->patientid])->first();
@@ -634,11 +719,11 @@ class PatientController extends BaseController
         exit;
     }
 
-    public function emailPrescription($id)
+    public function emailPrescription(Request $request, $id)
     {
         date_default_timezone_set('Asia/Manila');
         $data = [];
-        $data['query_prescription'] = Rx::where('appointment_id', $id)->get();
+        $data = array_merge($data, $this->buildPrescriptionPdfPayload((int) $id, $request->query('group_id', 'all')));
         $data['appointment_detail'] = Appointments::where('id', $id)->first();
         $data['profile'] = Profile::where('id', 1)->first();
         $data['patient_detail'] = Patients::where('patientid', $data['appointment_detail']->patientid)->first();
@@ -655,8 +740,29 @@ class PatientController extends BaseController
 
     public function printmedcert($id)
     {
+        // #region agent log
+        $apt = Appointments::where(['id' => $id])->first();
+        $remarks = (string) ($apt->medcert_remarks ?? '');
+        $diag = (string) ($apt->medcert_diagnosis ?? '');
+        $payload = json_encode([
+            'sessionId' => '37c2da',
+            'timestamp' => (int) round(microtime(true) * 1000),
+            'location' => 'PatientController.php:printmedcert',
+            'message' => 'db_at_print',
+            'data' => [
+                'appointmentId' => (int) $id,
+                'medcertRemarksLen' => strlen($remarks),
+                'medcertDiagnosisLen' => strlen($diag),
+            ],
+            'hypothesisId' => 'A',
+            'runId' => 'post-fix',
+        ]);
+        if ($payload !== false) {
+            @file_put_contents(base_path('debug-37c2da.log'), $payload."\n", FILE_APPEND);
+        }
+        // #endregion
         $data = array();
-        $data['appointment_detail'] = Appointments::where(['id' => $id])->first();
+        $data['appointment_detail'] = $apt;
         $data['profile'] = Profile::where(['id' => 1])->first();
         $data['patient_detail'] = Patients::where(['patientid' => $data['appointment_detail']->patientid])->first();
         $myPdf = new MedCertA5($data);
@@ -686,9 +792,7 @@ class PatientController extends BaseController
         $pdf->generate();
         $pdf->Output('example.pdf', 'I'); // I = inline display
         exit; */
-        $myPdf = new PdfService($data);
-        $myPdf->generatePdf();
-        exit;
+        return (new PdfService($data))->generatePdf();
     }
 
     public function printriskstrat($id)
@@ -724,10 +828,13 @@ class PatientController extends BaseController
         exit;
     }
 
-    public function printrequest($id, $type)
+    public function printrequest(Request $request, $id, $type)
     {
         $data = array();
-        $data['query_prescription'] = Ancillary::where(['appointment_id' => $id])->get();
+        $data = array_merge(
+            $data,
+            $this->buildDiagnosticPdfPayload((int) $id, $request->query('group_id', 'all'))
+        );
         $data['appointment_detail'] = Appointments::where(['id' => $id])->first();
         $data['profile'] = Profile::where(['id' => 1])->first();
         $data['patient_detail'] = Patients::where(['patientid' => $data['appointment_detail']->patientid])->first();
@@ -735,6 +842,40 @@ class PatientController extends BaseController
         $myPdf = new RequestprescriptionA5($data);
         $myPdf->Output('I', time() . "-.pdf", true);
         exit;
+    }
+
+    public function printfees($id)
+    {
+        $data = [];
+        $data['query_services'] = Rx_service::where(['appointment_id' => $id])->orderBy('rendered_id', 'asc')->get();
+        $data['appointment_detail'] = Appointments::where(['id' => $id])->first();
+        $data['profile'] = Profile::where(['id' => 1])->first();
+        $data['patient_detail'] = Patients::where(['patientid' => $data['appointment_detail']->patientid])->first();
+        $myPdf = new ClinicFeesA5Portrait($data);
+        $myPdf->Output('I', time() . '-fees.pdf', true);
+        exit;
+    }
+
+    public function publicPdfLink(Request $request, $id, $doc)
+    {
+        // Generates a signed, no-login link for sharing (no expiration).
+
+        $params = [
+            'doc' => $doc,
+            'id' => (int) $id,
+        ];
+
+        // For diagnostics we allow type (1/2) as query param or route param
+        if ($doc === 'diagnostics') {
+            $params['type'] = (int) $request->query('type', 1);
+        }
+
+        $url = URL::signedRoute('public.pdf', $params);
+
+        return response()->json([
+            'url' => $url,
+            'expires_at' => null,
+        ]);
     }
 
     public function printchart($id)
@@ -752,7 +893,9 @@ class PatientController extends BaseController
 
     function getpastConsultationList($id)
     {
-        $data = Appointments::where(['patientid' => $id, 'isdone' => 1])->get();
+        $data = Appointments::where(['patientid' => $id, 'isdone' => 1, 'is_cancel' => 0])
+            ->orderBy('appointment_dt', 'desc')
+            ->get();
         $array = array();
         foreach ($data as $key => $value) {
             $arr = array();
@@ -764,6 +907,247 @@ class PatientController extends BaseController
         return response()->json(['data' => $array]);
     }
 
+    public function getPatientConsultationHistory(Request $request, $id)
+    {
+        $excludeId = (int) $request->query('exclude_id', 0);
+        $appointmentId = (int) $request->query('appointment_id', 0);
+        $limit = min((int) $request->query('limit', 50), 100);
+
+        $query = Appointments::where([
+            'patientid' => $id,
+            'isdone' => 1,
+            'is_cancel' => 0,
+        ])->orderBy('appointment_dt', 'desc');
+
+        if ($appointmentId > 0) {
+            $query->where('id', $appointmentId);
+        }
+
+        if ($excludeId > 0) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        $appointments = $query->limit($limit)->get();
+        if ($appointments->isEmpty()) {
+            return response()->json(['data' => []]);
+        }
+
+        $patient = Helpers::patientDetail($id);
+        if (!$patient) {
+            return response()->json(['data' => []]);
+        }
+        $profile = Profile::find(1);
+        $defaultDoctor = $profile && $profile->name ? $profile->name : '—';
+        $defaultClinic = '—';
+
+        $appointmentIds = $appointments->pluck('id')->all();
+
+        $rxRows = RX::whereIn('appointment_id', $appointmentIds)
+            ->orderBy('prescription_group_id')
+            ->orderBy('sort_order')
+            ->orderBy('rx_id')
+            ->get()
+            ->groupBy('appointment_id');
+
+        $ancillaryRows = Ancillary::whereIn('appointment_id', $appointmentIds)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->groupBy('appointment_id');
+
+        $records = [];
+        foreach ($appointments as $apt) {
+            $appointmentId = (int) $apt->id;
+            $visitDate = $apt->appointment_dt;
+
+            $prescriptions = [];
+            foreach ($rxRows->get($appointmentId, collect()) as $rx) {
+                $medicineLabel = trim(($rx->generic_name ?? '') . ' ' . ($rx->medicine ?? ''));
+                $prescriptions[] = [
+                    'medicine' => $medicineLabel !== '' ? $medicineLabel : ($rx->medicine ?? ''),
+                    'qty' => $rx->qty,
+                    'remarks' => $rx->remarks,
+                ];
+            }
+
+            $diagnostics = [];
+            foreach ($ancillaryRows->get($appointmentId, collect()) as $item) {
+                $diagnostics[] = [
+                    'diagnostic' => $item->ancillary,
+                    'type' => (int) $item->type === 1 ? 'Lab' : 'Ancillary',
+                ];
+            }
+
+            $sys = trim((string) ($apt->vit_sys ?? ''));
+            $dia = trim((string) ($apt->vit_dia ?? ''));
+            $bp = '';
+            if ($sys || $dia) {
+                $bp = ($sys ?: '—') . '/' . ($dia ?: '—') . ' mmHg';
+            }
+
+            $weightVal = trim((string) ($apt->weight ?? ''));
+            $heightVal = trim((string) ($apt->height ?? ''));
+            $bsa = $this->computeBodySurfaceArea($weightVal, $heightVal);
+
+            $formPreview = RichTextSanitizer::toPlainText($apt->form_content ?? '', 200);
+
+            $records[] = [
+                'id' => $appointmentId,
+                'appointment_dt' => $visitDate,
+                'date_display' => date_format(date_create($visitDate), 'M d Y'),
+                'patient_name' => $patient->patientname ?? '',
+                'doctor_name' => trim((string) ($apt->doctor ?? '')) !== '' ? $apt->doctor : $defaultDoctor,
+                'clinic_name' => $defaultClinic,
+                'patient_age' => $this->computeAgeAtDate($patient->birthdate ?? null, $visitDate) . ' years',
+                'clinical' => [
+                    'history' => $apt->history,
+                    'pe' => $apt->pe,
+                    'diagnosis' => $apt->diagnosis,
+                    'plan' => $apt->remarks,
+                    'remarks' => $apt->nurse_remarks,
+                ],
+                'vitals' => [
+                    'weight' => $weightVal !== '' ? $weightVal . ' kg' : null,
+                    'bsa' => $bsa,
+                    'bp' => $bp !== '' ? $bp : null,
+                    'hr' => trim((string) ($apt->vit_cr ?? '')) !== ''
+                        ? trim((string) $apt->vit_cr) . ' bpm'
+                        : null,
+                ],
+                'prescriptions' => $prescriptions,
+                'diagnostics' => $diagnostics,
+                'forms' => [
+                    'medcert' => [
+                        'has_content' => $this->appointmentHasMedCert($apt),
+                        'diagnosis' => $apt->medcert_diagnosis,
+                        'remarks' => $apt->medcert_remarks,
+                    ],
+                    'referral' => [
+                        'has_content' => $this->appointmentHasReferral($apt),
+                        'doctor' => $apt->referral_doctor,
+                        'diagnosis' => $apt->referral_diagnosis,
+                        'remarks' => $apt->referral_remarks,
+                    ],
+                    'form' => [
+                        'has_content' => trim((string) ($apt->form_content ?? '')) !== '',
+                        'preview' => $formPreview,
+                    ],
+                ],
+            ];
+        }
+
+        return response()->json(['data' => $records]);
+    }
+
+    public function getPatientVitalsHistory($id)
+    {
+        $patient = Helpers::patientDetail($id);
+        if (!$patient) {
+            return response()->json(['vitals_data' => [], 'vitals_by_day' => []]);
+        }
+
+        $vitalsResponse = $this->buildVitalsResponse($id, 0, '1970-01-01');
+
+        return response()->json([
+            'vitals_data' => $vitalsResponse['vitals_data'],
+            'vitals_by_day' => $vitalsResponse['vitals_by_day'],
+        ]);
+    }
+
+    public function recordPatientVitals(Request $request)
+    {
+        date_default_timezone_set('Asia/Manila');
+        $patientId = $request->patientid;
+        $patient = Helpers::patientDetail($patientId);
+        if (!$patient) {
+            return response()->json(['success' => false, 'message' => 'Patient not found.'], 404);
+        }
+
+        $vitalsPayload = [
+            'vit_sys' => $request->vit_sys,
+            'vit_dia' => $request->vit_dia,
+            'vit_temp' => $request->vit_temp,
+            'vit_rr' => $request->vit_rr,
+            'o2_stat' => $request->o2_stat,
+            'vit_cr' => $request->vit_cr,
+            'weight' => $request->weight,
+            'height' => $request->height,
+            'bmi' => $request->bmi,
+        ];
+
+        if (!$this->payloadHasVitals($vitalsPayload)) {
+            return response()->json(['success' => false, 'message' => 'At least one vital sign is required.'], 422);
+        }
+
+        $appointment = Appointments::where([
+            'patientid' => $patientId,
+            'appointment_dt' => date('Y-m-d'),
+            'isdone' => 0,
+            'is_cancel' => 0,
+        ])->orderByDesc('id')->first();
+
+        $linkedAppointmentId = null;
+        if ($appointment) {
+            foreach ($this->vitalsFieldKeys() as $key) {
+                $appointment->{$key} = $vitalsPayload[$key];
+            }
+            $appointment->save();
+            $linkedAppointmentId = $appointment->id;
+        }
+
+        $log = $this->recordPatientVitalsLog($patientId, $appointment, $vitalsPayload, Auth::user()->id);
+        $effectiveDt = $appointment ? $appointment->appointment_dt : date('Y-m-d');
+        $vitalsEntry = $this->formatVitalsReading($log, $effectiveDt, true);
+
+        return response()->json([
+            'success' => true,
+            'vitals_entry' => $vitalsEntry,
+            'linked_appointment_id' => $linkedAppointmentId,
+        ]);
+    }
+
+    private function computeAgeAtDate($birthdate, $referenceDate)
+    {
+        if (!$birthdate || !$referenceDate) {
+            return '—';
+        }
+        try {
+            $birth = new \DateTime($birthdate);
+            $ref = new \DateTime($referenceDate);
+            return (string) $birth->diff($ref)->y;
+        } catch (\Exception $e) {
+            return '—';
+        }
+    }
+
+    private function computeBodySurfaceArea($weightKg, $heightCm)
+    {
+        $weight = (float) $weightKg;
+        $height = (float) $heightCm;
+        if ($weight <= 0 || $height <= 0) {
+            return null;
+        }
+        $bsa = sqrt(($height * $weight) / 3600);
+        return number_format($bsa, 2) . ' m2';
+    }
+
+    private function appointmentHasMedCert($apt)
+    {
+        return !empty($apt->medcert_diagnosis)
+            || !empty($apt->medcert_remarks)
+            || !empty($apt->medcert_undersigned);
+    }
+
+    private function appointmentHasReferral($apt)
+    {
+        return !empty($apt->referral_doctor)
+            || !empty($apt->referral_addr1)
+            || !empty($apt->referral_addr2)
+            || !empty($apt->referral_diagnosis)
+            || !empty($apt->referral_remarks)
+            || !empty($apt->referral_undersigned);
+    }
+
     function deleteMed($id)
     {
         RX::where('rx_id', $id)->delete();
@@ -772,23 +1156,46 @@ class PatientController extends BaseController
 
     public function addMed(Request $request)
     {
+        $appointmentId = (int) $request->id;
+        $groupId = $this->resolvePrescriptionGroupIdForAppointment(
+            $appointmentId,
+            $request->input('prescription_group_id')
+        );
+
+        $medicineDetail = null;
+        if (!$request->custom_meds && $request->med_id) {
+            $medicineDetail = Helpers::medicineDetail($request->med_id);
+        }
+
+        $brand = trim((string) ($request->custom_brand ?: ($medicineDetail ? $medicineDetail->medicine_name : '')));
+        $generic = trim((string) ($request->custom_generic ?: ($medicineDetail ? $medicineDetail->generic_name : '')));
+        $dosage = trim((string) $request->custom_dosage);
+        if ($dosage === '' && $medicineDetail && !empty($medicineDetail->unit)) {
+            $dosage = trim((string) $medicineDetail->unit);
+        }
+
         $rx = new RX();
-        $medicineDetail = Helpers::medicineDetail($request->med_id);
-        $rx->appointment_id = $request->id;
-        $rx->medicine_id = $request->med_id;
-        $rx->breakfastbefore = $request->bf_b;
-        $rx->breakfastafter = $request->bf_a;
-        $rx->lunchbefore = $request->l_b;
-        $rx->lunchafter = $request->l_a;
-        $rx->supperbefore = $request->s_b;
-        $rx->supperafter = $request->s_a;
-        $rx->bedtime = $request->bt;
+        $rx->appointment_id = $appointmentId;
+        $rx->prescription_group_id = $groupId;
+        $rx->medicine_id = $request->custom_meds ? 0 : (int) $request->med_id;
+        $rx->breakfastbefore = $request->bf_b ?? '';
+        $rx->breakfastafter = $request->bf_a ?? '';
+        $rx->lunchbefore = $request->l_b ?? '';
+        $rx->lunchafter = $request->l_a ?? '';
+        $rx->supperbefore = $request->s_b ?? '';
+        $rx->supperafter = $request->s_a ?? '';
+        $rx->bedtime = $request->bt ?? '';
         $rx->qty = $request->qty;
         $rx->remarks = $request->remarks;
         $rx->created_dt = date("Y-m-d H:i:s");
-        $rx->medicine = $request->custom_meds ? $request->custom_brand : $request->meds;
-        $rx->generic_id = $request->custom_meds ? 0 : $medicineDetail->generic_id;
-        $rx->generic_name = $request->custom_meds ? $request->custom_generic : $medicineDetail->generic_name;
+        //$rx->medicine = $brand;
+        $rx->medicine = $this->composeRxGenericName($brand, $dosage);
+        //$rx->generic_name = $this->composeRxGenericName($generic, $dosage);
+        $rx->generic_name = $generic;
+        $maxSort = RX::where('appointment_id', $appointmentId)
+            ->where('prescription_group_id', $groupId)
+            ->max('sort_order');
+        $rx->sort_order = $maxSort !== null ? ((int) $maxSort) + 1 : 0;
         $rx->save();
         return response()->json($medicineDetail);
     }
@@ -801,23 +1208,32 @@ class PatientController extends BaseController
         }
 
         $medicineDetail = null;
-        if (!$request->custom_meds) {
+        if (!$request->custom_meds && $request->med_id) {
             $medicineDetail = Helpers::medicineDetail($request->med_id);
         }
 
-        $rx->medicine_id = $request->custom_meds ? 0 : $request->med_id;
-        $rx->breakfastbefore = $request->bf_b;
-        $rx->breakfastafter = $request->bf_a;
-        $rx->lunchbefore = $request->l_b;
-        $rx->lunchafter = $request->l_a;
-        $rx->supperbefore = $request->s_b;
-        $rx->supperafter = $request->s_a;
-        $rx->bedtime = $request->bt;
+        $brand = trim((string) ($request->custom_brand ?: ($medicineDetail ? $medicineDetail->medicine_name : $request->meds)));
+        $generic = trim((string) ($request->custom_generic ?: ($medicineDetail ? $medicineDetail->generic_name : '')));
+        $dosage = trim((string) $request->custom_dosage);
+        if ($dosage === '' && $medicineDetail && !empty($medicineDetail->unit)) {
+            $dosage = trim((string) $medicineDetail->unit);
+        }
+
+        $rx->medicine_id = $request->custom_meds ? 0 : (int) $request->med_id;
+        $rx->breakfastbefore = $request->bf_b ?? '';
+        $rx->breakfastafter = $request->bf_a ?? '';
+        $rx->lunchbefore = $request->l_b ?? '';
+        $rx->lunchafter = $request->l_a ?? '';
+        $rx->supperbefore = $request->s_b ?? '';
+        $rx->supperafter = $request->s_a ?? '';
+        $rx->bedtime = $request->bt ?? '';
         $rx->qty = $request->qty;
         $rx->remarks = $request->remarks;
-        $rx->medicine = $request->custom_meds ? $request->custom_brand : $request->meds;
+        //$rx->medicine = $brand;
+        $rx->medicine = $this->composeRxGenericName($brand, $dosage);
         $rx->generic_id = $request->custom_meds ? 0 : ($medicineDetail ? $medicineDetail->generic_id : 0);
-        $rx->generic_name = $request->custom_meds ? $request->custom_generic . ' ' . $request->custom_dosage : ($medicineDetail ? $medicineDetail->generic_name . ' ' . $medicineDetail->unit : '');
+        //$rx->generic_name = $this->composeRxGenericName($generic, $dosage);
+        $rx->generic_name = $generic;
         $rx->save();
 
         return response()->json(['success' => true, 'message' => 'Medicine updated successfully']);
@@ -831,15 +1247,29 @@ class PatientController extends BaseController
 
     public function addDiagnostic(Request $request)
     {
+        $appointmentId = isset($request->rendered[0]['id']) ? (int) $request->rendered[0]['id'] : 0;
+        $groupId = $this->resolveDiagnosticGroupIdForAppointment(
+            $appointmentId,
+            $request->input('diagnostic_group_id')
+        );
+        $maxSort = $appointmentId
+            ? Ancillary::where('appointment_id', $appointmentId)
+                ->where('diagnostic_group_id', $groupId)
+                ->max('sort_order')
+            : null;
+        $baseSort = $maxSort !== null ? ((int) $maxSort) + 1 : 0;
+
         foreach ($request->rendered as $key => $value) {
             $rx = new Ancillary();
             $rx->appointment_id = $value['id'];
+            $rx->diagnostic_group_id = $groupId;
             $rx->ancillary_id = $value['procedure_id'];
             $rx->ancillary = $value['procedure'];
             $rx->remarks = $value['remarks'];
             $rx->micro_remarks = $value['lab_micro_remarks'];
             $rx->xray_remarks = $value['xray_remarks'];
             $rx->type = $value['type'];
+            $rx->sort_order = $baseSort + $key;
             $rx->save();
         }
         return response()->json(true);
@@ -870,9 +1300,64 @@ class PatientController extends BaseController
         return response()->json(true);
     }
 
+    function reorderAppointmentDiagnostics(Request $request)
+    {
+        $appointmentId = (int) $request->input('appointment_id');
+        $order = $request->input('order', []);
+        $groupId = $request->input('diagnostic_group_id');
+
+        if (!$appointmentId || !is_array($order)) {
+            return response()->json(['error' => 'Invalid request'], 422);
+        }
+
+        foreach ($order as $index => $ancillaryId) {
+            $query = Ancillary::where('id', (int) $ancillaryId)
+                ->where('appointment_id', $appointmentId);
+            if ($groupId) {
+                $query->where('diagnostic_group_id', (int) $groupId);
+            }
+            $query->update(['sort_order' => $index]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     function getAppointmentDiagnostics($id)
     {
-        $data = Ancillary::where(['appointment_id' => $id])->get();
+        $appointmentId = (int) $id;
+        $this->ensureDiagnosticGroupsForAppointment($appointmentId);
+
+        $groups = DiagnosticGroup::where('appointment_id', $appointmentId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        if (!$groups->count()) {
+            $groupId = $this->createDiagnosticGroupRecord($appointmentId, 'Diagnostics 1', 0);
+            $groups = DiagnosticGroup::where('appointment_id', $appointmentId)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+        }
+
+        $groupPayload = [];
+        foreach ($groups as $group) {
+            $groupPayload[] = [
+                'id' => $group->id,
+                'title' => $group->title,
+                'sort_order' => (int) $group->sort_order,
+                'lab_remarks' => $group->lab_remarks,
+                'request_date' => $group->request_date,
+                'findings' => $group->findings,
+                'notes' => $group->notes,
+                'recommendations' => $group->recommendations,
+            ];
+        }
+
+        $data = Ancillary::where(['appointment_id' => $appointmentId])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
         $array = array();
         foreach ($data as $key => $value) {
             $arr = array();
@@ -881,21 +1366,165 @@ class PatientController extends BaseController
             $arr['ancillary_id'] = $value->ancillary_id;
             $arr['remarks'] = $value->remarks;
             $arr['id'] = $value->id;
+            $arr['diagnostic_group_id'] = $value->diagnostic_group_id;
             $array[] = $arr;
         }
-        return response()->json(['data' => $array]);
+        return response()->json([
+            'groups' => $groupPayload,
+            'diagnostics' => $array,
+            'data' => $array,
+        ]);
+    }
+
+    public function createDiagnosticGroup(Request $request)
+    {
+        $appointmentId = (int) $request->input('appointment_id');
+        if (!$appointmentId) {
+            return response()->json(['error' => 'Invalid appointment'], 422);
+        }
+
+        $this->ensureDiagnosticGroupsForAppointment($appointmentId);
+        $count = DiagnosticGroup::where('appointment_id', $appointmentId)->count();
+        $title = trim((string) $request->input('title', ''));
+        if ($title === '') {
+            $title = 'Diagnostics ' . ($count + 1);
+        }
+
+        $groupId = $this->createDiagnosticGroupRecord($appointmentId, $title);
+
+        return response()->json([
+            'id' => $groupId,
+            'title' => $title,
+            'sort_order' => DiagnosticGroup::where('id', $groupId)->value('sort_order'),
+            'lab_remarks' => '',
+            'request_date' => null,
+            'findings' => '',
+            'notes' => '',
+            'recommendations' => '',
+        ]);
+    }
+
+    public function updateDiagnosticGroup(Request $request, $id)
+    {
+        $group = DiagnosticGroup::find((int) $id);
+        if (!$group) {
+            return response()->json(['error' => 'Diagnostic group not found'], 404);
+        }
+
+        if ($request->has('title')) {
+            $title = trim((string) $request->input('title', ''));
+            if ($title === '') {
+                return response()->json(['error' => 'Title is required'], 422);
+            }
+            $group->title = $title;
+        }
+
+        foreach (['lab_remarks', 'request_date', 'findings', 'notes', 'recommendations'] as $field) {
+            if ($request->has($field)) {
+                $value = $request->input($field);
+                $group->{$field} = $field === 'request_date' && $value === '' ? null : $value;
+            }
+        }
+
+        $group->save();
+
+        return response()->json([
+            'id' => $group->id,
+            'title' => $group->title,
+            'sort_order' => (int) $group->sort_order,
+            'lab_remarks' => $group->lab_remarks,
+            'request_date' => $group->request_date,
+            'findings' => $group->findings,
+            'notes' => $group->notes,
+            'recommendations' => $group->recommendations,
+        ]);
+    }
+
+    public function deleteDiagnosticGroup($id)
+    {
+        $group = DiagnosticGroup::find((int) $id);
+        if (!$group) {
+            return response()->json(['error' => 'Diagnostic group not found'], 404);
+        }
+
+        $appointmentId = (int) $group->appointment_id;
+        $remaining = DiagnosticGroup::where('appointment_id', $appointmentId)
+            ->where('id', '!=', $group->id)
+            ->count();
+
+        if ($remaining < 1) {
+            return response()->json(['error' => 'At least one diagnostic group is required'], 422);
+        }
+
+        Ancillary::where('diagnostic_group_id', $group->id)->delete();
+        $group->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    function reorderAppointmentMeds(Request $request)
+    {
+        $appointmentId = (int) $request->input('appointment_id');
+        $order = $request->input('order', []);
+        $groupId = $request->input('prescription_group_id');
+
+        if (!$appointmentId || !is_array($order)) {
+            return response()->json(['error' => 'Invalid request'], 422);
+        }
+
+        foreach ($order as $index => $rxId) {
+            $query = RX::where('rx_id', (int) $rxId)
+                ->where('appointment_id', $appointmentId);
+            if ($groupId) {
+                $query->where('prescription_group_id', (int) $groupId);
+            }
+            $query->update(['sort_order' => $index]);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     function getAppointmentMedicine($id)
     {
-        $data = RX::where(['appointment_id' => $id])->orderby('rx_id', 'desc')->get();
+        $appointmentId = (int) $id;
+        $this->ensurePrescriptionGroupsForAppointment($appointmentId);
+
+        $groups = PrescriptionGroup::where('appointment_id', $appointmentId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        if ($groups->isEmpty()) {
+            $this->createPrescriptionGroupRecord($appointmentId, 'Prescription 1', 0);
+            $groups = PrescriptionGroup::where('appointment_id', $appointmentId)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+        }
+
+        $groupPayload = [];
+        foreach ($groups as $group) {
+            $groupPayload[] = [
+                'id' => $group->id,
+                'title' => $group->title,
+                'sort_order' => (int) $group->sort_order,
+            ];
+        }
+
+        $data = RX::where(['appointment_id' => $appointmentId])
+            ->orderBy('prescription_group_id')
+            ->orderBy('sort_order')
+            ->orderBy('rx_id')
+            ->get();
+
         $array = array();
         foreach ($data as $key => $value) {
+            $split = $this->splitRxGenericAndDosage($value->generic_name, (int) $value->medicine_id);
             $arr = array();
-            $arr['medicine'] = $value->generic_name . ' ' . $value->medicine;
-            $arr['generic'] = $value->generic_name;
+            $arr['generic'] = $split['generic'];
             $arr['brand'] = $value->medicine;
-            $arr['dosage'] = $value->medicine;
+            $arr['dosage'] = $split['dosage'];
+            $arr['medicine'] = trim($split['generic'] . ' ' . $value->medicine);
             $arr['qty'] = $value->qty;
             $arr['bb'] = $value->breakfastbefore;
             $arr['ab'] = $value->breakfastafter;
@@ -906,10 +1535,83 @@ class PatientController extends BaseController
             $arr['bt'] = $value->bedtime;
             $arr['remarks'] = $value->remarks;
             $arr['medicineId'] = $value->medicine_id;
+            $arr['prescription_group_id'] = $value->prescription_group_id;
             $arr['id'] = $value->rx_id;
             $array[] = $arr;
         }
-        return response()->json(['data' => $array]);
+
+        return response()->json([
+            'groups' => $groupPayload,
+            'medicines' => $array,
+            'data' => $array,
+        ]);
+    }
+
+    public function createPrescriptionGroup(Request $request)
+    {
+        $appointmentId = (int) $request->input('appointment_id');
+        if (!$appointmentId) {
+            return response()->json(['error' => 'Invalid appointment'], 422);
+        }
+
+        $this->ensurePrescriptionGroupsForAppointment($appointmentId);
+        $count = PrescriptionGroup::where('appointment_id', $appointmentId)->count();
+        $title = trim((string) $request->input('title', ''));
+        if ($title === '') {
+            $title = 'Prescription ' . ($count + 1);
+        }
+
+        $groupId = $this->createPrescriptionGroupRecord($appointmentId, $title);
+
+        return response()->json([
+            'id' => $groupId,
+            'title' => $title,
+            'sort_order' => PrescriptionGroup::where('id', $groupId)->value('sort_order'),
+        ]);
+    }
+
+    public function updatePrescriptionGroup(Request $request, $id)
+    {
+        $group = PrescriptionGroup::find((int) $id);
+        if (!$group) {
+            return response()->json(['error' => 'Prescription group not found'], 404);
+        }
+
+        $title = trim((string) $request->input('title', ''));
+        if ($title === '') {
+            return response()->json(['error' => 'Title is required'], 422);
+        }
+
+        $group->title = $title;
+        $group->save();
+
+        return response()->json([
+            'id' => $group->id,
+            'title' => $group->title,
+            'sort_order' => (int) $group->sort_order,
+        ]);
+    }
+
+    public function deletePrescriptionGroup($id)
+    {
+        $group = PrescriptionGroup::find((int) $id);
+        if (!$group) {
+            return response()->json(['error' => 'Prescription group not found'], 404);
+        }
+
+        $appointmentId = (int) $group->appointment_id;
+        $remaining = PrescriptionGroup::where('appointment_id', $appointmentId)
+            ->where('id', '!=', $group->id)
+            ->count();
+
+        if ($remaining < 1) {
+            return response()->json(['error' => 'At least one prescription group is required'], 422);
+        }
+
+        RX::where('prescription_group_id', $group->id)->delete();
+        $group->delete();
+
+        return response()->json(['success' => true]);
     }
 
     function getAppointmentService($id)
@@ -939,8 +1641,7 @@ class PatientController extends BaseController
         $field->save();
         return response()->json(true);
     }
-
-    function getAttachments($id)
+    function getAttachments1($id)
     {
         $getidno = explode("-0", $id);
         if (sizeof($getidno) > 1) {
@@ -970,7 +1671,38 @@ class PatientController extends BaseController
         }
         return response()->json(['data' => $array]);
     }
-
+    function getAttachments($id)
+    {
+        $getidno = explode("-0", $id);
+        if (sizeof($getidno) > 1) {
+            $data = Attachments::where(['patientid' => $getidno[1]])->get();
+            $getPatientId = Patients::where('id', $getidno[1])->first();
+        } else {
+            $data = Attachments::where(['patientid' => $id])->get();
+            $getPatientId = Patients::where('patientid', $id)->first();
+        }
+        $array = array();
+        foreach ($data as $key => $value) {
+            $arr = array();
+            $fileName = $value->filename;
+            $fileUrl = url('public/storage/uploads/' . $fileName);
+            $fileExt = explode(".", $fileName);
+            $path =
+                Storage::disk('s3')->temporaryUrl(
+                    $getPatientId->id."/".$value->filename,
+                    Carbon::now()->addMinutes(180)
+                );    
+            $arr['newfile'] = $path;
+            $arr['oldfile'] = $path;
+            $arr['extension'] = $fileExt[1];
+            $arr['id'] = $value->AttachmentID;
+            $arr['fname'] = $fileName;
+            $arr['description'] = $value->description;
+            $arr['created_dt'] = date_format(date_create($value->created_dt), "F d, Y");
+            $array[] = $arr;
+        }
+        return response()->json(['data' => $array]);
+    }
     public function addpatientAttachments(Request $request)
     {
         try {
@@ -983,13 +1715,14 @@ class PatientController extends BaseController
 
             $uploadedFiles = [];
             foreach ($request->file('files') as $file) {
+
                 $att = new Attachments();
                 $getidno = explode("-0", $request->patientid);
 
-                
+                // Use unique filename to prevent conflicts
                 $originalName = $file->getClientOriginalName();
                 $extension = $file->getClientOriginalExtension();
-
+                
                 $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $ext = $file->getClientOriginalExtension();
 
@@ -1101,7 +1834,6 @@ class PatientController extends BaseController
             return response()->json(['error' => 'Upload failed: ' . $e->getMessage()], 500);
         }
     }
-    
     public function deleteAttachment($id)
     {
         $attachment = Attachments::find($id);
@@ -1127,7 +1859,6 @@ class PatientController extends BaseController
             ], 500);
         }
     }
-
     public function dashboard()
     {
         date_default_timezone_set('Asia/Manila');
@@ -1293,18 +2024,40 @@ class PatientController extends BaseController
 
     function updateBP(Request $request)
     {
+        date_default_timezone_set('Asia/Manila');
         $field = Appointments::find($request->id);
-        $field->vit_sys = $request->vit_sys;
-        $field->vit_dia = $request->vit_dia;
-        $field->vit_temp = $request->vit_temp;
-        $field->vit_rr = $request->vit_rr;
-        $field->o2_stat = $request->o2_stat;
-        $field->vit_cr = $request->vit_cr;
-        $field->weight = $request->weight;
-        $field->height = $request->height;
-        $field->bmi = $request->bmi;
+        $vitalsPayload = [
+            'vit_sys' => $request->vit_sys,
+            'vit_dia' => $request->vit_dia,
+            'vit_temp' => $request->vit_temp,
+            'vit_rr' => $request->vit_rr,
+            'o2_stat' => $request->o2_stat,
+            'vit_cr' => $request->vit_cr,
+            'weight' => $request->weight,
+            'height' => $request->height,
+            'bmi' => $request->bmi,
+        ];
+        $field->vit_sys = $vitalsPayload['vit_sys'];
+        $field->vit_dia = $vitalsPayload['vit_dia'];
+        $field->vit_temp = $vitalsPayload['vit_temp'];
+        $field->vit_rr = $vitalsPayload['vit_rr'];
+        $field->o2_stat = $vitalsPayload['o2_stat'];
+        $field->vit_cr = $vitalsPayload['vit_cr'];
+        $field->weight = $vitalsPayload['weight'];
+        $field->height = $vitalsPayload['height'];
+        $field->bmi = $vitalsPayload['bmi'];
         $field->save();
-        return response()->json(true);
+
+        $vitalsEntry = null;
+        if ($this->payloadHasVitals($vitalsPayload)) {
+            $log = $this->recordAppointmentVitals($field, $vitalsPayload, Auth::user()->id);
+            $vitalsEntry = $this->formatVitalsReading($log, $field->appointment_dt, true);
+        }
+
+        return response()->json([
+            'success' => true,
+            'vitals_entry' => $vitalsEntry,
+        ]);
     }
 
     function reorderAppointment(Request $request)
@@ -1347,7 +2100,7 @@ class PatientController extends BaseController
         return true;
     }
 
-    public function api_saveAppointment(Requet $request)
+    public function api_saveAppointment(Request $request)
     {
         if (env('SECRET_PASS') == "2024p@!") {
             date_default_timezone_set('Asia/Manila');
@@ -1773,17 +2526,67 @@ class PatientController extends BaseController
         exit;
     }
 
+    /**
+     * Past appointments for a patient that have at least one rx line (excludes current appointment).
+     */
+    public function getPatientPastPrescriptions($patientId, $currentAppointmentId)
+    {
+        $appointments = Appointments::where('patientid', $patientId)
+            ->where('id', '!=', $currentAppointmentId)
+            ->orderBy('appointment_dt', 'desc')
+            ->orderBy('id', 'desc')
+            ->limit(200)
+            ->get();
+
+        $out = [];
+        foreach ($appointments as $apt) {
+            $rxRows = Rx::where('appointment_id', $apt->id)->orderBy('sort_order')->orderBy('rx_id')->get();
+            if ($rxRows->isEmpty()) {
+                continue;
+            }
+            $meds = [];
+            foreach ($rxRows as $value) {
+                $meds[] = [
+                    'medicine_id' => (int) $value->medicine_id,
+                    'generic_id' => (int) $value->generic_id,
+                    'generic_name' => $value->generic_name,
+                    'medicine' => $value->medicine,
+                    'qty' => $value->qty,
+                    'remarks' => $value->remarks,
+                    'bf_b' => $value->breakfastbefore,
+                    'bf_a' => $value->breakfastafter,
+                    'l_b' => $value->lunchbefore,
+                    'l_a' => $value->lunchafter,
+                    's_b' => $value->supperbefore,
+                    's_a' => $value->supperafter,
+                    'bt' => $value->bedtime,
+                ];
+            }
+            $out[] = [
+                'appointment_id' => $apt->id,
+                'appointment_dt' => $apt->appointment_dt,
+                'diagnosis' => $apt->diagnosis ?? '',
+                'medications' => $meds,
+            ];
+        }
+
+        return response()->json(['data' => $out]);
+    }
+
     function ImportLastPrescription($id, $appId)
     {
         $appointment = Appointments::join('rx', 'rx.appointment_id', '=', 'appointments.id')
             ->where(['appointments.patientid' => $id])
             ->orderBy('appointments.id', 'desc')->first();
-        $prescriptions = Rx::where(['appointment_id' => $appointment->id])->get();
+        $prescriptions = Rx::where(['appointment_id' => $appointment->id])->orderBy('sort_order')->orderBy('rx_id')->get();
         $array = array();
+        $groupId = $this->resolvePrescriptionGroupIdForAppointment((int) $appId);
+
         foreach ($prescriptions as $key => $value) {
             $rx = new RX();
             $medicineDetail = Helpers::medicineDetail($value->med_id);
             $rx->appointment_id = $appId;
+            $rx->prescription_group_id = $groupId;
             $rx->medicine_id = $value->medicine_id;
             $rx->qty = $value->qty;
             $rx->remarks = $value->remarks;
@@ -1798,8 +2601,656 @@ class PatientController extends BaseController
             $rx->supperbefore = $value->supperbefore;
             $rx->supperafter = $value->supperafter;
             $rx->bedtime = $value->bedtime;
+            $rx->sort_order = $value->sort_order ?? $key;
             $rx->save();
         }
         return response()->json(['prescriptions' => $prescriptions, 'appointments' => $appointment]);
+    }
+
+    private function uploadPatientProfileToS3($patientId, $fileToUpload)
+    {
+        $resizeThreshold = 1 * 1024 * 1024; // 1MB
+        $finalFilename = basename($fileToUpload->getClientOriginalName());
+        $tmpPathToDelete = null;
+        $file = $fileToUpload;
+
+        $mime = (string) $fileToUpload->getMimeType();
+        $isImage = str_starts_with($mime, 'image/');
+        if ($isImage && $fileToUpload->getSize() > $resizeThreshold) {
+            try {
+                if (
+                    function_exists('imagecreatefromstring') &&
+                    function_exists('imagecreatetruecolor') &&
+                    function_exists('imagecopyresampled') &&
+                    function_exists('imagejpeg')
+                ) {
+                    $raw = @file_get_contents($fileToUpload->getRealPath());
+                    $src = $raw !== false ? @imagecreatefromstring($raw) : false;
+
+                    if ($src !== false) {
+                        $srcW = imagesx($src);
+                        $srcH = imagesy($src);
+
+                        $maxDim = 1920;
+                        $scale = 1.0;
+                        if ($srcW > $maxDim || $srcH > $maxDim) {
+                            $scale = min($maxDim / max($srcW, 1), $maxDim / max($srcH, 1));
+                        }
+                        $dstW = max(1, (int) round($srcW * $scale));
+                        $dstH = max(1, (int) round($srcH * $scale));
+
+                        $dst = imagecreatetruecolor($dstW, $dstH);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefilledrectangle($dst, 0, 0, $dstW, $dstH, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $dstW, $dstH, $srcW, $srcH);
+
+                        $tmpBase = tempnam(sys_get_temp_dir(), 'profile_');
+                        if ($tmpBase !== false) {
+                            $tmpPath = $tmpBase . '.jpg';
+                            @rename($tmpBase, $tmpPath);
+
+                            $quality = 85;
+                            $minQuality = 45;
+                            do {
+                                imagejpeg($dst, $tmpPath, $quality);
+                                clearstatcache(true, $tmpPath);
+                                $size = @filesize($tmpPath);
+                                $quality -= 10;
+                            } while ($size !== false && $size > $resizeThreshold && $quality >= $minQuality);
+
+                            if (is_file($tmpPath) && filesize($tmpPath) !== false) {
+                                $tmpPathToDelete = $tmpPath;
+                                $file = new \Illuminate\Http\File($tmpPath);
+                                $finalFilename = pathinfo($finalFilename, PATHINFO_FILENAME) . '.jpg';
+                            }
+                        }
+
+                        imagedestroy($dst);
+                        imagedestroy($src);
+                    }
+                }
+            } catch (\Throwable $t) {
+                // Fall back to original file upload
+            }
+        }
+
+        Storage::disk('s3')->putFileAs($patientId, $file, $finalFilename);
+
+        if ($tmpPathToDelete && is_file($tmpPathToDelete)) {
+            @unlink($tmpPathToDelete);
+        }
+
+        return $finalFilename;
+    }
+
+    private function composeRxGenericName($generic, $dosage)
+    {
+        $generic = trim((string) $generic);
+        $dosage = trim((string) $dosage);
+        if ($generic === '') {
+            return $dosage;
+        }
+        if ($dosage === '') {
+            return $generic;
+        }
+        if (preg_match('/\s' . preg_quote($dosage, '/') . '$/iu', $generic)) {
+            return $generic;
+        }
+        return trim($generic . ' ' . $dosage);
+    }
+
+    /**
+     * Split stored generic_name into generic label and dosage for the UI.
+     *
+     * @return array{generic: string, dosage: string}
+     */
+    private function splitRxGenericAndDosage($genericName, $medicineId = 0)
+    {
+        $stored = trim((string) $genericName);
+        $dosage = '';
+        $generic = $stored;
+
+        if ((int) $medicineId > 0) {
+            $detail = Helpers::medicineDetail($medicineId);
+            if ($detail && !empty($detail->unit)) {
+                $unit = trim((string) $detail->unit);
+                if ($unit !== '') {
+                    if ($stored !== '' && preg_match('/\s' . preg_quote($unit, '/') . '$/iu', $stored)) {
+                        $generic = trim(preg_replace('/\s' . preg_quote($unit, '/') . '$/iu', '', $stored));
+                        $dosage = $unit;
+                    } else {
+                        $dosage = $unit;
+                    }
+                }
+            }
+        }
+
+        if ($dosage === '' && $stored !== '') {
+            if (preg_match('/^(.+?)\s+(\d+\s*(?:mg|mcg|g|ml|iu|units?|%)\b.*)$/iu', $stored, $matches)) {
+                $generic = trim($matches[1]);
+                $dosage = trim($matches[2]);
+            }
+        }
+
+        return [
+            'generic' => $generic,
+            'dosage' => $dosage,
+        ];
+    }
+
+    private function ensurePrescriptionGroupsForAppointment(int $appointmentId): void
+    {
+        if (!\Schema::hasTable('prescription_groups')) {
+            return;
+        }
+
+        $hasGroups = PrescriptionGroup::where('appointment_id', $appointmentId)->exists();
+        if (!$hasGroups) {
+            $groupId = $this->createPrescriptionGroupRecord($appointmentId, 'Prescription 1', 0);
+            if (\Schema::hasColumn('rx', 'prescription_group_id')) {
+                Rx::where('appointment_id', $appointmentId)
+                    ->whereNull('prescription_group_id')
+                    ->update(['prescription_group_id' => $groupId]);
+            }
+            return;
+        }
+
+        if (\Schema::hasColumn('rx', 'prescription_group_id')) {
+            $defaultGroup = PrescriptionGroup::where('appointment_id', $appointmentId)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->first();
+            if ($defaultGroup) {
+                Rx::where('appointment_id', $appointmentId)
+                    ->whereNull('prescription_group_id')
+                    ->update(['prescription_group_id' => $defaultGroup->id]);
+            }
+        }
+    }
+
+    private function createPrescriptionGroupRecord(int $appointmentId, string $title, ?int $sortOrder = null): int
+    {
+        if ($sortOrder === null) {
+            $max = PrescriptionGroup::where('appointment_id', $appointmentId)->max('sort_order');
+            $sortOrder = $max !== null ? ((int) $max) + 1 : 0;
+        }
+
+        $group = new PrescriptionGroup();
+        $group->appointment_id = $appointmentId;
+        $group->title = $title;
+        $group->sort_order = $sortOrder;
+        $group->created_dt = date('Y-m-d H:i:s');
+        $group->save();
+
+        return (int) $group->id;
+    }
+
+    private function resolvePrescriptionGroupIdForAppointment(int $appointmentId, $requestedGroupId = null): int
+    {
+        $this->ensurePrescriptionGroupsForAppointment($appointmentId);
+
+        if ($requestedGroupId) {
+            $group = PrescriptionGroup::where('id', (int) $requestedGroupId)
+                ->where('appointment_id', $appointmentId)
+                ->first();
+            if ($group) {
+                return (int) $group->id;
+            }
+        }
+
+        $first = PrescriptionGroup::where('appointment_id', $appointmentId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->first();
+
+        return $first ? (int) $first->id : $this->createPrescriptionGroupRecord($appointmentId, 'Prescription 1', 0);
+    }
+
+    public function buildPrescriptionPdfPayload(int $appointmentId, $groupFilter = 'all'): array
+    {
+        $this->ensurePrescriptionGroupsForAppointment($appointmentId);
+
+        if ($groupFilter && $groupFilter !== 'all') {
+            $groupId = (int) $groupFilter;
+            $rxRows = Rx::where('appointment_id', $appointmentId)
+                ->where('prescription_group_id', $groupId)
+                ->orderBy('sort_order')
+                ->orderBy('rx_id')
+                ->get();
+
+            return [
+                'query_prescription' => $rxRows,
+                'prescription_sections' => null,
+            ];
+        }
+
+        $groups = PrescriptionGroup::where('appointment_id', $appointmentId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        if ($groups->count() <= 1) {
+            $rxRows = Rx::where('appointment_id', $appointmentId)
+                ->orderBy('sort_order')
+                ->orderBy('rx_id')
+                ->get();
+
+            return [
+                'query_prescription' => $rxRows,
+                'prescription_sections' => null,
+            ];
+        }
+
+        $sections = [];
+        foreach ($groups as $group) {
+            $items = Rx::where('appointment_id', $appointmentId)
+                ->where('prescription_group_id', $group->id)
+                ->orderBy('sort_order')
+                ->orderBy('rx_id')
+                ->get();
+            if ($items->isNotEmpty()) {
+                $sections[] = [
+                    'title' => $group->title,
+                    'items' => $items,
+                ];
+            }
+        }
+
+        return [
+            'query_prescription' => collect(),
+            'prescription_sections' => $sections,
+        ];
+    }
+
+    private function ensureDiagnosticGroupsForAppointment(int $appointmentId): void
+    {
+        if (!\Schema::hasTable('diagnostic_groups')) {
+            return;
+        }
+
+        $hasGroups = DiagnosticGroup::where('appointment_id', $appointmentId)->exists();
+        if (!$hasGroups) {
+            $labRemarks = null;
+            if (\Schema::hasTable('appointments')) {
+                $labRemarks = Appointments::where('id', $appointmentId)->value('lab_remarks');
+            }
+            $groupId = $this->createDiagnosticGroupRecord($appointmentId, 'Diagnostics 1', 0, $labRemarks);
+            if (\Schema::hasColumn('ancillary', 'diagnostic_group_id')) {
+                Ancillary::where('appointment_id', $appointmentId)
+                    ->whereNull('diagnostic_group_id')
+                    ->update(['diagnostic_group_id' => $groupId]);
+            }
+            return;
+        }
+
+        if (\Schema::hasColumn('ancillary', 'diagnostic_group_id')) {
+            $defaultGroup = DiagnosticGroup::where('appointment_id', $appointmentId)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->first();
+            if ($defaultGroup) {
+                Ancillary::where('appointment_id', $appointmentId)
+                    ->whereNull('diagnostic_group_id')
+                    ->update(['diagnostic_group_id' => $defaultGroup->id]);
+            }
+        }
+    }
+
+    private function createDiagnosticGroupRecord(
+        int $appointmentId,
+        string $title,
+        ?int $sortOrder = null,
+        ?string $labRemarks = null
+    ): int {
+        if ($sortOrder === null) {
+            $max = DiagnosticGroup::where('appointment_id', $appointmentId)->max('sort_order');
+            $sortOrder = $max !== null ? ((int) $max) + 1 : 0;
+        }
+
+        $group = new DiagnosticGroup();
+        $group->appointment_id = $appointmentId;
+        $group->title = $title;
+        $group->lab_remarks = $labRemarks;
+        $group->sort_order = $sortOrder;
+        $group->created_dt = date('Y-m-d H:i:s');
+        $group->save();
+
+        return (int) $group->id;
+    }
+
+    private function resolveDiagnosticGroupIdForAppointment(int $appointmentId, $requestedGroupId = null): int
+    {
+        $this->ensureDiagnosticGroupsForAppointment($appointmentId);
+
+        if ($requestedGroupId) {
+            $group = DiagnosticGroup::where('id', (int) $requestedGroupId)
+                ->where('appointment_id', $appointmentId)
+                ->first();
+            if ($group) {
+                return (int) $group->id;
+            }
+        }
+
+        $first = DiagnosticGroup::where('appointment_id', $appointmentId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->first();
+
+        return $first
+            ? (int) $first->id
+            : $this->createDiagnosticGroupRecord($appointmentId, 'Diagnostics 1', 0);
+    }
+
+    public function buildDiagnosticPdfPayload(int $appointmentId, $groupFilter = 'all'): array
+    {
+        $this->ensureDiagnosticGroupsForAppointment($appointmentId);
+
+        if ($groupFilter && $groupFilter !== 'all') {
+            $groupId = (int) $groupFilter;
+            $group = DiagnosticGroup::where('id', $groupId)
+                ->where('appointment_id', $appointmentId)
+                ->first();
+            $items = Ancillary::where('appointment_id', $appointmentId)
+                ->where('diagnostic_group_id', $groupId)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            return [
+                'query_prescription' => $items,
+                'diagnostic_sections' => null,
+                'diagnostic_group_detail' => $group,
+            ];
+        }
+
+        $groups = DiagnosticGroup::where('appointment_id', $appointmentId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        if ($groups->count() <= 1) {
+            $group = $groups->first();
+            $itemsQuery = Ancillary::where('appointment_id', $appointmentId)
+                ->orderBy('sort_order')
+                ->orderBy('id');
+            if ($group) {
+                $itemsQuery->where('diagnostic_group_id', $group->id);
+            }
+            $items = $itemsQuery->get();
+
+            return [
+                'query_prescription' => $items,
+                'diagnostic_sections' => null,
+                'diagnostic_group_detail' => $group,
+            ];
+        }
+
+        $sections = [];
+        foreach ($groups as $group) {
+            $items = Ancillary::where('appointment_id', $appointmentId)
+                ->where('diagnostic_group_id', $group->id)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+            $hasMeta = trim((string) $group->lab_remarks) !== ''
+                || !empty($group->request_date)
+                || trim((string) $group->findings) !== ''
+                || trim((string) $group->notes) !== ''
+                || trim((string) $group->recommendations) !== '';
+            if ($items->isNotEmpty() || $hasMeta) {
+                $sections[] = [
+                    'title' => $group->title,
+                    'items' => $items,
+                    'lab_remarks' => $group->lab_remarks,
+                    'request_date' => $group->request_date,
+                    'findings' => $group->findings,
+                    'notes' => $group->notes,
+                    'recommendations' => $group->recommendations,
+                ];
+            }
+        }
+
+        return [
+            'query_prescription' => collect(),
+            'diagnostic_sections' => $sections,
+            'diagnostic_group_detail' => null,
+        ];
+    }
+
+    private function vitalsFieldKeys()
+    {
+        return ['vit_sys', 'vit_dia', 'weight', 'height', 'bmi', 'vit_temp', 'vit_cr', 'vit_rr', 'o2_stat'];
+    }
+
+    private function normalizeVitalValue($value)
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        return trim((string) $value);
+    }
+
+    private function payloadHasVitals(array $payload)
+    {
+        foreach ($this->vitalsFieldKeys() as $key) {
+            if ($this->normalizeVitalValue($payload[$key] ?? '') !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function rowHasVitals($row)
+    {
+        foreach ($this->vitalsFieldKeys() as $key) {
+            if ($this->normalizeVitalValue($row->{$key} ?? '') !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function vitalsFieldsChanged($appointment, array $payload)
+    {
+        foreach ($this->vitalsFieldKeys() as $key) {
+            $current = $this->normalizeVitalValue($appointment->{$key} ?? '');
+            $incoming = $this->normalizeVitalValue($payload[$key] ?? '');
+            if ($current !== $incoming) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function buildVitalsBp($sys, $dia)
+    {
+        $sys = $this->normalizeVitalValue($sys);
+        $dia = $this->normalizeVitalValue($dia);
+        if ($sys === '' && $dia === '') {
+            return '';
+        }
+
+        return ($sys !== '' ? $sys : '—') . '/' . ($dia !== '' ? $dia : '—');
+    }
+
+    private function formatVitalsTimeDisplay($recordedAt)
+    {
+        if (!$recordedAt) {
+            return '';
+        }
+
+        return date_format(date_create($recordedAt), 'g:i A');
+    }
+
+    private function formatVitalsReading($row, $appointmentDt, $isLatest = false)
+    {
+        return [
+            'id' => $row->id,
+            'appointment_id' => $row->appointment_id,
+            'recorded_at' => $row->recorded_at,
+            'time_display' => $this->formatVitalsTimeDisplay($row->recorded_at),
+            'date' => date_format(date_create($appointmentDt), 'M d, Y'),
+            'date_sort' => $appointmentDt,
+            'day_key' => date_format(date_create($appointmentDt), 'Y-m-d'),
+            'bp' => $this->buildVitalsBp($row->vit_sys, $row->vit_dia),
+            'vit_sys' => $row->vit_sys,
+            'vit_dia' => $row->vit_dia,
+            'weight' => $row->weight,
+            'height' => $row->height,
+            'bmi' => $row->bmi,
+            'vit_temp' => $row->vit_temp,
+            'vit_cr' => $row->vit_cr,
+            'vit_rr' => $row->vit_rr,
+            'o2_stat' => $row->o2_stat,
+            'is_latest' => $isLatest,
+        ];
+    }
+
+    private function recordPatientVitalsLog($patientId, $appointment, array $payload, $userId = null)
+    {
+        date_default_timezone_set('Asia/Manila');
+
+        $log = new AppointmentVitals();
+        $log->appointment_id = $appointment ? $appointment->id : null;
+        $log->patientid = $patientId;
+        $log->recorded_at = date('Y-m-d H:i:s');
+        $log->recorded_by = $userId;
+        foreach ($this->vitalsFieldKeys() as $key) {
+            $log->{$key} = $payload[$key] ?? null;
+        }
+        $log->save();
+
+        return $log;
+    }
+
+    private function recordAppointmentVitals($appointment, array $payload, $userId = null)
+    {
+        return $this->recordPatientVitalsLog($appointment->patientid, $appointment, $payload, $userId);
+    }
+
+    private function ensureAppointmentVitalsBackfill($appointment)
+    {
+        if (!$this->rowHasVitals($appointment)) {
+            return;
+        }
+
+        $existingCount = AppointmentVitals::where('appointment_id', $appointment->id)->count();
+        if ($existingCount > 0) {
+            return;
+        }
+
+        $payload = [];
+        foreach ($this->vitalsFieldKeys() as $key) {
+            $payload[$key] = $appointment->{$key};
+        }
+
+        date_default_timezone_set('Asia/Manila');
+        $log = new AppointmentVitals();
+        $log->appointment_id = $appointment->id;
+        $log->patientid = $appointment->patientid;
+        $log->recorded_at = $appointment->updated_dt ?: ($appointment->created_dt ?: ($appointment->appointment_dt . ' 00:00:00'));
+        $log->recorded_by = $appointment->updated_by ?: $appointment->created_by;
+        foreach ($this->vitalsFieldKeys() as $key) {
+            $log->{$key} = $payload[$key];
+        }
+        $log->save();
+    }
+
+    private function resolveVitalsEffectiveDate($row)
+    {
+        if (!empty($row->appointment_dt)) {
+            return $row->appointment_dt;
+        }
+
+        return date('Y-m-d', strtotime($row->recorded_at));
+    }
+
+    private function buildVitalsResponse($patientId, $currentAppointmentId, $currentAppointmentDt)
+    {
+        $rows = DB::table('appointment_vitals as av')
+            ->leftJoin('appointments as a', 'av.appointment_id', '=', 'a.id')
+            ->where('av.patientid', $patientId)
+            ->where(function ($query) {
+                $query->whereNull('av.appointment_id')
+                    ->orWhere('a.is_cancel', 0);
+            })
+            ->orderBy('av.recorded_at', 'desc')
+            ->select(
+                'av.*',
+                'a.appointment_dt'
+            )
+            ->get();
+
+        $vitalsToday = [];
+        $byDay = [];
+        $todayKey = date('Y-m-d');
+
+        foreach ($rows as $row) {
+            $effectiveDt = $this->resolveVitalsEffectiveDate($row);
+            $dayKey = date_format(date_create($effectiveDt), 'Y-m-d');
+            if (!isset($byDay[$dayKey])) {
+                $byDay[$dayKey] = [];
+            }
+            $byDay[$dayKey][] = $row;
+
+            $isCurrentAppointment = $currentAppointmentId > 0
+                && (int) $row->appointment_id === (int) $currentAppointmentId;
+            $isStandaloneToday = !$row->appointment_id
+                && date('Y-m-d', strtotime($row->recorded_at)) === $todayKey;
+            if ($isCurrentAppointment || $isStandaloneToday) {
+                $vitalsToday[] = $row;
+            }
+        }
+
+        $vitalsByDay = [];
+        foreach ($byDay as $dayKey => $dayRows) {
+            $formatted = [];
+            foreach ($dayRows as $index => $dayRow) {
+                $formatted[] = $this->formatVitalsReading(
+                    $dayRow,
+                    $this->resolveVitalsEffectiveDate($dayRow),
+                    $index === 0
+                );
+            }
+            $vitalsByDay[$dayKey] = $formatted;
+        }
+
+        $formattedToday = [];
+        foreach ($vitalsToday as $index => $row) {
+            $formattedToday[] = $this->formatVitalsReading(
+                $row,
+                $this->resolveVitalsEffectiveDate($row),
+                $index === 0
+            );
+        }
+
+        $currentDayKey = date_format(date_create($currentAppointmentDt), 'Y-m-d');
+        $vitalsData = [];
+        foreach ($byDay as $dayKey => $dayRows) {
+            $latest = $dayRows[0];
+            $effectiveDt = $this->resolveVitalsEffectiveDate($latest);
+            $reading = $this->formatVitalsReading($latest, $effectiveDt, true);
+            $reading['reading_count'] = count($dayRows);
+            $reading['day_key'] = $dayKey;
+            $reading['is_current'] = $dayKey === $currentDayKey;
+            $reading['id'] = $latest->appointment_id
+                ? (int) $latest->appointment_id
+                : (int) $latest->id;
+            $vitalsData[] = $reading;
+        }
+
+        usort($vitalsData, function ($a, $b) {
+            return strcmp($b['date_sort'], $a['date_sort']);
+        });
+
+        return [
+            'vitals_today' => $formattedToday,
+            'vitals_data' => $vitalsData,
+            'vitals_by_day' => $vitalsByDay,
+        ];
     }
 }

@@ -86,6 +86,7 @@ class UserController extends BaseController
                 'username' => $params['username'],
                 'email' => $params['email'],
                 'password' => Hash::make($params['password']),
+                'login_otp_enabled' => filter_var(Arr::get($params, 'login_otp_enabled', true), FILTER_VALIDATE_BOOLEAN),
             ]);
             $role = Role::findByName($params['role']);
             $user->syncRoles($role);
@@ -118,11 +119,13 @@ class UserController extends BaseController
         if ($user === null) {
             return response()->json(['error' => 'User not found'], 404);
         }
-        if ($user->isAdmin()) {
+
+        $currentUser = Auth::user();
+
+        if ($user->isAdmin() && !$currentUser->isAdmin()) {
             return response()->json(['error' => 'Admin can not be modified'], 403);
         }
 
-        $currentUser = Auth::user();
         if (!$currentUser->isAdmin()
             && $currentUser->id !== $user->id
             && !$currentUser->hasPermission(\App\Laravue\Acl::PERMISSION_USER_MANAGE)
@@ -142,9 +145,60 @@ class UserController extends BaseController
 
             $user->name = $request->get('name');
             $user->email = $email;
+            if ($currentUser->isAdmin() && $request->has('login_otp_enabled')) {
+                $user->login_otp_enabled = filter_var($request->input('login_otp_enabled'), FILTER_VALIDATE_BOOLEAN);
+            }
             $user->save();
+
+            if ($currentUser->isAdmin()) {
+                $roles = $request->get('roles');
+                if (is_array($roles) && count($roles) > 0) {
+                    $roleName = $roles[0];
+                    $allowed = ['admin', 'doctor', 'pt', 'user', 'secretary'];
+                    if (!in_array($roleName, $allowed, true)) {
+                        return response()->json(['errors' => ['roles' => ['Invalid role selected.']]], 403);
+                    }
+                    $roleModel = Role::findOrCreate($roleName, 'api');
+                    $user->syncRoles([$roleModel]);
+                }
+            }
+
             return new UserResource($user);
         }
+    }
+
+    /**
+     * Set a new password for a user (admin only).
+     *
+     * @param Request $request
+     * @param User    $user
+     * @return UserResource|\Illuminate\Http\JsonResponse
+     */
+    public function resetPassword(Request $request, User $user)
+    {
+        if (!Auth::user()->isAdmin()) {
+            return response()->json(['error' => 'Permission denied'], 403);
+        }
+
+        if ($user === null) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'password' => ['required', 'min:6', 'confirmed'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 403);
+        }
+
+        $user->password = Hash::make($request->get('password'));
+        $user->save();
+
+        return new UserResource($user);
     }
 
     /**

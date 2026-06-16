@@ -20,6 +20,7 @@ use App\Http\Resources\AppointmentResource;
 use App\Laravue\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use DB;
 
 /**
@@ -30,98 +31,137 @@ use DB;
 class MedicineController extends BaseController
 {
     const ITEM_PER_PAGE = 15;
+
     /**
-     * Entry point for Laravue Dashboard
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response|ResourceCollection
+     * Admin list — one row per medicine record with defaults for appointments.
      */
-    public function index1(Request $request)
-    {
-        $searchParams = $request->all();
-        $userQuery = Medicine::query();
-        $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
-        $keyword = Arr::get($searchParams, 'keyword', '');
-
-        if (!empty($keyword)) {
-            $userQuery->whereRaw('LOWER(medicine_name) LIKE ?', ['%'.$keyword.'%']);
-        }
-        return MedicineResource::collection($userQuery->paginate($limit));
-    }
-
     public function index(Request $request)
     {
         $searchParams = $request->all();
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'keyword', '');
 
-        $userQuery = Medicine::query()
-            ->select('medicines.generic_name', 'medicines.medicine_name', 'medicines.unit', 'medicines.id')
-            ->join(DB::raw("(SELECT MIN(id) as id 
-                            FROM medicines
-                            WHERE isincluded = 1" . 
-                            (!empty($keyword) 
-                                ? " AND (medicine_name LIKE '%".addslashes($keyword)."%' 
-                                    OR generic_name LIKE '%".addslashes($keyword)."%')" 
-                                : "") . "
-                            GROUP BY medicine_name) as filtered"), 
-                    'medicines.id', '=', 'filtered.id');
+        $userQuery = Medicine::query();
+
+        if (!empty($keyword)) {
+            $kw = '%' . addcslashes($keyword, '%_\\') . '%';
+            $userQuery->where(function ($q) use ($kw) {
+                $q->where('medicine_name', 'like', $kw)
+                    ->orWhere('generic_name', 'like', $kw);
+            });
+        }
+
+        $userQuery->orderByDesc('id');
 
         return MedicineResource::collection($userQuery->paginate($limit));
     }
 
-
     public function findMedicine($kw)
     {
-        $q = DB::connection('mysql')->select("SELECT m.generic_name, m.medicine_name, m.unit, m.id
-        FROM medicines m
-        JOIN (
-            SELECT MIN(id) AS id
-            FROM medicines
-            WHERE (medicine_name LIKE '%$kw%' OR generic_name LIKE '%$kw%')
-              AND isincluded = 1
-            GROUP BY medicine_name
-        ) AS filtered
-        ON m.id = filtered.id
-        LIMIT 10;");
-        $data = array();
-        foreach ($q as $key => $value) {
-            $arr =  array();
-            //$arr['medicine'] = $value->generic_name.' ('.$value->medicine_name.') '.$value->unit;
-            $arr['medicine'] = $value->medicine_name;
-            $arr['id'] = $value->id;
-            $data[] = $arr;
+        $like = '%' . addcslashes((string) $kw, '%_\\') . '%';
+        $q = DB::connection('mysql')->select(
+            'SELECT m.generic_name, m.medicine_name, m.unit, m.id,
+                m.default_qty, m.default_bf_b, m.default_bf_a,
+                m.default_l_b, m.default_l_a, m.default_s_b, m.default_s_a,
+                m.default_bt, m.default_remarks
+            FROM medicines m
+            JOIN (
+                /* Prefer latest row per brand so defaults edited in admin match search/get-meds. */
+                SELECT MAX(id) AS id
+                FROM medicines
+                WHERE (medicine_name LIKE ? OR generic_name LIKE ?)
+                  AND isincluded = 1
+                GROUP BY medicine_name
+            ) AS filtered
+            ON m.id = filtered.id
+            ORDER BY m.medicine_name ASC
+            LIMIT 10',
+            [$like, $like]
+        );
+        $data = [];
+        foreach ($q as $value) {
+            $data[] = [
+                'medicine' => $value->medicine_name,
+                'id' => $value->id,
+                'generic_name' => $value->generic_name,
+                'unit' => $value->unit,
+                'default_qty' => $value->default_qty,
+                'default_bf_b' => $value->default_bf_b,
+                'default_bf_a' => $value->default_bf_a,
+                'default_l_b' => $value->default_l_b,
+                'default_l_a' => $value->default_l_a,
+                'default_s_b' => $value->default_s_b,
+                'default_s_a' => $value->default_s_a,
+                'default_bt' => $value->default_bt,
+                'default_remarks' => $value->default_remarks,
+            ];
         }
+
         return response()->json(['suggestions' => $data]);
     }
-    
-    public function store(Request $request) {
+
+    public function store(Request $request)
+    {
         $field = new Medicine();
-        $field->medicine_name = $request->medicine_name	;
-        //$field->generic_name = $request->generic_name;
-        $field->isincluded = 1;
+        $this->fillMedicineFromRequest($field, $request);
+        $field->isincluded = $request->input('isincluded', 1) ? 1 : 0;
+        if (Schema::hasColumn('medicines', 'created_at')) {
+            $field->created_at = now();
+        }
         $field->save();
         return response()->json(true);
     }
 
-    public function update(Request $request) {
+    public function update(Request $request)
+    {
         $field = Medicine::find($request->id);
-        $field->medicine_name = $request->medicine_name	;
-        //$field->generic_name = $request->generic_name;
-        $field->isincluded = 1;
+        if (!$field) {
+            return response()->json(['message' => 'Medicine not found'], 404);
+        }
+        $this->fillMedicineFromRequest($field, $request);
+        if ($request->has('isincluded')) {
+            $field->isincluded = $request->input('isincluded') ? 1 : 0;
+        }
         $field->save();
         return response()->json(true);
     }
 
-    function delete($id) {
+    function delete($id)
+    {
         $field = Medicine::find($id);
         $field->isincluded = 0;
         $field->save();
-        return response()->json( $field);
+        return response()->json($field);
     }
-    
-    function edit($id) {
-        $data = Medicine::where('id',$id)->first();
+
+    function edit($id)
+    {
+        $data = Medicine::where('id', $id)->first();
         return response()->json($data);
+    }
+
+    private function fillMedicineFromRequest(Medicine $field, Request $request)
+    {
+        $brand = $request->input('medicine_name', $request->input('brand_name'));
+        $field->medicine_name = $brand;
+        if ($request->has('generic_name')) {
+            $field->generic_name = $request->input('generic_name');
+        }
+        foreach ([
+            'unit',
+            'default_qty',
+            'default_bf_b',
+            'default_bf_a',
+            'default_l_b',
+            'default_l_a',
+            'default_s_b',
+            'default_s_a',
+            'default_bt',
+            'default_remarks',
+        ] as $col) {
+            if ($request->has($col)) {
+                $field->{$col} = $request->input($col);
+            }
+        }
     }
 }
