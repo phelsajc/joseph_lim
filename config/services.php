@@ -30,4 +30,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'login_otp' => [
+        'ttl_minutes' => (int) env('LOGIN_OTP_TTL_MINUTES', 10),
+    ],
+
 ];

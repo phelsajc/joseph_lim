@@ -13,6 +13,10 @@ class CreatePeTemplatesTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('pe_templates')) {
+            return;
+        }
+
         Schema::create('pe_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();

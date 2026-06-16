@@ -8,6 +8,10 @@ class AddMedcertControlNoToAppointments extends Migration
 {
     public function up()
     {
+        if (Schema::hasColumn('appointments', 'medcert_control_no')) {
+            return;
+        }
+
         Schema::table('appointments', function (Blueprint $table) {
             $table->string('medcert_control_no', 20)->nullable()->unique()->after('medcert_remarks');
         });

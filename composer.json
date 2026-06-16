@@ -21,7 +21,9 @@
     "require": {
         "php": "^7.3|^8.0",
         "barryvdh/laravel-dompdf": "^2.1",
+        "aws/aws-sdk-php": "^3.0",
         "codedge/laravel-fpdf": "^1.10",
+        "ezyang/htmlpurifier": "^4.19",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
