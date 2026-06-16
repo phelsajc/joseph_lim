@@ -227,11 +227,12 @@ class MedCertA5 extends Fpdf
             $yearMonth = date('Ym', strtotime($date));
             $prefix = $yearMonth . '-JTL';
 
-            $maxSeq = Appointments::where('medcert_control_no', 'like', $prefix . '%')
+            $maxSeq = Appointments::whereNotNull('medcert_control_no')
+                ->where('medcert_control_no', 'like', '%-JTL%')
                 ->lockForUpdate()
                 ->pluck('medcert_control_no')
-                ->map(function ($controlNo) use ($prefix) {
-                    return (int) substr($controlNo, strlen($prefix));
+                ->map(function ($controlNo) {
+                    return preg_match('/-JTL(\d+)$/', $controlNo, $m) ? (int) $m[1] : 0;
                 })
                 ->max();
 
