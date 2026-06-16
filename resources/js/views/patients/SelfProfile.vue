@@ -1,28 +1,22 @@
 <template>
   <div class="app-container">
-    <el-form v-if="user" :model="user">
-      <el-row :gutter="10">
-        <el-col :span="6">
-          <user-card :user="user" :profile="usrprofile" @return-img="getImg" />
-          <!-- <user-bio /> -->
-        </el-col>
-        <el-col :span="18">
-          <user-activity :user="user" :profile="usrprofile" :image="img" />
-        </el-col>
-      </el-row>
-    </el-form>
+    <user-activity
+      v-if="user && user.name"
+      :user="user"
+      :profile="usrprofile"
+      :image="img"
+      @return-img="getImg"
+    />
   </div>
 </template>
 
 <script>
-// import UserBio from './components/UserBio';
-import UserCard from './components/UserCard';
 import UserActivity from './components/UserActivity';
 import Patients from '@/api/patients';
 
 export default {
   name: 'SelfProfile',
-  components: { /* UserBio, */ UserCard, UserActivity },
+  components: { UserActivity },
   data() {
     return {
       user: {},

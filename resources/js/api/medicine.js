@@ -31,6 +31,18 @@ export default {
   getAppointmentMeds(id) {
     return request.get('get-appointment-meds/' + id);
   },
+  reorderAppointmentMeds(data) {
+    return request.post('reorder-appointment-meds', data);
+  },
+  createPrescriptionGroup(data) {
+    return request.post('prescription-groups', data);
+  },
+  updatePrescriptionGroup(id, data) {
+    return request.patch(`prescription-groups/${id}`, data);
+  },
+  deletePrescriptionGroup(id) {
+    return request.delete(`prescription-groups/${id}`);
+  },
   add_rx_blank(data) {
     return request.post('add-meds-blank', data);
   },

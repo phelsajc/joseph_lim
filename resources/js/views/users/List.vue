@@ -1,21 +1,29 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="query.keyword" :placeholder="$t('table.keyword')" style="width: 200px;" class="filter-item"
-        @keyup.enter.native="handleFilter" />
-      <el-select v-model="query.role" :placeholder="$t('table.role')" clearable style="width: 90px" class="filter-item"
-        @change="handleFilter">
+      <el-input
+        v-model="query.keyword" :placeholder="$t('table.keyword')" style="width: 200px;" class="filter-item"
+        @keyup.enter.native="handleFilter"
+      />
+      <el-select
+        v-model="query.role" :placeholder="$t('table.role')" clearable style="width: 90px" class="filter-item"
+        @change="handleFilter"
+      >
         <el-option v-for="item in roles" :key="item" :label="item | uppercaseFirst" :value="item" />
       </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus"
-        @click="handleCreate">
+      <el-button
+        class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus"
+        @click="handleCreate"
+      >
         {{ $t('table.add') }}
       </el-button>
-      <el-button v-waves :loading="downloading" class="filter-item" type="primary" icon="el-icon-download"
-        @click="handleDownload">
+      <el-button
+        v-waves :loading="downloading" class="filter-item" type="primary" icon="el-icon-download"
+        @click="handleDownload"
+      >
         {{ $t('table.export') }}
       </el-button>
     </div>
@@ -45,27 +53,67 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="Actions" width="350">
+      <el-table-column v-if="isAdminUser" align="center" label="Login OTP" width="130">
         <template slot-scope="scope">
-          <router-link v-if="!scope.row.roles.includes('admin')" :to="'/administrator/users/edit/' + scope.row.id">
+          <el-tooltip
+            content="On: user receives a code by email at login. Off: username and password only."
+            placement="top"
+          >
+            <el-switch
+              :value="scope.row.login_otp_enabled"
+              :disabled="loginOtpTogglingId === scope.row.id"
+              @change="handleLoginOtpToggle(scope.row, $event)"
+            />
+          </el-tooltip>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="Actions" width="480">
+        <template slot-scope="scope">
+          <router-link v-if="!isAdminUser && !scope.row.roles.includes('admin')" :to="'/administrator/users/edit/' + scope.row.id">
             <el-button v-permission="['manage user']" type="primary" size="small" icon="el-icon-edit">
               Edit
             </el-button>
           </router-link>
-          <el-button v-if="!scope.row.roles.includes('admin')" v-permission="['manage permission']" type="warning"
-            size="small" icon="el-icon-edit" @click="handleEditPermissions(scope.row.id);">
-            Permissions
+          <el-button
+            v-if="isAdminUser"
+            type="primary"
+            size="small"
+            icon="el-icon-edit"
+            @click="openEditUserDialog(scope.row)"
+          >
+            Edit
           </el-button>
-          <el-button v-if="scope.row.roles.includes('visitor')" v-permission="['manage user']" type="danger"
-            size="small" icon="el-icon-delete" @click="handleDelete(scope.row.id, scope.row.name);">
+          <el-button
+            v-if="isAdminUser"
+            type="warning"
+            plain
+            size="small"
+            icon="el-icon-lock"
+            @click="openResetPasswordDialog(scope.row)"
+          >
+            Reset Password
+          </el-button>
+          <!-- <el-button
+            v-if="!scope.row.roles.includes('admin')" v-permission="['manage permission']" type="warning"
+            size="small" icon="el-icon-edit" @click="handleEditPermissions(scope.row.id);"
+          >
+            Permissions
+          </el-button> -->
+          <el-button
+            v-if="scope.row.roles.includes('visitor')" v-permission="['manage user']" type="danger"
+            size="small" icon="el-icon-delete" @click="handleDelete(scope.row.id, scope.row.name);"
+          >
             Delete
           </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
-      @pagination="getList" />
+    <pagination
+      v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
+      @pagination="getList"
+    />
 
     <el-dialog :visible.sync="dialogPermissionVisible" :title="'Edit Permissions - ' + currentUser.name">
       <div v-if="currentUser.name" v-loading="dialogPermissionLoading" class="form-container">
@@ -73,18 +121,22 @@
           <div class="block">
             <el-form :model="currentUser" label-width="80px" label-position="top">
               <el-form-item label="Menus">
-                <el-tree ref="menuPermissions" :data="normalizedMenuPermissions"
+                <el-tree
+                  ref="menuPermissions" :data="normalizedMenuPermissions"
                   :default-checked-keys="permissionKeys(userMenuPermissions)" :props="permissionProps" show-checkbox
-                  node-key="id" class="permission-tree" />
+                  node-key="id" class="permission-tree"
+                />
               </el-form-item>
             </el-form>
           </div>
           <div class="block">
             <el-form :model="currentUser" label-width="80px" label-position="top">
               <el-form-item label="Permissions">
-                <el-tree ref="otherPermissions" :data="normalizedOtherPermissions"
+                <el-tree
+                  ref="otherPermissions" :data="normalizedOtherPermissions"
                   :default-checked-keys="permissionKeys(userOtherPermissions)" :props="permissionProps" show-checkbox
-                  node-key="id" class="permission-tree" />
+                  node-key="id" class="permission-tree"
+                />
               </el-form-item>
             </el-form>
           </div>
@@ -103,8 +155,10 @@
 
     <el-dialog :title="'Create new user'" :visible.sync="dialogFormVisible">
       <div v-loading="userCreating" class="form-container">
-        <el-form ref="userForm" :rules="rules" :model="newUser" label-position="left" label-width="150px"
-          style="max-width: 500px;">
+        <el-form
+          ref="userForm" :rules="rules" :model="newUser" label-position="left" label-width="150px"
+          style="max-width: 500px;"
+        >
           <el-form-item :label="$t('user.role')" prop="role">
             <el-select v-model="newUser.role" class="filter-item" placeholder="Please select role">
               <el-option v-for="item in nonAdminRoles" :key="item" :label="item | uppercaseFirst" :value="item" />
@@ -125,6 +179,13 @@
           <el-form-item :label="$t('user.confirmPassword')" prop="confirmPassword">
             <el-input v-model="newUser.confirmPassword" show-password />
           </el-form-item>
+          <el-form-item label="Require login OTP">
+            <el-switch
+              v-model="newUser.login_otp_enabled"
+              active-text="On"
+              inactive-text="Off"
+            />
+          </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">
@@ -136,10 +197,58 @@
         </div>
       </div>
     </el-dialog>
+
+    <el-dialog :title="'Edit user — ' + (editUserForm.name || '')" :visible.sync="dialogEditUserVisible" width="480px">
+      <div v-loading="editUserUpdating" class="form-container">
+        <el-form ref="editUserForm" :rules="editUserRules" :model="editUserForm" label-position="left" label-width="100px">
+          <el-form-item :label="$t('user.email')" prop="email">
+            <el-input v-model="editUserForm.email" autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="Role" prop="role">
+            <el-select v-model="editUserForm.role" placeholder="Role" style="width: 100%;">
+              <el-option v-for="item in adminEditableRoles" :key="item" :label="item | uppercaseFirst" :value="item" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Require login OTP">
+            <el-switch
+              v-model="editUserForm.login_otp_enabled"
+              active-text="On"
+              inactive-text="Off"
+            />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogEditUserVisible = false">{{ $t('table.cancel') }}</el-button>
+          <el-button type="primary" :loading="editUserUpdating" @click="submitEditUser">
+            {{ $t('table.confirm') }}
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog :title="'Reset password — ' + resetPasswordTargetName" :visible.sync="dialogResetPasswordVisible" width="480px">
+      <div v-loading="resetPasswordSubmitting" class="form-container">
+        <el-form ref="resetPasswordForm" :rules="resetPasswordRules" :model="resetPasswordForm" label-position="left" label-width="160px">
+          <el-form-item :label="$t('user.password')" prop="password">
+            <el-input v-model="resetPasswordForm.password" type="password" show-password autocomplete="new-password" />
+          </el-form-item>
+          <el-form-item :label="$t('user.confirmPassword')" prop="password_confirmation">
+            <el-input v-model="resetPasswordForm.password_confirmation" type="password" show-password autocomplete="new-password" />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogResetPasswordVisible = false">{{ $t('table.cancel') }}</el-button>
+          <el-button type="primary" :loading="resetPasswordSubmitting" @click="submitResetPassword">
+            {{ $t('table.confirm') }}
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import Pagination from '@/components/Pagination'; // Secondary package based on el-pagination
 import UserResource from '@/api/user';
 import Resource from '@/api/resource';
@@ -162,6 +271,13 @@ export default {
         callback();
       }
     };
+    var validateResetPasswordConfirm = (rule, value, callback) => {
+      if (value !== this.resetPasswordForm.password) {
+        callback(new Error('Password is mismatched!'));
+      } else {
+        callback();
+      }
+    };
     return {
       list: null,
       total: 0,
@@ -176,10 +292,40 @@ export default {
       },
       roles: ['admin', 'manager', 'editor', 'user', 'visitor'],
       nonAdminRoles: ['editor', 'user', 'visitor', 'doctor', 'secretary', 'admin'],
+      adminEditableRoles: ['admin', 'doctor', 'pt', 'user'],
       newUser: {},
       dialogFormVisible: false,
       dialogPermissionVisible: false,
       dialogPermissionLoading: false,
+      dialogEditUserVisible: false,
+      dialogResetPasswordVisible: false,
+      editUserUpdating: false,
+      loginOtpTogglingId: null,
+      resetPasswordSubmitting: false,
+      editUserForm: {
+        id: null,
+        name: '',
+        email: '',
+        role: 'user',
+        login_otp_enabled: true,
+      },
+      editUserRules: {
+        email: [
+          { required: true, message: 'Email is required', trigger: 'blur' },
+          { type: 'email', message: 'Please input correct email address', trigger: ['blur', 'change'] },
+        ],
+        role: [{ required: true, message: 'Role is required', trigger: 'change' }],
+      },
+      resetPasswordUserId: null,
+      resetPasswordTargetName: '',
+      resetPasswordForm: {
+        password: '',
+        password_confirmation: '',
+      },
+      resetPasswordRules: {
+        password: [{ required: true, min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }],
+        password_confirmation: [{ validator: validateResetPasswordConfirm, trigger: 'blur' }],
+      },
       currentUserId: 0,
       currentUser: {
         name: '',
@@ -208,6 +354,10 @@ export default {
     };
   },
   computed: {
+    ...mapGetters({ userRoles: 'roles' }),
+    isAdminUser() {
+      return Array.isArray(this.userRoles) && this.userRoles.includes('admin');
+    },
     normalizedMenuPermissions() {
       let tmp = [];
       this.currentUser.permissions.role.forEach(permission => {
@@ -300,6 +450,9 @@ export default {
       this.list = data;
       this.list.forEach((element, index) => {
         element['index'] = (page - 1) * limit + index + 1;
+        if (typeof element.login_otp_enabled === 'undefined') {
+          element.login_otp_enabled = true;
+        }
       });
       this.total = meta.total;
       this.loading = false;
@@ -391,6 +544,7 @@ export default {
         password: '',
         confirmPassword: '',
         role: 'user',
+        login_otp_enabled: true,
       };
     },
     handleDownload() {
@@ -450,6 +604,128 @@ export default {
         });
         this.dialogPermissionLoading = false;
         this.dialogPermissionVisible = false;
+      });
+    },
+    resolveEditableRole(row) {
+      const assigned = row.roles || [];
+      const match = this.adminEditableRoles.find(r => assigned.includes(r));
+      return match || 'user';
+    },
+    handleLoginOtpToggle(row, enabled) {
+      if (!this.isAdminUser) {
+        return;
+      }
+      const prev = row.login_otp_enabled !== false;
+      if (prev === enabled) {
+        return;
+      }
+      this.$set(row, 'login_otp_enabled', enabled);
+      this.loginOtpTogglingId = row.id;
+      userResource
+        .update(row.id, {
+          name: row.name,
+          email: row.email,
+          roles: row.roles,
+          login_otp_enabled: enabled,
+        })
+        .then(() => {
+          this.$message({
+            message: 'Login OTP setting updated.',
+            type: 'success',
+            duration: 3000,
+          });
+        })
+        .catch(() => {
+          this.$set(row, 'login_otp_enabled', prev);
+        })
+        .finally(() => {
+          this.loginOtpTogglingId = null;
+        });
+    },
+    openEditUserDialog(row) {
+      this.editUserForm = {
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        role: this.resolveEditableRole(row),
+        login_otp_enabled: row.login_otp_enabled !== false,
+      };
+      this.dialogEditUserVisible = true;
+      this.$nextTick(() => {
+        if (this.$refs.editUserForm) {
+          this.$refs.editUserForm.clearValidate();
+        }
+      });
+    },
+    submitEditUser() {
+      this.$refs.editUserForm.validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        this.editUserUpdating = true;
+        userResource
+          .update(this.editUserForm.id, {
+            name: this.editUserForm.name,
+            email: this.editUserForm.email,
+            roles: [this.editUserForm.role],
+            login_otp_enabled: this.editUserForm.login_otp_enabled,
+          })
+          .then(() => {
+            this.$message({
+              message: 'User has been updated successfully.',
+              type: 'success',
+              duration: 5 * 1000,
+            });
+            this.dialogEditUserVisible = false;
+            this.getList();
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+          .finally(() => {
+            this.editUserUpdating = false;
+          });
+      });
+    },
+    openResetPasswordDialog(row) {
+      this.resetPasswordUserId = row.id;
+      this.resetPasswordTargetName = row.name || row.email || '';
+      this.resetPasswordForm = {
+        password: '',
+        password_confirmation: '',
+      };
+      this.dialogResetPasswordVisible = true;
+      this.$nextTick(() => {
+        if (this.$refs.resetPasswordForm) {
+          this.$refs.resetPasswordForm.clearValidate();
+        }
+      });
+    },
+    submitResetPassword() {
+      this.$refs.resetPasswordForm.validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        this.resetPasswordSubmitting = true;
+        userResource
+          .resetPassword(this.resetPasswordUserId, {
+            password: this.resetPasswordForm.password,
+            password_confirmation: this.resetPasswordForm.password_confirmation,
+          })
+          .then(() => {
+            this.$message({
+              message: 'Password has been reset successfully.',
+              type: 'success',
+              duration: 5 * 1000,
+            });
+            this.dialogResetPasswordVisible = false;
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+          .finally(() => {
+            this.resetPasswordSubmitting = false;
+          });
       });
     },
   },

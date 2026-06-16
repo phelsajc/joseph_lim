@@ -31,4 +31,16 @@ export default {
   getAppointmentDiagnostics(id) {
     return request.get('get-appointment-diagnostics/' + id);
   },
+  reorderAppointmentDiagnostics(data) {
+    return request.post('reorder-appointment-diagnostics', data);
+  },
+  createDiagnosticGroup(data) {
+    return request.post('diagnostic-groups', data);
+  },
+  updateDiagnosticGroup(id, data) {
+    return request.patch(`diagnostic-groups/${id}`, data);
+  },
+  deleteDiagnosticGroup(id) {
+    return request.delete(`diagnostic-groups/${id}`);
+  },
 };

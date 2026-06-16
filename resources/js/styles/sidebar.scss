@@ -3,7 +3,7 @@
   .main-container {
     min-height: 100%;
     transition: margin-left .28s;
-    margin-left: $sideBarWidth;
+    margin-left: 0;
     position: relative;
   }
 
@@ -88,11 +88,11 @@
 
   .hideSidebar {
     .sidebar-container {
-      width: 54px !important;
+      width: $sideBarCollapsedWidth !important;
     }
 
     .main-container {
-      margin-left: 54px;
+      margin-left: $sideBarCollapsedWidth;
     }
 
     .svg-icon {

@@ -20,6 +20,14 @@ class UserResource extends Resource {
       data: permissions,
     });
   }
+
+  resetPassword(id, data) {
+    return request({
+      url: '/' + this.uri + '/' + id + '/reset-password',
+      method: 'post',
+      data,
+    });
+  }
 }
 
 export { UserResource as default };

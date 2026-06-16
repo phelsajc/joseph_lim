@@ -8,12 +8,12 @@
           <p class="dashboard-subtitle">Welcome back! Here's what's happening with your medical practice today.</p>
         </div>
         <div class="header-actions">
-          <el-button 
-            type="primary" 
-            icon="el-icon-plus" 
-            @click="addAppointment"
+          <el-button
+            type="primary"
+            icon="el-icon-plus"
             class="add-appointment-btn"
             size="medium"
+            @click="addAppointment"
           >
             Add Appointment
           </el-button>
@@ -23,12 +23,12 @@
 
     <!-- Statistics Cards -->
     <div class="stats-section">
-      <panel-group 
-        @handleSetLineChartData="handleSetLineChartData" 
-        :total_patients="count_px" 
-        :total_meds="count_meds" 
-        :total_dxs="count_dx" 
+      <panel-group
+        :total_patients="count_px"
+        :total_meds="count_meds"
+        :total_dxs="count_dx"
         :total_appts="count_appt"
+        @handleSetLineChartData="handleSetLineChartData"
       />
     </div>
 
@@ -42,7 +42,6 @@
               <div class="chart-actions">
                 <el-button-group>
                   <el-button size="mini" @click="refreshChart">Refresh</el-button>
-                  <el-button size="mini" icon="el-icon-download" @click="exportChart">Export</el-button>
                 </el-button-group>
               </div>
             </div>
@@ -53,111 +52,48 @@
                 height="350"
                 :options="chartOptions"
                 :series="series"
-              ></apexchart>
+              />
             </div>
           </div>
-      </el-col>
-         <el-col :xs="24" :sm="24" :md="24" :lg="8" :xl="8">
-           <div class="quick-stats-card">
-             <h3 class="card-title">Today's Activity</h3>
-             <div class="quick-stats">
-               <div class="stat-item">
-                 <div class="stat-icon patients">
-                   <i class="el-icon-user-solid"></i>
-                 </div>
-                 <div class="stat-content">
-                   <span class="stat-label">New Patients Today</span>
-                   <span class="stat-value">{{ new_patients_today }}</span>
-                 </div>
-               </div>
-               <div class="stat-item">
-                 <div class="stat-icon appointments">
-                   <i class="el-icon-check"></i>
-                 </div>
-                 <div class="stat-content">
-                   <span class="stat-label">Completed Today</span>
-                   <span class="stat-value">{{ completedToday }}</span>
-                 </div>
-               </div>
-               <div class="stat-item">
-                 <div class="stat-icon pending">
-                   <i class="el-icon-time"></i>
-                 </div>
-                 <div class="stat-content">
-                   <span class="stat-label">Pending Today</span>
-                   <span class="stat-value">{{ pendingToday }}</span>
-                 </div>
-               </div>
-               <!-- <div class="stat-item">
-                 <div class="stat-icon revenue">
-                   <i class="el-icon-money"></i>
-                 </div>
-                 <div class="stat-content">
-                   <span class="stat-label">Today's Revenue</span>
-                   <span class="stat-value">${{ todayRevenue }}</span>
-                 </div>
-               </div> -->
-             </div>
-        </div>
-         </el-col>
-    </el-row>
-     </div>
+        </el-col>
+        <el-col :xs="24" :sm="24" :md="24" :lg="8" :xl="8">
+          <div class="quick-stats-card">
+            <h3 class="card-title">Today's Activity</h3>
+            <div class="quick-stats">
+              <div class="stat-item">
+                <div class="stat-icon patients">
+                  <i class="el-icon-user-solid" />
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">New Patients Today</span>
+                  <span class="stat-value">{{ new_patients_today }}</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon appointments">
+                  <i class="el-icon-check" />
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Completed Today</span>
+                  <span class="stat-value">{{ completedToday }}</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon pending">
+                  <i class="el-icon-time" />
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Pending Today</span>
+                  <span class="stat-value">{{ pendingToday }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
 
-     <!-- Analytics Overview Section -->
-     <!-- <div class="analytics-section">
-       <el-row :gutter="24">
-         <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
-           <div class="analytics-card">
-             <div class="analytics-header">
-               <h4 class="analytics-title">Patient Growth</h4>
-               <i class="el-icon-trend-charts analytics-icon"></i>
-             </div>
-             <div class="analytics-content">
-               <div class="analytics-value">{{ patientGrowthRate }}%</div>
-               <div class="analytics-subtitle">vs last month</div>
-               <div class="analytics-trend">
-                 <i class="el-icon-arrow-up trend-up"></i>
-                 <span>+12% this week</span>
-               </div>
-             </div>
-           </div>
-      </el-col>
-         <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
-           <div class="analytics-card">
-             <div class="analytics-header">
-               <h4 class="analytics-title">Appointment Rate</h4>
-               <i class="el-icon-pie-chart analytics-icon"></i>
-             </div>
-             <div class="analytics-content">
-               <div class="analytics-value">{{ appointmentRate }}%</div>
-               <div class="analytics-subtitle">completion rate</div>
-               <div class="analytics-trend">
-                 <i class="el-icon-arrow-up trend-up"></i>
-                 <span>+5% this month</span>
-               </div>
-             </div>
-           </div>
-      </el-col>
-         <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
-           <div class="analytics-card">
-             <div class="analytics-header">
-               <h4 class="analytics-title">Revenue Growth</h4>
-               <i class="el-icon-coin analytics-icon"></i>
-             </div>
-             <div class="analytics-content">
-               <div class="analytics-value">{{ revenueGrowthRate }}%</div>
-               <div class="analytics-subtitle">vs last month</div>
-               <div class="analytics-trend">
-                 <i class="el-icon-arrow-up trend-up"></i>
-                 <span>+8% this week</span>
-               </div>
-             </div>
-           </div>
-      </el-col>
-       </el-row>
-     </div> -->
-
-     <!-- Calendar Section -->
+    <!-- Calendar Section -->
     <div class="calendar-section">
       <div class="calendar-card">
         <div class="calendar-header">
@@ -169,56 +105,26 @@
             <el-button-group>
               <el-button size="mini" icon="el-icon-refresh" @click="refreshCalendar">Refresh</el-button>
               <el-button size="mini" icon="el-icon-plus" @click="addAppointment">Add Appointment</el-button>
-              <el-button size="mini" @click="viewAllAppointments">View All</el-button>
+              <!-- <el-button size="mini" @click="viewAllAppointments">View All</el-button> -->
             </el-button-group>
           </div>
         </div>
         <div class="calendar-content">
           <div class="calendar-wrapper">
-            <full-calendar 
-              :events="events" 
+            <full-calendar
+              :events="events"
               locale="en"
               :config="calendarConfig"
               @event-click="handleEventClick"
               @day-click="handleDayClick"
-            ></full-calendar>
+            />
           </div>
         </div>
-       <!--  <div class="calendar-footer" v-if="events && events.length > 0">
-          <div class="upcoming-events">
-            <h4 class="events-title">Today's Schedule</h4>
-            <div class="events-list">
-              <div 
-                v-for="event in todayEvents" 
-                :key="event.id" 
-                class="event-item"
-                @click="handleEventClick(event)"
-              >
-                <div class="event-time">
-                  <i class="el-icon-time"></i>
-                  <span>{{ formatEventTime(event.start) }}</span>
-                </div>
-                <div class="event-details">
-                  <span class="event-title">{{ event.title }}</span>
-                  <span class="event-description" v-if="event.description">{{ event.description }}</span>
-                </div>
-                <div class="event-status">
-                  <el-tag 
-                    size="mini" 
-                    :type="getEventStatusType(event)"
-                  >
-                    {{ getEventStatus(event) }}
-                  </el-tag>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> -->
       </div>
     </div>
 
     <!-- Recent Activity Section -->
-    <div class="activity-section" v-if="todayspxs && todayspxs.length > 0">
+    <div v-if="todayspxs && todayspxs.length > 0" class="activity-section">
       <div class="activity-card">
         <div class="activity-header">
           <h3 class="activity-title">Today's Patients</h3>
@@ -226,13 +132,13 @@
         </div>
         <div class="activity-content">
           <div class="patient-list">
-            <div 
-              v-for="patient in todayspxs.slice(0, 5)" 
-              :key="patient.id" 
+            <div
+              v-for="patient in todayspxs.slice(0, 5)"
+              :key="patient.id"
               class="patient-item"
             >
               <div class="patient-avatar">
-                <i class="el-icon-user"></i>
+                <i class="el-icon-user" />
               </div>
               <div class="patient-info">
                 <span class="patient-name">{{ patient.patient || 'Unknown Patient' }}</span>
@@ -251,59 +157,95 @@
     <el-dialog
       title="Add New Appointment"
       :visible.sync="showAppointmentModal"
-      width="600px"
+      width="640px"
+      custom-class="appointment-modal"
+      append-to-body
       :close-on-click-modal="false"
       :close-on-press-escape="false"
-      class="appointment-modal"
     >
       <div class="modal-content">
-        <el-form ref="appForm" :model="form" :rules="rules" label-position="left" label-width="150px" style="max-width: 500px;">
-          <el-form-item :label="'Patient'" prop="patient">
-            <el-autocomplete
-              v-model="form.patient"
-              :fetch-suggestions="querySearch"
-              popper-class="my-autocomplete"
-              placeholder="Please input"
-              @select="handleSelect"
-              style="width: 150%;"
-            >
-              <template #suffix>
-                <el-icon class="el-input__icon">
-                  <edit />
-                </el-icon>
-              </template>
-              <template #default="{ item }">
-                <div class="value">{{ item.patientname }}</div>
-              </template>
-            </el-autocomplete>
-          </el-form-item>
-          <el-form-item :label="'Date'" prop="apt_dt">
-            <el-date-picker v-model="form.apt_dt" type="date" :picker-options="pickerOptions" placeholder="Pick a day" style="width: 40%;"/>
-          </el-form-item>
-          <el-form-item :label="'Systolic'" prop="vit_sys">
-            <el-input v-model="form.vit_sys" style="width: 23%;"/>
-          </el-form-item>
-          <el-form-item :label="'Diastolic'" prop="vit_dia">
-            <el-input v-model="form.vit_dia" style="width: 23%;"/>
-          </el-form-item>
-          <el-form-item :label="'Weight'" prop="weight">
-            <el-input v-model="form.weight" style="width: 23%;"/>
-          </el-form-item>
-          <el-form-item :label="'Height'" prop="height">
-            <el-input v-model="form.height" style="width: 23%;"/>
-          </el-form-item>
-          <el-form-item :label="'Temperature'" prop="vit_temp">
-            <el-input v-model="form.vit_temp" style="width: 23%;"/>
-          </el-form-item>
-          <el-form-item :label="'CR'" prop="vit_cr">
-            <el-input v-model="form.vit_cr" style="width: 23%;"/>
-          </el-form-item>
-          <el-form-item :label="'RR'" prop="vit_rr">
-            <el-input v-model="form.vit_rr" style="width: 23%;"/>
-          </el-form-item>
-          <el-form-item :label="'Remarks'" prop="remarks">
-            <el-input v-model="form.nurse_remarks" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px" :rows="2" type="textarea" placeholder="Please input" />
-          </el-form-item>
+        <el-form
+          ref="appForm"
+          :model="form"
+          :rules="rules"
+          label-position="top"
+          class="appointment-form"
+        >
+          <el-row :gutter="16">
+            <el-col :span="24">
+              <el-form-item label="Patient" prop="patient">
+                <el-autocomplete
+                  v-model="form.patient"
+                  class="appointment-field-full"
+                  :fetch-suggestions="querySearch"
+                  popper-class="my-autocomplete"
+                  placeholder="Search patient"
+                  @select="handleSelect"
+                >
+                  <template #default="{ item }">
+                    <div class="value">{{ item.patientname }}</div>
+                  </template>
+                </el-autocomplete>
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="Date" prop="apt_dt">
+                <el-date-picker
+                  v-model="form.apt_dt"
+                  class="appointment-field-full"
+                  type="date"
+                  :picker-options="pickerOptions"
+                  placeholder="Pick a day"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="12" :sm="8">
+              <el-form-item label="Systolic" prop="vit_sys">
+                <el-input v-model="form.vit_sys" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="12" :sm="8">
+              <el-form-item label="Diastolic" prop="vit_dia">
+                <el-input v-model="form.vit_dia" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="12" :sm="8">
+              <el-form-item label="Weight" prop="weight">
+                <el-input v-model="form.weight" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="12" :sm="8">
+              <el-form-item label="Height" prop="height">
+                <el-input v-model="form.height" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="12" :sm="8">
+              <el-form-item label="Temperature" prop="vit_temp">
+                <el-input v-model="form.vit_temp" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="12" :sm="8">
+              <el-form-item label="CR" prop="vit_cr">
+                <el-input v-model="form.vit_cr" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="12" :sm="8">
+              <el-form-item label="RR" prop="vit_rr">
+                <el-input v-model="form.vit_rr" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="Remarks" prop="remarks">
+                <el-input
+                  v-model="form.nurse_remarks"
+                  :autosize="{ minRows: 2, maxRows: 4 }"
+                  :rows="2"
+                  type="textarea"
+                  placeholder="Please input"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
         </el-form>
       </div>
 
@@ -318,19 +260,11 @@
 </template>
 
 <script>
-//import GithubCorner from '@/components/GithubCorner';
-import PanelGroup from './components/PanelGroup';
-import LineChart from './components/LineChart';
-import RaddarChart from './components/RaddarChart';
-import PieChart from './components/PieChart';
-import BarChart from './components/BarChart';
-import TransactionTable from './components/TransactionTable';
-import TodoList from './components/TodoList';
-import BoxCard from './components/BoxCard';
-import fullCalendar from 'vue-fullcalendar'
+// import GithubCorner from '@/components/GithubCorner';
+// import LineChart from './components/LineChart';
+import fullCalendar from 'vue-fullcalendar';
 import Patients from '@/api/patients';
-import ApexCharts from "apexcharts";
-import VueApexCharts from "vue-apexcharts";
+import VueApexCharts from 'vue-apexcharts';
 import moment from 'moment-timezone';
 
 const lineChartData = {
@@ -356,32 +290,8 @@ export default {
   name: 'DashboardAdmin',
   components: {
     fullCalendar,
-    //GithubCorner,
-    PanelGroup,
-    LineChart,
-    RaddarChart,
-    PieChart,
-    BarChart,
-    TransactionTable,
-    TodoList,
-    BoxCard,
+    // LineChart,
     apexchart: VueApexCharts,
-  },
-  created() {
-    this.dashoboard();
-  },
-  mounted() {
-    Echo.channel('patients')
-      .listen('NewAppointments', (e) => {
-        this.dashoboard();
-      });
-    
-    // Add keyboard shortcut for adding appointments (Ctrl/Cmd + N)
-    document.addEventListener('keydown', this.handleKeyboardShortcut);
-  },
-  beforeDestroy() {
-    // Clean up keyboard event listener
-    document.removeEventListener('keydown', this.handleKeyboardShortcut);
   },
   data() {
     return {
@@ -401,7 +311,7 @@ export default {
         header: {
           left: 'prev,next today',
           center: 'title',
-          right: 'month,agendaWeek,agendaDay'
+          right: 'month,agendaWeek,agendaDay',
         },
         defaultView: 'month',
         height: 'auto',
@@ -420,14 +330,14 @@ export default {
           today: 'Today',
           month: 'Month',
           week: 'Week',
-          day: 'Day'
+          day: 'Day',
         },
-        eventRender: this.customEventRender
+        eventRender: this.customEventRender,
       },
       chartOptions: {
         chart: {
           height: 350,
-          type: "line",
+          type: 'line',
           zoom: {
             enabled: false,
           },
@@ -436,32 +346,32 @@ export default {
           enabled: true,
           background: {
             enabled: true,
-            foreColor: "#000000",
+            foreColor: '#000000',
             padding: 4,
             borderRadius: 2,
             borderWidth: 1,
-            borderColor: "#000000",
+            borderColor: '#000000',
             opacity: 0.9,
             dropShadow: {
               enabled: false,
               top: 1,
               left: 1,
               blur: 1,
-              color: "#000000",
+              color: '#000000',
               opacity: 0.45,
             },
           },
         },
         stroke: {
-          curve: "straight",
+          curve: 'straight',
         },
         title: {
-          text: "Monthly Census Report",
-          align: "left",
+          text: 'Monthly Census Report',
+          align: 'left',
         },
         grid: {
           row: {
-            colors: ["#f3f3f3", "transparent"],
+            colors: ['#f3f3f3', 'transparent'],
             opacity: 0.5,
           },
         },
@@ -469,8 +379,8 @@ export default {
           categories: [],
         },
         legend: {
-          position: "top",
-          horizontalAlign: "right",
+          position: 'top',
+          horizontalAlign: 'right',
           floating: true,
           offsetY: -25,
           offsetX: -5,
@@ -479,7 +389,7 @@ export default {
       chartOptionsBar: {
         chart: {
           height: 350,
-          type: "line",
+          type: 'line',
           zoom: {
             enabled: false,
           },
@@ -488,32 +398,32 @@ export default {
           enabled: true,
           background: {
             enabled: true,
-            foreColor: "#000000",
+            foreColor: '#000000',
             padding: 4,
             borderRadius: 2,
             borderWidth: 1,
-            borderColor: "#000000",
+            borderColor: '#000000',
             opacity: 0.9,
             dropShadow: {
               enabled: false,
               top: 1,
               left: 1,
               blur: 1,
-              color: "#000000",
+              color: '#000000',
               opacity: 0.45,
             },
           },
         },
         stroke: {
-          curve: "straight",
+          curve: 'straight',
         },
         title: {
-          text: "Monthly Revenue Report",
-          align: "left",
+          text: 'Monthly Revenue Report',
+          align: 'left',
         },
         grid: {
           row: {
-            colors: ["#f3f3f3", "transparent"],
+            colors: ['#f3f3f3', 'transparent'],
             opacity: 0.5,
           },
         },
@@ -521,8 +431,8 @@ export default {
           categories: [],
         },
         legend: {
-          position: "top",
-          horizontalAlign: "right",
+          position: 'top',
+          horizontalAlign: 'right',
           floating: true,
           offsetY: -25,
           offsetX: -5,
@@ -541,6 +451,7 @@ export default {
         vit_temp: null,
         vit_cr: null,
         vit_rr: null,
+        nurse_remarks: null,
       },
       showAppointmentModal: false,
       savingAppointment: false,
@@ -553,33 +464,35 @@ export default {
         chief_complaints: '',
         appointment_type: 'consultation',
         duration: 30,
-        notes: ''
+        notes: '',
       },
       appointmentRules: {
         patient_id: [
-          { required: true, message: 'Please select a patient', trigger: 'change' }
+          { required: true, message: 'Please select a patient', trigger: 'change' },
         ],
         appointment_date: [
-          { required: true, message: 'Please select appointment date', trigger: 'change' }
+          { required: true, message: 'Please select appointment date', trigger: 'change' },
         ],
         appointment_time: [
-          { required: true, message: 'Please select appointment time', trigger: 'change' }
-        ]
+          { required: true, message: 'Please select appointment time', trigger: 'change' },
+        ],
       },
       datePickerOptions: {
         disabledDate(time) {
           return time.getTime() < Date.now() - 8.64e7; // Disable past dates
-        }
+        },
       },
     };
   },
   computed: {
     todayEvents() {
-      if (!this.events || this.events.length === 0) return [];
-      
+      if (!this.events || this.events.length === 0) {
+        return [];
+      }
+
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
-      
+
       return this.events.filter(event => {
         const eventDate = new Date(event.start);
         const eventDateStr = eventDate.toISOString().split('T')[0];
@@ -606,13 +519,31 @@ export default {
     appointmentRate() {
       // Calculate appointment completion rate
       const totalToday = this.completedToday + this.pendingToday;
-      if (totalToday === 0) return 0;
+      if (totalToday === 0) {
+        return 0;
+      }
       return Math.round((this.completedToday / totalToday) * 100);
     },
     revenueGrowthRate() {
       // Mock calculation for revenue growth rate
       return Math.floor(Math.random() * 15) + 5; // Random between 5-20%
-    }
+    },
+  },
+  created() {
+    this.dashoboard();
+  },
+  mounted() {
+    Echo.channel('patients')
+      .listen('NewAppointments', (e) => {
+        this.dashoboard();
+      });
+
+    // Add keyboard shortcut for adding appointments (Ctrl/Cmd + N)
+    document.addEventListener('keydown', this.handleKeyboardShortcut);
+  },
+  beforeDestroy() {
+    // Clean up keyboard event listener
+    document.removeEventListener('keydown', this.handleKeyboardShortcut);
   },
   methods: {
     async querySearch(queryString, cb) {
@@ -643,7 +574,7 @@ export default {
     saveAppointment(){
       this.$refs['appForm'].validate((valid) => {
         if (valid) {
-          //this.isProcessing = true;
+          // this.isProcessing = true;
           this.form.apt_dt = moment(this.form.apt_dt).tz('Asia/Manila').format('YYYY-MM-DD');
           Patients.addAppointment(this.form).then((response) => {
             this.form.complaints = '';
@@ -657,16 +588,17 @@ export default {
               duration: 5 * 1000,
             });
             this.showAppointmentModal = false;
+            this.dashoboard();
           })
             .catch((err) => {
               console.error('Error adding suggestions:', err);
             })
             .finally(() => {
               // This will always run, regardless of the request outcome
-              //this.isProcessing = false;
+              // this.isProcessing = false;
             });
-          //}, 5000);
-        }else{
+          // }, 5000);
+        } else {
           console.log('error submit!!');
           return false;
         }
@@ -697,7 +629,7 @@ export default {
           },
         };
         this.events = response.calendar;
-        console.log(this.events)
+        console.log(this.events);
         this.todayspxs = response.todaysAppt;
       })
         .catch((err) => {
@@ -735,16 +667,16 @@ export default {
     },
     formatEventTime(startTime) {
       const date = new Date(startTime);
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
         minute: '2-digit',
-        hour12: true 
+        hour12: true,
       });
     },
     getEventStatus(event) {
       const now = new Date();
       const eventTime = new Date(event.start);
-      
+
       if (eventTime < now) {
         return 'Completed';
       } else if (eventTime.toDateString() === now.toDateString()) {
@@ -756,7 +688,7 @@ export default {
     getEventStatusType(event) {
       const now = new Date();
       const eventTime = new Date(event.start);
-      
+
       if (eventTime < now) {
         return 'success';
       } else if (eventTime.toDateString() === now.toDateString()) {
@@ -765,15 +697,15 @@ export default {
         return 'info';
       }
     },
-     customEventRender(event, element) {
-       // Custom event rendering for better visual appearance
-       element.css({
-         'border-radius': '8px',
-         'border': 'none',
-         'box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
-         'font-weight': '500'
-         });
-     },
+    customEventRender(event, element) {
+      // Custom event rendering for better visual appearance
+      element.css({
+        'border-radius': '8px',
+        'border': 'none',
+        'box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
+        'font-weight': '500',
+      });
+    },
     handleKeyboardShortcut(event) {
       // Ctrl/Cmd + N to add new appointment
       if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
@@ -789,7 +721,7 @@ export default {
         chief_complaints: '',
         appointment_type: 'consultation',
         duration: 30,
-        notes: ''
+        notes: '',
       };
       this.patientOptions = [];
       // Clear form validation
@@ -811,8 +743,8 @@ export default {
             { id: 2, name: 'Jane Smith' },
             { id: 3, name: 'Bob Johnson' },
             { id: 4, name: 'Alice Brown' },
-            { id: 5, name: 'Charlie Wilson' }
-          ].filter(patient => 
+            { id: 5, name: 'Charlie Wilson' },
+          ].filter(patient =>
             patient.name.toLowerCase().includes(query.toLowerCase())
           );
           this.patientLoading = false;
@@ -825,24 +757,24 @@ export default {
       this.$refs.appointmentForm.validate((valid) => {
         if (valid) {
           this.savingAppointment = true;
-          
+
           // Prepare appointment data
-          const appointmentData = {
+          /* const appointmentData = {
             ...this.appointmentForm,
             appointment_date: this.formatDateForAPI(this.appointmentForm.appointment_date),
-            appointment_time: this.appointmentForm.appointment_time
-          };
-          
+            appointment_time: this.appointmentForm.appointment_time,
+          }; */
+
           // Simulate API call - replace with actual appointment creation API
           setTimeout(() => {
             this.savingAppointment = false;
             this.closeAppointmentModal();
             this.$message.success('Appointment created successfully!');
-            
+
             // Refresh dashboard data
             this.dashoboard();
           }, 1000);
-          
+
           // TODO: Replace with actual API call
           // Patients.createAppointment(appointmentData).then(() => {
           //   this.savingAppointment = false;
@@ -859,7 +791,9 @@ export default {
       });
     },
     formatDateForAPI(date) {
-      if (!date) return '';
+      if (!date) {
+        return '';
+      }
       const d = new Date(date);
       return d.toISOString().split('T')[0];
     },
@@ -872,7 +806,7 @@ export default {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   padding: 24px;
-  
+
   .dashboard-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 16px;
@@ -880,14 +814,14 @@ export default {
     margin-bottom: 32px;
     color: white;
     box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-    
+
     .header-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 20px;
-      
+
       .welcome-section {
         .dashboard-title {
           font-size: 2.5rem;
@@ -895,13 +829,13 @@ export default {
           margin: 0 0 8px 0;
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
          .dashboard-subtitle {
            font-size: 1.1rem;
            opacity: 0.9;
            margin: 0;
            font-weight: 300;
-           
+
            kbd {
              background: rgba(255, 255, 255, 0.2);
              border: 1px solid rgba(255, 255, 255, 0.3);
@@ -915,7 +849,7 @@ export default {
            }
          }
       }
-      
+
        .header-actions {
          .add-appointment-btn {
            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
@@ -929,18 +863,18 @@ export default {
            letter-spacing: 0.5px;
            transition: all 0.3s ease;
            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
-           
+
            &:hover {
              background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
              border-color: rgba(255, 255, 255, 0.5);
              transform: translateY(-3px);
              box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
            }
-           
+
            &:active {
              transform: translateY(-1px);
            }
-           
+
            .el-icon-plus {
              margin-right: 8px;
              font-size: 16px;
@@ -949,14 +883,14 @@ export default {
        }
     }
   }
-  
+
   .stats-section {
     margin-bottom: 32px;
   }
-  
+
   .charts-section {
     margin-bottom: 32px;
-    
+
     .chart-card {
       background: white;
       border-radius: 16px;
@@ -964,12 +898,12 @@ export default {
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
       border: 1px solid rgba(0, 0, 0, 0.05);
       transition: all 0.3s ease;
-      
+
       &:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
       }
-      
+
       .chart-header {
         display: flex;
         justify-content: space-between;
@@ -977,21 +911,21 @@ export default {
         margin-bottom: 24px;
         padding-bottom: 16px;
         border-bottom: 2px solid #f0f2f5;
-        
+
         .chart-title {
           font-size: 1.5rem;
           font-weight: 600;
           color: #2c3e50;
           margin: 0;
         }
-        
+
         .chart-actions {
           .el-button-group {
             .el-button {
               border-radius: 8px;
               font-weight: 500;
               transition: all 0.3s ease;
-              
+
               &:hover {
                 transform: translateY(-1px);
               }
@@ -999,12 +933,12 @@ export default {
           }
         }
       }
-      
+
       .chart-content {
         position: relative;
       }
     }
-    
+
     .quick-stats-card {
       background: white;
       border-radius: 16px;
@@ -1013,12 +947,12 @@ export default {
       border: 1px solid rgba(0, 0, 0, 0.05);
       height: 100%;
       transition: all 0.3s ease;
-      
+
       &:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
       }
-      
+
       .card-title {
         font-size: 1.3rem;
         font-weight: 600;
@@ -1027,18 +961,18 @@ export default {
         padding-bottom: 16px;
         border-bottom: 2px solid #f0f2f5;
       }
-      
+
       .quick-stats {
         .stat-item {
           display: flex;
           align-items: center;
           padding: 16px 0;
           border-bottom: 1px solid #f8f9fa;
-          
+
           &:last-child {
             border-bottom: none;
           }
-          
+
           .stat-icon {
             width: 48px;
             height: 48px;
@@ -1049,31 +983,31 @@ export default {
             margin-right: 16px;
             font-size: 20px;
             color: white;
-            
+
             &.patients {
               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             }
-            
+
              &.appointments {
                background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
              }
-            
+
              &.medicines {
                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
              }
-             
+
              &.pending {
                background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
              }
-             
+
              &.revenue {
                background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
              }
           }
-          
+
           .stat-content {
             flex: 1;
-            
+
             .stat-label {
               display: block;
               font-size: 0.9rem;
@@ -1081,7 +1015,7 @@ export default {
               margin-bottom: 4px;
               font-weight: 500;
             }
-            
+
             .stat-value {
               display: block;
               font-size: 1.5rem;
@@ -1093,10 +1027,10 @@ export default {
       }
     }
    }
-   
+
    .analytics-section {
      margin-bottom: 32px;
-     
+
      .analytics-card {
        background: white;
        border-radius: 16px;
@@ -1105,32 +1039,32 @@ export default {
        border: 1px solid rgba(0, 0, 0, 0.05);
        transition: all 0.3s ease;
        height: 100%;
-       
+
        &:hover {
          transform: translateY(-4px);
          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
        }
-       
+
        .analytics-header {
          display: flex;
          justify-content: space-between;
          align-items: center;
          margin-bottom: 20px;
-         
+
          .analytics-title {
            font-size: 1.1rem;
            font-weight: 600;
            color: #2c3e50;
            margin: 0;
          }
-         
+
          .analytics-icon {
            font-size: 24px;
            color: #667eea;
            opacity: 0.8;
          }
        }
-       
+
        .analytics-content {
          .analytics-value {
            font-size: 2.5rem;
@@ -1142,21 +1076,21 @@ export default {
            -webkit-text-fill-color: transparent;
            background-clip: text;
          }
-         
+
          .analytics-subtitle {
            font-size: 0.9rem;
            color: #6c757d;
            margin-bottom: 12px;
            font-weight: 500;
          }
-         
+
          .analytics-trend {
            display: flex;
            align-items: center;
            font-size: 0.85rem;
            color: #28a745;
            font-weight: 600;
-           
+
            .trend-up {
              margin-right: 6px;
              font-size: 14px;
@@ -1165,10 +1099,10 @@ export default {
        }
      }
    }
-   
+
    .calendar-section {
     margin-bottom: 32px;
-    
+
     .calendar-card {
       background: white;
       border-radius: 16px;
@@ -1176,12 +1110,12 @@ export default {
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
       border: 1px solid rgba(0, 0, 0, 0.05);
       transition: all 0.3s ease;
-      
+
       &:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
       }
-      
+
       .calendar-header {
         display: flex;
         justify-content: space-between;
@@ -1189,7 +1123,7 @@ export default {
         margin-bottom: 24px;
         padding-bottom: 20px;
         border-bottom: 2px solid #f0f2f5;
-        
+
         .calendar-title-section {
           .calendar-title {
             font-size: 1.5rem;
@@ -1197,7 +1131,7 @@ export default {
             color: #2c3e50;
             margin: 0 0 4px 0;
           }
-          
+
           .calendar-subtitle {
             font-size: 0.9rem;
             color: #6c757d;
@@ -1205,7 +1139,7 @@ export default {
             font-weight: 400;
           }
         }
-        
+
         .calendar-actions {
           .el-button-group {
             .el-button {
@@ -1213,11 +1147,11 @@ export default {
               font-weight: 500;
               transition: all 0.3s ease;
               margin-left: 4px;
-              
+
               &:first-child {
                 margin-left: 0;
               }
-              
+
               &:hover {
                 transform: translateY(-1px);
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -1226,7 +1160,7 @@ export default {
           }
         }
       }
-      
+
       .calendar-content {
         .calendar-wrapper {
           background: #fafbfc;
@@ -1239,7 +1173,7 @@ export default {
             border-radius: 8px;
             overflow: hidden;
             background: white;
-            
+
             // Custom FullCalendar styles
             .fc-toolbar {
               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1247,7 +1181,7 @@ export default {
               padding: 16px 20px;
               border-radius: 8px 8px 0 0;
               margin-bottom: 0;
-              
+
               .fc-button {
                 background: rgba(255, 255, 255, 0.2);
                 border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1255,31 +1189,31 @@ export default {
                 border-radius: 6px;
                 font-weight: 500;
                 transition: all 0.3s ease;
-                
+
                 &:hover {
                   background: rgba(255, 255, 255, 0.3);
                   border-color: rgba(255, 255, 255, 0.5);
                   transform: translateY(-1px);
                 }
-                
+
                 &.fc-state-active {
                   background: rgba(255, 255, 255, 0.4);
                   border-color: rgba(255, 255, 255, 0.6);
                 }
               }
-              
+
               .fc-toolbar-title {
                 font-size: 1.3rem;
                 font-weight: 600;
                 text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
               }
             }
-            
+
             .fc-view-container {
               border-radius: 0 0 8px 8px;
               overflow: hidden;
             }
-            
+
             .fc-day-header {
               background: #f8f9fa;
               color: #495057;
@@ -1287,21 +1221,21 @@ export default {
               padding: 12px 8px;
               border-color: #dee2e6;
             }
-            
+
             .fc-day {
               border-color: #dee2e6;
               transition: all 0.3s ease;
-              
+
               &:hover {
                 background: #f8f9fa;
               }
-              
+
               &.fc-today {
                 background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
                 border-color: #667eea;
               }
             }
-            
+
             .fc-event {
               border-radius: 6px;
               border: none;
@@ -1309,7 +1243,7 @@ export default {
               font-weight: 500;
               box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
               transition: all 0.3s ease;
-              
+
               &:hover {
                 transform: translateY(-1px);
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -1318,12 +1252,12 @@ export default {
           }
         }
       }
-      
+
       .calendar-footer {
         margin-top: 24px;
         padding-top: 20px;
         border-top: 2px solid #f0f2f5;
-        
+
         .upcoming-events {
           .events-title {
             font-size: 1.2rem;
@@ -1332,14 +1266,14 @@ export default {
             margin: 0 0 16px 0;
             display: flex;
             align-items: center;
-            
+
             &::before {
               content: '📅';
               margin-right: 8px;
               font-size: 1.1rem;
             }
           }
-          
+
           .events-list {
             .event-item {
               display: flex;
@@ -1351,17 +1285,17 @@ export default {
               border-left: 4px solid #667eea;
               cursor: pointer;
               transition: all 0.3s ease;
-              
+
               &:hover {
                 background: #e9ecef;
                 transform: translateX(4px);
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
               }
-              
+
               &:last-child {
                 margin-bottom: 0;
               }
-              
+
               .event-time {
                 display: flex;
                 align-items: center;
@@ -1369,16 +1303,16 @@ export default {
                 color: #667eea;
                 font-weight: 600;
                 font-size: 0.9rem;
-                
+
                 i {
                   margin-right: 6px;
                   font-size: 14px;
                 }
               }
-              
+
               .event-details {
                 flex: 1;
-                
+
                 .event-title {
                   display: block;
                   font-weight: 600;
@@ -1386,14 +1320,14 @@ export default {
                   margin-bottom: 2px;
                   font-size: 0.95rem;
                 }
-                
+
                 .event-description {
                   display: block;
                   font-size: 0.85rem;
                   color: #6c757d;
                 }
               }
-              
+
               .event-status {
                 .el-tag {
                   border-radius: 20px;
@@ -1407,7 +1341,7 @@ export default {
       }
     }
   }
-  
+
   .activity-section {
     .activity-card {
       background: white;
@@ -1416,12 +1350,12 @@ export default {
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
       border: 1px solid rgba(0, 0, 0, 0.05);
       transition: all 0.3s ease;
-      
+
       &:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
       }
-      
+
       .activity-header {
         display: flex;
         justify-content: space-between;
@@ -1429,25 +1363,25 @@ export default {
         margin-bottom: 24px;
         padding-bottom: 16px;
         border-bottom: 2px solid #f0f2f5;
-        
+
         .activity-title {
           font-size: 1.5rem;
           font-weight: 600;
           color: #2c3e50;
           margin: 0;
         }
-        
+
         .el-button {
           border-radius: 8px;
           font-weight: 500;
           transition: all 0.3s ease;
-          
+
           &:hover {
             transform: translateY(-1px);
           }
         }
       }
-      
+
       .activity-content {
         .patient-list {
           .patient-item {
@@ -1456,18 +1390,18 @@ export default {
             padding: 16px 0;
             border-bottom: 1px solid #f8f9fa;
             transition: all 0.3s ease;
-            
+
             &:last-child {
               border-bottom: none;
             }
-            
+
             &:hover {
               background: #f8f9fa;
               border-radius: 8px;
               padding: 16px 12px;
               margin: 0 -12px;
             }
-            
+
             .patient-avatar {
               width: 40px;
               height: 40px;
@@ -1480,24 +1414,24 @@ export default {
               color: white;
               font-size: 18px;
             }
-            
+
             .patient-info {
               flex: 1;
-              
+
               .patient-name {
                 display: block;
                 font-weight: 600;
                 color: #2c3e50;
                 margin-bottom: 4px;
               }
-              
+
               .patient-time {
                 display: block;
                 font-size: 0.9rem;
                 color: #6c757d;
               }
             }
-            
+
             .patient-status {
               .el-tag {
                 border-radius: 20px;
@@ -1515,26 +1449,26 @@ export default {
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 16px;
-    
+
     .dashboard-header {
       padding: 24px 20px;
-      
+
       .header-content {
         flex-direction: column;
         text-align: center;
-        
+
         .welcome-section {
           .dashboard-title {
             font-size: 2rem;
           }
-          
+
           .dashboard-subtitle {
             font-size: 1rem;
           }
         }
       }
     }
-    
+
     .charts-section {
       .chart-card,
       .quick-stats-card {
@@ -1564,159 +1498,124 @@ export default {
   color: #1989fa;
 }
 
-// Appointment Modal Styles
-.appointment-modal {
-  .el-dialog {
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    
-    .el-dialog__header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px 24px;
-      border-radius: 16px 16px 0 0;
-      
-      .el-dialog__title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: white;
-      }
-      
-      .el-dialog__headerbtn {
-        .el-dialog__close {
-          color: white;
-          font-size: 20px;
-          
-          &:hover {
-            color: rgba(255, 255, 255, 0.8);
-          }
-        }
-      }
-    }
-    
-    .el-dialog__body {
-      padding: 30px 24px;
-      background: #fafbfc;
-    }
-    
-    .el-dialog__footer {
-      padding: 20px 24px;
-      background: white;
-      border-radius: 0 0 16px 16px;
-      border-top: 1px solid #e2e8f0;
-    }
-  }
-  
-  .modal-content {
-    .appointment-form {
-      .el-form-item {
-        margin-bottom: 20px;
-        
-        .el-form-item__label {
-          font-weight: 600;
-          color: #2c3e50;
-          font-size: 14px;
-        }
-        
-        .el-input, .el-select, .el-textarea, .el-date-picker, .el-time-picker {
-          .el-input__inner, .el-textarea__inner {
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            
-            &:focus {
-              border-color: #667eea;
-              box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
-          }
-        }
-        
-        .el-select {
-          .el-input__suffix {
-            .el-input__suffix-inner {
-              .el-select__caret {
-                color: #667eea;
-              }
-            }
-          }
-        }
-        
-        .el-textarea {
-          .el-textarea__inner {
-            resize: vertical;
-            min-height: 80px;
-          }
-        }
-        
-        .el-input-number {
-          width: 100%;
-          
-          .el-input__inner {
-            text-align: center;
-          }
-        }
-      }
-    }
-  }
-  
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    
-    .el-button {
-      padding: 10px 24px;
-      border-radius: 8px;
+// Appointment modal (dialog is appended to body)
+::v-deep .appointment-modal {
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+
+  .el-dialog__header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 24px;
+
+    .el-dialog__title {
+      font-size: 1.3rem;
       font-weight: 600;
-      transition: all 0.3s ease;
-      
-      &.el-button--default {
-        background: #f8f9fa;
-        border-color: #e2e8f0;
-        color: #6c757d;
-        
-        &:hover {
-          background: #e9ecef;
-          border-color: #dee2e6;
-          color: #495057;
-        }
-      }
-      
-      &.el-button--primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        color: white;
-        
-        &:hover {
-          background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        
-        &:active {
-          transform: translateY(0);
-        }
+      color: white;
+    }
+
+    .el-dialog__headerbtn .el-dialog__close {
+      color: white;
+      font-size: 20px;
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.8);
       }
     }
+  }
+
+  .el-dialog__body {
+    padding: 24px;
+    background: #fafbfc;
+    max-height: 70vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .el-dialog__footer {
+    padding: 16px 24px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
   }
 }
 
-// Responsive modal
+.appointment-form {
+  width: 100%;
+
+  ::v-deep .el-form-item {
+    margin-bottom: 16px;
+  }
+
+  ::v-deep .el-form-item__label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+    line-height: 1.4;
+    padding-bottom: 4px;
+  }
+
+  ::v-deep .el-input,
+  ::v-deep .el-textarea,
+  ::v-deep .el-autocomplete {
+    width: 100%;
+  }
+
+  ::v-deep .appointment-field-full {
+    width: 100%;
+  }
+
+  ::v-deep .appointment-field-full .el-input {
+    width: 100%;
+  }
+
+  ::v-deep .el-date-editor.el-input {
+    width: 100%;
+  }
+
+  ::v-deep .el-input__inner,
+  ::v-deep .el-textarea__inner {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+    &:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+  }
+
+  ::v-deep .el-textarea__inner {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .el-button {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+}
+
 @media (max-width: 768px) {
-  .appointment-modal {
-    .el-dialog {
-      width: 95% !important;
-      margin: 20px auto !important;
-      
-      .el-dialog__body {
-        padding: 20px 16px;
-      }
-      
-      .el-dialog__footer {
-        padding: 16px;
-      }
+  ::v-deep .appointment-modal {
+    width: 95% !important;
+    margin: 20px auto !important;
+
+    .el-dialog__body {
+      padding: 16px;
+      max-height: 75vh;
+    }
+
+    .el-dialog__footer {
+      padding: 12px 16px;
     }
   }
 }

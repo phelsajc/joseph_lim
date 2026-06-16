@@ -9,6 +9,7 @@ const state = {
   device: 'desktop',
   language: getLanguage(),
   size: Cookies.get('size') || 'medium',
+  pageLoading: false,
 };
 
 const mutations = {
@@ -36,6 +37,9 @@ const mutations = {
   SET_SIZE: (state, size) => {
     state.size = size;
     Cookies.set('size', size);
+  },
+  SET_PAGE_LOADING: (state, loading) => {
+    state.pageLoading = loading;
   },
 };
 

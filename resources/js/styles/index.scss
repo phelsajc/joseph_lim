@@ -192,3 +192,18 @@ aside {
 .multiselect--active {
   z-index: 1000 !important;
 }
+
+/* Route navigation progress (nprogress) */
+#nprogress {
+  pointer-events: none;
+  z-index: 10001 !important;
+
+  .bar {
+    background: #409EFF !important;
+    height: 3px !important;
+  }
+
+  .peg {
+    box-shadow: 0 0 10px #409EFF, 0 0 5px #409EFF !important;
+  }
+}
