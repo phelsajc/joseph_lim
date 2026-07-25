@@ -226,19 +226,19 @@ class PatientController extends BaseController
         $data->pmh_others = $request->pmh_others;
 
 
-        if ($data->profile_name != null) {
-            /* $oldFilePath = public_path('profiles/' . $data->profile_name);
-            if (file_exists($oldFilePath)) {
-                unlink($oldFilePath);
-            } */
-
-            $filePath = $data->id . "/" . $data->profile_name;
-            if ($filePath && Storage::disk('s3')->exists($filePath)) {
-                Storage::disk('s3')->delete($filePath);
-            }
-        }
-
         if ($request->hasFile('profile_pic')) {
+            if ($data->profile_name != null) {
+                /* $oldFilePath = public_path('profiles/' . $data->profile_name);
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath);
+                } */
+
+                $filePath = $data->id . "/" . $data->profile_name;
+                if ($filePath && Storage::disk('s3')->exists($filePath)) {
+                    Storage::disk('s3')->delete($filePath);
+                }
+            }
+
             $data->profile_name = $this->uploadPatientProfileToS3($data->id, $request->file('profile_pic'));
         }
 
