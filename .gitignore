@@ -20,6 +20,8 @@ yarn-error.log
 /public/stats.html
 /public/*.js
 /public/*.js.map
+/storage/*.txt
+/storage/*.json
 .idea
 .DS_Store
 public/attachment/170111014117.jpg
@@ -45,3 +47,4 @@ Line(5
 name)
 PE_TEMPLATES_SETUP.md
 PHYSICAL_EXAMINATION_TEMPLATES.md
+*.sql

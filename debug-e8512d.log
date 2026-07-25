@@ -1,0 +1,9 @@
+{"sessionId":"e8512d","timestamp":1781594485786,"location":"AuthController.php:login","message":"login_session_created","data":{"userId":1,"authCheck":true,"branch":"no_otp"},"hypothesisId":"C","runId":"pre-fix"}
+{"sessionId":"e8512d","timestamp":1781599850976,"location":"AuthController.php:login","message":"login_otp_sent_no_session","data":{"userId":1,"loginOtpEnabled":true,"hasOtpInRequest":false,"authCheck":false},"hypothesisId":"A","runId":"pre-fix"}
+{"sessionId":"e8512d","timestamp":1781599905213,"location":"AuthController.php:login","message":"login_otp_sent_no_session","data":{"userId":1,"loginOtpEnabled":true,"hasOtpInRequest":false,"authCheck":false},"hypothesisId":"A","runId":"pre-fix"}
+{"sessionId":"e8512d","timestamp":1781599917263,"location":"AuthController.php:login","message":"login_session_created","data":{"userId":1,"authCheck":true,"branch":"otp_verified"},"hypothesisId":"C","runId":"pre-fix"}
+{"sessionId":"e8512d","timestamp":1781669533150,"location":"AuthController.php:login","message":"login_validate_failed","data":{"username":null},"hypothesisId":"A","runId":"pre-fix"}
+{"sessionId":"e8512d","timestamp":1781669542310,"location":"AuthController.php:login","message":"login_validate_failed","data":{"username":null},"hypothesisId":"A","runId":"pre-fix"}
+{"sessionId":"e8512d","timestamp":1781857628075,"location":"AuthController.php:login","message":"login_otp_sent_no_session","data":{"userId":1,"loginOtpEnabled":true,"hasOtpInRequest":false,"authCheck":false},"hypothesisId":"A","runId":"pre-fix"}
+{"sessionId":"e8512d","timestamp":1781857646236,"location":"AuthController.php:login","message":"login_session_created","data":{"userId":1,"authCheck":true,"branch":"otp_verified"},"hypothesisId":"C","runId":"pre-fix"}
+{"sessionId":"e8512d","timestamp":1784984263493,"location":"AuthController.php:login","message":"login_session_created","data":{"userId":1,"authCheck":true,"branch":"no_otp"},"hypothesisId":"C","runId":"pre-fix"}

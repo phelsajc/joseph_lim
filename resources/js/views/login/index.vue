@@ -9,7 +9,7 @@
               <i class="el-icon-first-aid-kit" />
             </div>
             <h2 class="welcome-title">Welcome to EMR</h2>
-            <h3 class="doctor-name">JOSEPH PETER T. LIM, MD</h3>
+            <!-- <h3 class="doctor-name">JOSEPH PETER T. LIM, MD</h3> -->
             <p class="welcome-subtitle">Electronic Medical Records System</p>
             <div class="features-list">
               <div class="feature-item">
