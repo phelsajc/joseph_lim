@@ -21,6 +21,7 @@ use App\Model\Rx_service;
 use App\Model\Services;
 use App\Model\Attachments;
 use App\Model\Ancillary;
+use App\Services\ImageOrientationService;
 use App\Model\Labs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -1754,7 +1755,7 @@ class PatientController extends BaseController
                             $src = $raw !== false ? @imagecreatefromstring($raw) : false;
 
                             if ($src !== false) {
-                                $src = $this->applyExifOrientationToGdImage($src, $file->getRealPath());
+                                $src = ImageOrientationService::applyExifOrientationToGdImage($src, $file->getRealPath());
                                 $srcW = imagesx($src);
                                 $srcH = imagesy($src);
 
@@ -1841,6 +1842,106 @@ class PatientController extends BaseController
             return response()->json(['error' => 'Upload failed: ' . $e->getMessage()], 500);
         }
     }
+    public function rotatePatientProfile($id)
+    {
+        $patient = Patients::find($id);
+        if (!$patient || !$patient->profile_name) {
+            return response()->json(['message' => 'Patient or profile image not found'], 404);
+        }
+
+        $s3Key = $patient->id . '/' . $patient->profile_name;
+        $disk = Storage::disk('s3');
+        if (!$disk->exists($s3Key)) {
+            return response()->json(['message' => 'Profile file not found on storage'], 404);
+        }
+
+        $tmpIn = tempnam(sys_get_temp_dir(), 'prof_in_');
+        $tmpOut = tempnam(sys_get_temp_dir(), 'prof_out_') . '.jpg';
+        if ($tmpIn === false) {
+            return response()->json(['message' => 'Server error'], 500);
+        }
+
+        try {
+            file_put_contents($tmpIn, $disk->get($s3Key));
+            if (!ImageOrientationService::bakeAndRotate90ClockwiseToJpegFile($tmpIn, $tmpOut)) {
+                return response()->json(['message' => 'Could not rotate image'], 422);
+            }
+            $disk->put($s3Key, file_get_contents($tmpOut));
+
+            $fileUrl = $disk->temporaryUrl(
+                $s3Key,
+                \Illuminate\Support\Carbon::now()->addMinutes(180)
+            );
+
+            return response()->json([
+                'success' => true,
+                'profile' => $fileUrl,
+            ]);
+        } finally {
+            @unlink($tmpIn);
+            @unlink($tmpOut);
+        }
+    }
+
+    public function rotatePatientAttachment($id)
+    {
+        $attachment = Attachments::find($id);
+        if (!$attachment) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        $patient = Patients::where('patientid', $attachment->patientid)->first();
+        if (!$patient) {
+            return response()->json(['message' => 'Patient not found'], 404);
+        }
+
+        $ext = strtolower(pathinfo($attachment->filename, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'], true)) {
+            return response()->json(['message' => 'Not an image'], 422);
+        }
+
+        $s3Key = $patient->id . '/' . $attachment->filename;
+        $disk = Storage::disk('s3');
+        if (!$disk->exists($s3Key)) {
+            return response()->json(['message' => 'File not found on storage'], 404);
+        }
+
+        $tmpIn = tempnam(sys_get_temp_dir(), 'att_in_');
+        $tmpOut = tempnam(sys_get_temp_dir(), 'att_out_') . '.jpg';
+        if ($tmpIn === false) {
+            return response()->json(['message' => 'Server error'], 500);
+        }
+
+        try {
+            file_put_contents($tmpIn, $disk->get($s3Key));
+            if (!ImageOrientationService::bakeAndRotate90ClockwiseToJpegFile($tmpIn, $tmpOut)) {
+                return response()->json(['message' => 'Could not rotate image'], 422);
+            }
+            $newName = pathinfo($attachment->filename, PATHINFO_FILENAME) . '.jpg';
+            $newKey = $patient->id . '/' . $newName;
+            $disk->put($newKey, file_get_contents($tmpOut));
+            if ($newKey !== $s3Key) {
+                $disk->delete($s3Key);
+                $attachment->filename = $newName;
+                $attachment->save();
+            }
+
+            $fileUrl = $disk->temporaryUrl(
+                $newKey,
+                \Illuminate\Support\Carbon::now()->addMinutes(180)
+            );
+
+            return response()->json([
+                'success' => true,
+                'newfile' => $fileUrl,
+                'filename' => $attachment->filename,
+            ]);
+        } finally {
+            @unlink($tmpIn);
+            @unlink($tmpOut);
+        }
+    }
+
     public function deleteAttachment($id)
     {
         $attachment = Attachments::find($id);
@@ -2614,92 +2715,6 @@ class PatientController extends BaseController
         return response()->json(['prescriptions' => $prescriptions, 'appointments' => $appointment]);
     }
 
-    /**
-     * Apply JPEG EXIF Orientation to a GD image resource before resize/upload.
-     * Returns the (possibly replaced) image resource; destroys the old one when rotated.
-     *
-     * @param resource|\GdImage $src
-     * @param string|null $filePath
-     * @return resource|\GdImage
-     */
-    private function applyExifOrientationToGdImage($src, $filePath)
-    {
-        if (!$filePath || !is_file($filePath) || !function_exists('exif_read_data') || !function_exists('imagerotate')) {
-            return $src;
-        }
-
-        try {
-            $exif = @exif_read_data($filePath);
-            $orientation = isset($exif['Orientation']) ? (int) $exif['Orientation'] : 1;
-            if ($orientation <= 1) {
-                return $src;
-            }
-
-            $rotated = $src;
-            switch ($orientation) {
-                case 2:
-                    if (function_exists('imageflip')) {
-                        imageflip($rotated, IMG_FLIP_HORIZONTAL);
-                    }
-                    break;
-                case 3:
-                    $tmp = imagerotate($rotated, 180, 0);
-                    if ($tmp !== false) {
-                        imagedestroy($rotated);
-                        $rotated = $tmp;
-                    }
-                    break;
-                case 4:
-                    if (function_exists('imageflip')) {
-                        imageflip($rotated, IMG_FLIP_VERTICAL);
-                    }
-                    break;
-                case 5:
-                    if (function_exists('imageflip')) {
-                        imageflip($rotated, IMG_FLIP_HORIZONTAL);
-                    }
-                    $tmp = imagerotate($rotated, 270, 0);
-                    if ($tmp !== false) {
-                        imagedestroy($rotated);
-                        $rotated = $tmp;
-                    }
-                    break;
-                case 6:
-                    // 90° CW
-                    $tmp = imagerotate($rotated, 270, 0);
-                    if ($tmp !== false) {
-                        imagedestroy($rotated);
-                        $rotated = $tmp;
-                    }
-                    break;
-                case 7:
-                    if (function_exists('imageflip')) {
-                        imageflip($rotated, IMG_FLIP_HORIZONTAL);
-                    }
-                    $tmp = imagerotate($rotated, 90, 0);
-                    if ($tmp !== false) {
-                        imagedestroy($rotated);
-                        $rotated = $tmp;
-                    }
-                    break;
-                case 8:
-                    // 90° CCW
-                    $tmp = imagerotate($rotated, 90, 0);
-                    if ($tmp !== false) {
-                        imagedestroy($rotated);
-                        $rotated = $tmp;
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            return $rotated;
-        } catch (\Throwable $t) {
-            return $src;
-        }
-    }
-
     private function uploadPatientProfileToS3($patientId, $fileToUpload)
     {
         $resizeThreshold = 1 * 1024 * 1024; // 1MB
@@ -2721,7 +2736,7 @@ class PatientController extends BaseController
                     $src = $raw !== false ? @imagecreatefromstring($raw) : false;
 
                     if ($src !== false) {
-                        $src = $this->applyExifOrientationToGdImage($src, $fileToUpload->getRealPath());
+                        $src = ImageOrientationService::applyExifOrientationToGdImage($src, $fileToUpload->getRealPath());
                         $srcW = imagesx($src);
                         $srcH = imagesy($src);
 

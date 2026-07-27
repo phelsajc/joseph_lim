@@ -930,6 +930,7 @@ export default {
   border-radius: 50%;
   border: 2px solid #f0f2f5;
   transition: all 0.3s ease;
+  image-orientation: from-image;
 }
 
 .image-slot {
@@ -1241,6 +1242,7 @@ export default {
   height: 40px;
   border-radius: 50%;
   border: 2px solid #f0f2f5;
+  image-orientation: from-image;
 }
 
 .patient-name-list {

@@ -60,6 +60,16 @@
                   Change photo
                 </el-button>
               </el-upload>
+              <el-button
+                v-if="headerPhotoSrc"
+                size="small"
+                plain
+                icon="el-icon-refresh-right"
+                :loading="profileRotateLoading"
+                @click="rotateProfilePhoto"
+              >
+                Rotate 90°
+              </el-button>
             </div>
           </div>
         </div>
@@ -651,6 +661,16 @@
                       <i class="el-icon-download" />
                     </button>
                     <button
+                      v-if="lightboxCurrentItem && isImageAttachment(lightboxCurrentItem.extension)"
+                      type="button"
+                      class="ua-lightbox__btn"
+                      aria-label="Rotate 90 degrees"
+                      :disabled="lightboxRotateLoading"
+                      @click="rotateLightboxAttachment"
+                    >
+                      <i class="el-icon-refresh-right" />
+                    </button>
+                    <button
                       type="button"
                       class="ua-lightbox__btn ua-lightbox__btn--danger"
                       aria-label="Delete"
@@ -804,6 +824,9 @@ export default {
       isProcessingAdolecents: false,
       isProcessingVax: false,
       isUploading: false,
+      profileRotateLoading: false,
+      lightboxRotateLoading: false,
+      profilePhotoVersion: 0,
       // Upload progress tracking
       uploadProgress: 0,
       uploadStatus: '',
@@ -1085,27 +1108,35 @@ export default {
       return urls;
     },
     headerPhotoSrc() {
+      let src = '';
       const fp = this.form.profile;
       if (fp && Array.isArray(fp) && fp.length > 0) {
         const f = fp[0];
         if (f.url) {
-          return f.url;
-        }
-        if (f.raw) {
+          src = f.url;
+        } else if (f.raw) {
           try {
-            return URL.createObjectURL(f.raw);
+            src = URL.createObjectURL(f.raw);
           } catch (e) {
-            return '';
+            src = '';
           }
         }
       }
-      const p = this.profile;
-      if (!p || !p.patientid) {
-        return p && p.profile ? p.profile : '';
+      if (!src) {
+        const p = this.profile;
+        if (!p || !p.patientid) {
+          src = p && p.profile ? p.profile : '';
+        } else {
+          src = p.isold_patient === 1
+            ? '/public/photos/' + p.patientid + '.jpg'
+            : p.profile || '';
+        }
       }
-      return p.isold_patient === 1
-        ? '/public/photos/' + p.patientid + '.jpg'
-        : p.profile || '';
+      if (src && this.profilePhotoVersion && !src.startsWith('blob:')) {
+        const sep = src.includes('?') ? '&' : '?';
+        return src + sep + 'v=' + this.profilePhotoVersion;
+      }
+      return src;
     },
     displayPatientName() {
       if (this.profile && this.profile.patientname) {
@@ -1356,6 +1387,52 @@ export default {
         key: 'img_val',
         value: list,
       });
+    },
+    async rotateProfilePhoto() {
+      const id = this.$route.params.id;
+      if (!id) {
+        return;
+      }
+      this.profileRotateLoading = true;
+      try {
+        const res = await Patients.rotateProfile(id);
+        const url = res && res.profile;
+        if (url) {
+          this.profilePhotoVersion = Date.now();
+          if (this.profile) {
+            this.$set(this.profile, 'profile', url);
+          }
+          this.form.profile = [];
+          this.$message.success('Photo rotated');
+        }
+      } catch (e) {
+        console.error(e);
+        this.$message.error('Could not rotate photo');
+      } finally {
+        this.profileRotateLoading = false;
+      }
+    },
+    async rotateLightboxAttachment() {
+      const item = this.lightboxCurrentItem;
+      if (!item || !this.isImageAttachment(item.extension)) {
+        return;
+      }
+      this.lightboxRotateLoading = true;
+      try {
+        await Patients.rotateAttachment(item.id);
+        this.$message.success('Image rotated');
+        const keepId = item.id;
+        await this.get_attachments();
+        const idx = this.galleryDisplayItems.findIndex((i) => i.id === keepId);
+        if (idx >= 0) {
+          this.lightboxIndex = idx;
+        }
+      } catch (e) {
+        console.error(e);
+        this.$message.error('Could not rotate image');
+      } finally {
+        this.lightboxRotateLoading = false;
+      }
     },
     computeAgeFromDate(dateString) {
       const today = new Date();
@@ -2103,6 +2180,21 @@ export default {
 .ua-profile-header__avatar ::v-deep .el-image__inner,
 .ua-profile-header__avatar ::v-deep img {
   border-radius: 10px;
+  image-orientation: from-image;
+}
+
+.ua-drive-item__thumb img,
+.ua-lightbox__image,
+.ua-lightbox__thumb img {
+  image-orientation: from-image;
+}
+
+.ua-profile-header__upload {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
 }
 
 .ua-profile-header__avatar--placeholder,

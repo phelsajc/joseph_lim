@@ -81,6 +81,12 @@ export default {
   deleteAttachments(id) {
     return request.delete('delete-patient-attachments/' + id);
   },
+  rotateProfile(id) {
+    return request.post('rotate-patient-profile/' + id);
+  },
+  rotateAttachment(id) {
+    return request.post('rotate-patient-attachment/' + id);
+  },
   cancel_appointment(data) {
     return request.patch('cancel-appointment', data);
   },

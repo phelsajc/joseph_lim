@@ -187,6 +187,8 @@ Route::
                 Route::get('get-profile', 'ProfileController@getProfile');
                 Route::get('get-patient-attachments/{id}', 'PatientController@getAttachments');
                 Route::post('add-patient-attachments', 'PatientController@addpatientAttachments');
+                Route::post('rotate-patient-profile/{id}', 'PatientController@rotatePatientProfile');
+                Route::post('rotate-patient-attachment/{id}', 'PatientController@rotatePatientAttachment');
                 Route::delete('delete-patient-attachments/{id}', 'PatientController@deleteAttachment');
                 Route::get('dashboard', 'PatientController@dashboard');
                 Route::get('printchart/{id}', 'PatientController@printchart');
