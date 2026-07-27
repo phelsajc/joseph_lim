@@ -769,6 +769,82 @@
           </el-col>
         </el-row>
       </el-form>
+      <el-row :gutter="20">
+        <el-form :inline="true" label-position="top" class="demo-form-inline" style="width: 100%;">
+          <el-row :gutter="16" style="width: 100%;" class="rx-meal-timing-inputs">
+            <el-col :xs="24" :sm="12" :md="8" :lg="3">
+              <el-form-item label="Before Breakfast">
+                <el-input
+                  v-model="medsArr.bf_b"
+                  autosize
+                  clearable
+                  :class="{ 'rx-dose-input--filled': rxTimingDoseFilled(medsArr.bf_b) }"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="3">
+              <el-form-item label="After Breakfast">
+                <el-input
+                  v-model="medsArr.bf_a"
+                  autosize
+                  clearable
+                  :class="{ 'rx-dose-input--filled': rxTimingDoseFilled(medsArr.bf_a) }"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="3">
+              <el-form-item label="Before Lunch">
+                <el-input
+                  v-model="medsArr.l_b"
+                  autosize
+                  clearable
+                  :class="{ 'rx-dose-input--filled': rxTimingDoseFilled(medsArr.l_b) }"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="3">
+              <el-form-item label="After Lunch">
+                <el-input
+                  v-model="medsArr.l_a"
+                  autosize
+                  clearable
+                  :class="{ 'rx-dose-input--filled': rxTimingDoseFilled(medsArr.l_a) }"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="3">
+              <el-form-item label="Before Dinner">
+                <el-input
+                  v-model="medsArr.s_b"
+                  autosize
+                  clearable
+                  :class="{ 'rx-dose-input--filled': rxTimingDoseFilled(medsArr.s_b) }"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="3">
+              <el-form-item label="After Dinner">
+                <el-input
+                  v-model="medsArr.s_a"
+                  autosize
+                  clearable
+                  :class="{ 'rx-dose-input--filled': rxTimingDoseFilled(medsArr.s_a) }"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="3">
+              <el-form-item label="Bedtime">
+                <el-input
+                  v-model="medsArr.bt"
+                  autosize
+                  clearable
+                  :class="{ 'rx-dose-input--filled': rxTimingDoseFilled(medsArr.bt) }"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </el-row>
       <el-row :gutter="24">
         <el-form :inline="false" label-position="top" class="demo-form-inline meds-remarks-form" style="width: 100%;">
           <el-col :xs="24" :sm="24" :md="24" :lg="24">
@@ -1923,6 +1999,47 @@
                 <el-table-column prop="brand" label="Brand" min-width="160" show-overflow-tooltip />
                 <el-table-column prop="dosage" label="Dosage" width="90" align="center" show-overflow-tooltip />
                 <el-table-column prop="qty" label="Qty" width="56" align="center" />
+                <el-table-column label="Breakfast" width="120">
+                  <el-table-column label="B" width="60" align="center">
+                    <template slot-scope="scope">
+                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_b) }">{{ scope.row.bf_b }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="A" width="60" align="center">
+                    <template slot-scope="scope">
+                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_a) }">{{ scope.row.bf_a }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table-column>
+                <el-table-column label="Lunch" width="120">
+                  <el-table-column label="B" width="60" align="center">
+                    <template slot-scope="scope">
+                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_b) }">{{ scope.row.l_b }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="A" width="60" align="center">
+                    <template slot-scope="scope">
+                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_a) }">{{ scope.row.l_a }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table-column>
+                <el-table-column label="Dinner" width="120">
+                  <el-table-column label="B" width="60" align="center">
+                    <template slot-scope="scope">
+                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_b) }">{{ scope.row.s_b }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="A" width="60" align="center">
+                    <template slot-scope="scope">
+                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_a) }">{{ scope.row.s_a }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table-column>
+                <el-table-column label="Bed" width="56" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bt) }">{{ scope.row.bt }}</span>
+                  </template>
+                </el-table-column>
                 <el-table-column prop="remarks" label="Remarks" min-width="180" show-overflow-tooltip />
                 <el-table-column align="center" label="Actions" width="180">
                   <template slot-scope="scope">
@@ -2969,6 +3086,47 @@
               <el-table-column prop="brand" label="Brand" min-width="160" show-overflow-tooltip />
               <el-table-column prop="dosage" label="Dosage" width="90" align="center" show-overflow-tooltip />
               <el-table-column prop="qty" label="Qty" width="50" align="center" />
+              <el-table-column label="Breakfast" width="120">
+                <el-table-column label="B" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_b) }">{{ scope.row.bf_b }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="A" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_a) }">{{ scope.row.bf_a }}</span>
+                  </template>
+                </el-table-column>
+              </el-table-column>
+              <el-table-column label="Lunch" width="120">
+                <el-table-column label="B" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_b) }">{{ scope.row.l_b }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="A" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_a) }">{{ scope.row.l_a }}</span>
+                  </template>
+                </el-table-column>
+              </el-table-column>
+              <el-table-column label="Dinner" width="120">
+                <el-table-column label="B" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_b) }">{{ scope.row.s_b }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="A" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_a) }">{{ scope.row.s_a }}</span>
+                  </template>
+                </el-table-column>
+              </el-table-column>
+              <el-table-column label="Bed" width="56" align="center">
+                <template slot-scope="scope">
+                  <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bt) }">{{ scope.row.bt }}</span>
+                </template>
+              </el-table-column>
               <el-table-column prop="remarks" label="Remarks" width="150" show-overflow-tooltip />
               <el-table-column align="center" label="Actions" width="180">
                 <template slot-scope="scope">
@@ -3808,6 +3966,47 @@
               <el-table-column prop="brand" label="Brand" min-width="160" show-overflow-tooltip />
               <el-table-column prop="dosage" label="Dosage" width="90" align="center" show-overflow-tooltip />
               <el-table-column prop="qty" label="Qty" width="56" align="center" />
+              <el-table-column label="Breakfast" width="120">
+                <el-table-column label="B" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_b) }">{{ scope.row.bf_b }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="A" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_a) }">{{ scope.row.bf_a }}</span>
+                  </template>
+                </el-table-column>
+              </el-table-column>
+              <el-table-column label="Lunch" width="120">
+                <el-table-column label="B" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_b) }">{{ scope.row.l_b }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="A" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_a) }">{{ scope.row.l_a }}</span>
+                  </template>
+                </el-table-column>
+              </el-table-column>
+              <el-table-column label="Dinner" width="120">
+                <el-table-column label="B" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_b) }">{{ scope.row.s_b }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="A" width="60" align="center">
+                  <template slot-scope="scope">
+                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_a) }">{{ scope.row.s_a }}</span>
+                  </template>
+                </el-table-column>
+              </el-table-column>
+              <el-table-column label="Bed" width="56" align="center">
+                <template slot-scope="scope">
+                  <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bt) }">{{ scope.row.bt }}</span>
+                </template>
+              </el-table-column>
               <el-table-column prop="remarks" label="Remarks" min-width="180" show-overflow-tooltip />
               <el-table-column align="center" label="Actions" width="120">
                 <template slot-scope="scope">
@@ -4244,6 +4443,7 @@ import {
 import moment from "moment-timezone";
 import debounce from "lodash/debounce";
 import checkRole from "@/utils/role"; // Role checking
+import { orientAndCompressImage } from "@/utils/orientImage";
 import DatePicker from "vue2-datepicker";
 import heic2any from "heic2any";
 import QuillEditor from "@/components/QuillEditor";
@@ -5847,6 +6047,7 @@ export default {
     },
     buildFavoritePayloadFromRxSuggestion(item) {
       const hasId = item.id && item.id !== 0;
+      const meal = this.rxMealTimingFromMedsArr();
       return {
         medicine_id: hasId ? item.id : null,
         drug_name: hasId ? item.medicine : (this.rxMedicineStringOrEmpty(this.medsArr.custom_brand) || item.medicine),
@@ -5854,6 +6055,13 @@ export default {
         default_qty: this.rxMedicineStringOrEmpty(this.medsArr.qty) || null,
         default_dosage: this.rxMedicineStringOrEmpty(this.medsArr.custom_dosage || item.unit) || null,
         default_remarks: this.rxMedicineStringOrEmpty(this.medsArr.remarks) || null,
+        default_bf_b: meal.bf_b || null,
+        default_bf_a: meal.bf_a || null,
+        default_l_b: meal.l_b || null,
+        default_l_a: meal.l_a || null,
+        default_s_b: meal.s_b || null,
+        default_s_a: meal.s_a || null,
+        default_bt: meal.bt || null,
       };
     },
     async toggleRxFavoriteStar(item) {
@@ -5884,6 +6092,59 @@ export default {
       }
       const n = Number(s);
       return Number.isFinite(n) && n > 0;
+    },
+    emptyRxMealTiming() {
+      return { bf_b: "", bf_a: "", l_b: "", l_a: "", s_b: "", s_a: "", bt: "" };
+    },
+    rxMealTimingFromMedsArr() {
+      return {
+        bf_b: this.rxMedicineStringOrEmpty(this.medsArr.bf_b),
+        bf_a: this.rxMedicineStringOrEmpty(this.medsArr.bf_a),
+        l_b: this.rxMedicineStringOrEmpty(this.medsArr.l_b),
+        l_a: this.rxMedicineStringOrEmpty(this.medsArr.l_a),
+        s_b: this.rxMedicineStringOrEmpty(this.medsArr.s_b),
+        s_a: this.rxMedicineStringOrEmpty(this.medsArr.s_a),
+        bt: this.rxMedicineStringOrEmpty(this.medsArr.bt),
+      };
+    },
+    rxMealTimingFromListRow(row) {
+      if (!row) {
+        return this.emptyRxMealTiming();
+      }
+      const pick = (primary, legacy) => {
+        const a = this.rxMedicineStringOrEmpty(primary);
+        if (a !== "") {
+          return a;
+        }
+        return this.rxMedicineStringOrEmpty(legacy);
+      };
+      return {
+        bf_b: pick(row.bf_b, row.bb),
+        bf_a: pick(row.bf_a, row.ab),
+        l_b: pick(row.l_b, row.bl),
+        l_a: pick(row.l_a, row.al),
+        s_b: pick(row.s_b, row.bs),
+        s_a: pick(row.s_a, row.as),
+        bt: this.rxMedicineStringOrEmpty(row.bt),
+      };
+    },
+    applyMealTimingToMedsArr(meal) {
+      const m = meal || this.emptyRxMealTiming();
+      this.medsArr.bf_b = m.bf_b || "";
+      this.medsArr.bf_a = m.bf_a || "";
+      this.medsArr.l_b = m.l_b || "";
+      this.medsArr.l_a = m.l_a || "";
+      this.medsArr.s_b = m.s_b || "";
+      this.medsArr.s_a = m.s_a || "";
+      this.medsArr.bt = m.bt || "";
+    },
+    itemHasMealTiming(row) {
+      const meal = row && (row.bf_b !== undefined || row.bb !== undefined)
+        ? this.rxMealTimingFromListRow(row)
+        : this.rxMealTimingFromMedsArr();
+      return ["bf_b", "bf_a", "l_b", "l_a", "s_b", "s_a", "bt"].some((k) =>
+        this.rxTimingDoseFilled(meal[k]),
+      );
     },
     mealTimingFieldsFromFavoriteRecord(r) {
       const fromFreq = appointmentMealTimingStringsFromFrequency(r.default_frequency || "");
@@ -5926,13 +6187,21 @@ export default {
       }
       this.medsArr.qty = qty !== "" ? qty : "1";
 
-      this.medsArr.bf_b = "";
-      this.medsArr.bf_a = "";
-      this.medsArr.l_b = "";
-      this.medsArr.l_a = "";
-      this.medsArr.s_b = "";
-      this.medsArr.s_a = "";
-      this.medsArr.bt = "";
+      const masterMeal = this.mealTimingFieldsFromMedicineRecord(item);
+      let meal = { ...masterMeal };
+      if (favoriteRecord) {
+        const favMeal = this.mealTimingFieldsFromFavoriteRecord(favoriteRecord);
+        meal = {
+          bf_b: favMeal.bf_b || masterMeal.bf_b,
+          bf_a: favMeal.bf_a || masterMeal.bf_a,
+          l_b: favMeal.l_b || masterMeal.l_b,
+          l_a: favMeal.l_a || masterMeal.l_a,
+          s_b: favMeal.s_b || masterMeal.s_b,
+          s_a: favMeal.s_a || masterMeal.s_a,
+          bt: favMeal.bt || masterMeal.bt,
+        };
+      }
+      this.applyMealTimingToMedsArr(meal);
 
       const masterRemarks = this.rxMedicineStringOrEmpty(item.default_remarks);
       const favRemarks = favoriteRecord
@@ -5971,13 +6240,7 @@ export default {
       const favQty = this.rxMedicineStringOrEmpty(r.default_qty);
       this.medsArr.qty = favQty !== "" ? favQty : "1";
 
-      this.medsArr.bf_b = "";
-      this.medsArr.bf_a = "";
-      this.medsArr.l_b = "";
-      this.medsArr.l_a = "";
-      this.medsArr.s_b = "";
-      this.medsArr.s_a = "";
-      this.medsArr.bt = "";
+      this.applyMealTimingToMedsArr(this.mealTimingFieldsFromFavoriteRecord(r));
       this.medsArr.remarks = this.rxMedicineStringOrEmpty(r.default_remarks);
     },
     buildRxPayloadFromFavorite(r) {
@@ -5985,15 +6248,7 @@ export default {
       const dq = r.default_qty != null ? String(r.default_qty).trim() : "";
       const qty = dq !== "" ? dq : "1";
       const groupId = this.getActivePrescriptionGroupId();
-      const emptyMeal = {
-        bf_b: "",
-        bf_a: "",
-        l_b: "",
-        l_a: "",
-        s_b: "",
-        s_a: "",
-        bt: "",
-      };
+      const meal = this.mealTimingFieldsFromFavoriteRecord(r);
       if (hasMaster) {
         const brand = (r.drug_name || "").trim();
         const generic = (r.custom_generic_name || "").trim();
@@ -6008,7 +6263,7 @@ export default {
           custom_brand: brand,
           custom_dosage: dosage,
           qty,
-          ...emptyMeal,
+          ...meal,
           remarks: r.default_remarks || "",
         };
       }
@@ -6024,7 +6279,7 @@ export default {
         custom_brand: brand || gen,
         custom_dosage: (r.default_dosage || "").trim(),
         qty,
-        ...emptyMeal,
+        ...meal,
         remarks: r.default_remarks || "",
       };
     },
@@ -6478,13 +6733,7 @@ export default {
       this.medsArr.custom_dosage = this.rxMedicineStringOrEmpty(row.dosage);
       this.medsArr.custom_meds = row.medicineId == 0;
       this.medsArr.meds = this.rxMedicineStringOrEmpty(row.brand);
-      this.medsArr.bf_b = "";
-      this.medsArr.bf_a = "";
-      this.medsArr.l_b = "";
-      this.medsArr.l_a = "";
-      this.medsArr.s_b = "";
-      this.medsArr.s_a = "";
-      this.medsArr.bt = "";
+      this.applyMealTimingToMedsArr(this.rxMealTimingFromListRow(row));
       this.rxOrderDialogVisible = true;
     },
     handleRxListSelectionChange(val) {
@@ -6609,19 +6858,17 @@ export default {
       const brand = this.rxMedicineStringOrEmpty(this.medsArr.custom_brand);
       const qty = this.rxMedicineStringOrEmpty(this.medsArr.qty);
       if (generic !== "" && qty !== "") {
+        if (!this.itemHasMealTiming(this.medsArr)) {
+          this.$message.warning("Enter at least one meal timing dose.");
+          return;
+        }
         const payload = {
           ...this.medsArr,
           custom_generic: generic,
           custom_brand: brand,
           qty,
           custom_dosage: this.rxMedicineStringOrEmpty(this.medsArr.custom_dosage),
-          bf_b: "",
-          bf_a: "",
-          l_b: "",
-          l_a: "",
-          s_b: "",
-          s_a: "",
-          bt: "",
+          ...this.rxMealTimingFromMedsArr(),
           prescription_group_id: this.getActivePrescriptionGroupId(),
         };
         if (this.isEditMode) {
@@ -6896,7 +7143,11 @@ export default {
         .then((response) => {
           const payload = response || {};
           this.prescription_groups = payload.groups || [];
-          this.rx_list = payload.medicines || payload.data || [];
+          const meds = payload.medicines || payload.data || [];
+          this.rx_list = meds.map((row) => ({
+            ...row,
+            ...this.rxMealTimingFromListRow(row),
+          }));
           this.ensureActivePrescriptionGroup();
           this.initRxMedTableSortable();
         })
@@ -7602,45 +7853,9 @@ export default {
       this.form_att.files = fileList.map((fileItem) => fileItem.raw);
     },
     
-    // Image compression utility
+    // Image compression utility (applies EXIF orientation)
     compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
-      return new Promise((resolve) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-        
-        img.onload = () => {
-          // Calculate new dimensions
-          let { width, height } = img;
-          
-          if (width > maxWidth || height > maxHeight) {
-            const ratio = Math.min(maxWidth / width, maxHeight / height);
-            width *= ratio;
-            height *= ratio;
-          }
-          
-          // Set canvas dimensions
-          canvas.width = width;
-          canvas.height = height;
-          
-          // Draw and compress
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          canvas.toBlob(
-            (blob) => {
-              const compressedFile = new File([blob], file.name, {
-                type: 'image/jpeg',
-                lastModified: Date.now()
-              });
-              resolve(compressedFile);
-            },
-            'image/jpeg',
-            quality
-          );
-        };
-        
-        img.src = URL.createObjectURL(file);
-      });
+      return orientAndCompressImage(file, { quality, maxWidth, maxHeight });
     },
     async submitUpload() {
       // Initialize upload progress
@@ -8046,15 +8261,7 @@ export default {
       const brand = (item.brand_name || "").trim();
       const generic = (item.generic_name || "").trim();
       const groupId = this.getActivePrescriptionGroupId();
-      const emptyMeal = {
-        bf_b: "",
-        bf_a: "",
-        l_b: "",
-        l_a: "",
-        s_b: "",
-        s_a: "",
-        bt: "",
-      };
+      const meal = appointmentMealTimingStringsFromFrequency(item.frequency);
 
       if (hasMaster) {
         return {
@@ -8065,7 +8272,7 @@ export default {
           custom_brand: brand,
           custom_dosage: "",
           qty: (item.quantity || "").trim() || this.qtyFromTemplateDuration(item.duration),
-          ...emptyMeal,
+          ...meal,
           meds: brand,
           remarks,
           med_id: item.medicine_id,
@@ -8080,7 +8287,7 @@ export default {
         custom_brand: brand || generic,
         custom_dosage: "",
         qty: (item.quantity || "").trim() || this.qtyFromTemplateDuration(item.duration),
-        ...emptyMeal,
+        ...meal,
         meds: "",
         remarks,
         med_id: 0,
@@ -8311,13 +8518,13 @@ export default {
         custom_brand: brand,
         custom_dosage: "",
         qty: rx.qty != null ? String(rx.qty) : "",
-        bf_b: "",
-        bf_a: "",
-        l_b: "",
-        l_a: "",
-        s_b: "",
-        s_a: "",
-        bt: "",
+        bf_b: this.rxMedicineStringOrEmpty(rx.bf_b),
+        bf_a: this.rxMedicineStringOrEmpty(rx.bf_a),
+        l_b: this.rxMedicineStringOrEmpty(rx.l_b),
+        l_a: this.rxMedicineStringOrEmpty(rx.l_a),
+        s_b: this.rxMedicineStringOrEmpty(rx.s_b),
+        s_a: this.rxMedicineStringOrEmpty(rx.s_a),
+        bt: this.rxMedicineStringOrEmpty(rx.bt),
         remarks: rx.remarks || "",
       };
     },

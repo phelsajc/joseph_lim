@@ -320,29 +320,29 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->SetFont('Arial', '', 10);
         $this->cell(-3, 3, '', '0', 0, 'R');
 
-        $this->Cell(57, 5, "Medicine Name", 'LTR', 0, 'C');
-        $this->Cell(15, 5, "Quantity", "TR", 0, 'C');
+        $this->Cell(40, 5, "Medicine Name", 'LTR', 0, 'C');
+        $this->Cell(8, 5, "QTY", "TR", 0, 'C');
 
-        /* $this->Cell(16, 5, "Breakfast", 'T', 0, 'C');
+        $this->Cell(16, 5, "Breakfast", 'T', 0, 'C');
         $this->Cell(16, 5, "Lunch", 1, 0, 'C');
 
 
-        $this->Cell(16, 5, "Dinner", 1, 0, 'C');
+        $this->Cell(16, 5, "Supper", 1, 0, 'C');
 
-        $this->Cell(10.5, 5, "Bedtime", "TR", 0, 'C'); */
+        $this->Cell(10.5, 5, "Bedtime", "TR", 0, 'C');
 
 
-        $this->Cell(63, 5, "Remarks", "TR", 0, 'C');
+        $this->Cell(30, 5, "Remarks", "TR", 0, 'C');
 
         $this->Ln(5);
         $this->cell(-3, 3, '', '0', 0, 'R');
 
         $this->SetFont('Arial', '', 9);
-        $this->Cell(57, 5, "", 'LBR', 0, 'C');
+        $this->Cell(40, 5, "", 'LBR', 0, 'C');
 
-        $this->Cell(15, 5, "", "RB", 0, 'C');
+        $this->Cell(8, 5, "", "RB", 0, 'C');
 
-        /* $this->Cell(8, 5, "B", 1, 0, 'C');//bf
+        $this->Cell(8, 5, "B", 1, 0, 'C');//bf
         $this->Cell(8, 5, "A", 1, 0, 'C');
 
 
@@ -353,24 +353,24 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Cell(8, 5, "A", 1, 0, 'C');
 
 
-        $this->Cell(10.5, 5, "", "RB", 0, 'C'); */
+        $this->Cell(10.5, 5, "", "RB", 0, 'C');
 
 
-        $this->Cell(63, 5, "", "RB", 0, 'C');
+        $this->Cell(30, 5, "", "RB", 0, 'C');
         $this->Ln(5);
 
         $this->SetWidths(
             array(
-                57,
-                15,
-                /* 8,
+                40,
                 8,
                 8,
                 8,
                 8,
                 8,
-                10.5, */
-                63
+                8,
+                8,
+                10.5,
+                30
             )
         );
 
@@ -438,13 +438,13 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
                 array(
                     $this->formatMedicineName($item['generic_name'], $item['medicine'], $item['medicine_id']),
                     $item['qty'],
-                    /* $item['breakfastbefore'],
+                    $item['breakfastbefore'],
                     $item['breakfastafter'],
                     $item['lunchbefore'],
                     $item['lunchafter'],
                     $item['supperbefore'],
                     $item['supperafter'],
-                    $item['bedtime'], */
+                    $item['bedtime'],
                     $item['remarks']
                 )
             );

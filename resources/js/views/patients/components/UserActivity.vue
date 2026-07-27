@@ -750,6 +750,7 @@ import Patients from '@/api/patients';
 import Pagination from '@/components/Pagination';
 import moment from 'moment-timezone';
 import checkRole from '@/utils/role'; // Role checking
+import { orientAndCompressImage } from '@/utils/orientImage';
 import heic2any from 'heic2any';
 export default {
   components: {
@@ -1327,8 +1328,29 @@ export default {
       this.selectedImage = image;
       this.dialogVisible = true;
     },
-    handleProfileUploadChange(file, fileList) {
-      const list = fileList.slice(-1);
+    async handleProfileUploadChange(file, fileList) {
+      let list = fileList.slice(-1);
+      const item = list[0];
+      if (item && item.raw && item.raw.type && item.raw.type.startsWith('image/')) {
+        try {
+          const normalized = await this.compressImage(item.raw, 0.92, 4096, 4096);
+          if (item.url) {
+            try {
+              URL.revokeObjectURL(item.url);
+            } catch (e) {
+              /* ignore */
+            }
+          }
+          list = [{
+            ...item,
+            raw: normalized,
+            url: URL.createObjectURL(normalized),
+          }];
+        } catch (e) {
+          console.error('Profile photo orientation fix failed:', e);
+        }
+      }
+      this.form.profile = list;
       this.$emit('return-img', list);
       this.$store.dispatch('globalvar/changeval', {
         key: 'img_val',
@@ -1557,45 +1579,8 @@ export default {
         })
         .catch(() => {});
     },
-    // Image compression utility
     compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
-      return new Promise((resolve) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-
-        img.onload = () => {
-          // Calculate new dimensions
-          let { width, height } = img;
-
-          if (width > maxWidth || height > maxHeight) {
-            const ratio = Math.min(maxWidth / width, maxHeight / height);
-            width *= ratio;
-            height *= ratio;
-          }
-
-          // Set canvas dimensions
-          canvas.width = width;
-          canvas.height = height;
-
-          // Draw and compress
-          ctx.drawImage(img, 0, 0, width, height);
-
-          canvas.toBlob(
-            (blob) => {
-              const compressedFile = new File([blob], file.name, {
-                type: 'image/jpeg',
-                lastModified: Date.now(),
-              });
-              resolve(compressedFile);
-            },
-            'image/jpeg',
-            quality
-          );
-        };
-
-        img.src = URL.createObjectURL(file);
-      });
+      return orientAndCompressImage(file, { quality, maxWidth, maxHeight });
     },
     async submitUpload() {
       if (!this.form_att.files || !this.form_att.files.length) {

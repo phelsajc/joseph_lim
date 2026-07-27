@@ -5,6 +5,8 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Model\Patients;
 use App\Model\Rx_service;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Carbon;
 
 class AppointmentResource extends JsonResource
 {
@@ -26,10 +28,33 @@ class AppointmentResource extends JsonResource
         $patient = Patients::where('patientid',$this->patientid)->first();
         $fileUrl = '';
         //if($this->profile){
-            $fileName = $this->profile_name;
-            $fileUrl = url('storage/app/public/pp/' . $fileName);// url('public/profiles/' . $fileName);
+            //$fileName = $this->profile_name;
+            //$fileUrl = url('storage/app/public/pp/' . $fileName);// url('public/profiles/' . $fileName);
             //$fileUrl = url('storage/pp/' . $fileName);
         //}
+        $fileUrl = '';
+$fileName = $this->profile_name;
+
+if ($fileName && $patient) {
+    $localKey = 'pp/' . $fileName;
+    $s3Path = $patient->id . '/' . $fileName;
+
+    if (Storage::disk('public')->exists($localKey)) {
+        // After `php artisan storage:link`, browser path is usually /storage/pp/...
+        $fileUrl = url('storage/app/public/pp/' . $fileName);
+        // If your app still uses the longer path everywhere, use:
+        // $fileUrl = url('storage/app/public/pp/' . $fileName);
+    } elseif (Storage::disk('s3')->exists($s3Path)) {
+        try {
+            $fileUrl = Storage::disk('s3')->temporaryUrl(
+                $s3Path,
+                Carbon::now()->addMinutes(180)
+            );
+        } catch (\Throwable $e) {
+            $fileUrl = '';
+        }
+    }
+}
         return [
             'id' => $this->id,
             'patientid' => $this->patientid,

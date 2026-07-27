@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Carbon;
 
 class PatientsResource extends JsonResource
 {
@@ -17,7 +19,11 @@ class PatientsResource extends JsonResource
         $fileUrl = '';
         if($this->profile_name){
             $fileName = $this->profile_name;
-            $fileUrl =  url('/storage/app/public/pp/' . $fileName);//url('public/profiles/' . $fileName);
+            //$fileUrl =  url('/storage/app/public/pp/' . $fileName);//url('public/profiles/' . $fileName);
+            $fileUrl =  Storage::disk('s3')->temporaryUrl(
+                $this->id."/".$this->profile_name,
+                Carbon::now()->addMinutes(180)
+            );
         }
         return [
             'id' => $this->id,

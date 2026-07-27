@@ -1533,6 +1533,12 @@ class PatientController extends BaseController
             $arr['bs'] = $value->supperbefore;
             $arr['as'] = $value->supperafter;
             $arr['bt'] = $value->bedtime;
+            $arr['bf_b'] = $value->breakfastbefore;
+            $arr['bf_a'] = $value->breakfastafter;
+            $arr['l_b'] = $value->lunchbefore;
+            $arr['l_a'] = $value->lunchafter;
+            $arr['s_b'] = $value->supperbefore;
+            $arr['s_a'] = $value->supperafter;
             $arr['remarks'] = $value->remarks;
             $arr['medicineId'] = $value->medicine_id;
             $arr['prescription_group_id'] = $value->prescription_group_id;
@@ -1748,6 +1754,7 @@ class PatientController extends BaseController
                             $src = $raw !== false ? @imagecreatefromstring($raw) : false;
 
                             if ($src !== false) {
+                                $src = $this->applyExifOrientationToGdImage($src, $file->getRealPath());
                                 $srcW = imagesx($src);
                                 $srcH = imagesy($src);
 
@@ -2607,6 +2614,92 @@ class PatientController extends BaseController
         return response()->json(['prescriptions' => $prescriptions, 'appointments' => $appointment]);
     }
 
+    /**
+     * Apply JPEG EXIF Orientation to a GD image resource before resize/upload.
+     * Returns the (possibly replaced) image resource; destroys the old one when rotated.
+     *
+     * @param resource|\GdImage $src
+     * @param string|null $filePath
+     * @return resource|\GdImage
+     */
+    private function applyExifOrientationToGdImage($src, $filePath)
+    {
+        if (!$filePath || !is_file($filePath) || !function_exists('exif_read_data') || !function_exists('imagerotate')) {
+            return $src;
+        }
+
+        try {
+            $exif = @exif_read_data($filePath);
+            $orientation = isset($exif['Orientation']) ? (int) $exif['Orientation'] : 1;
+            if ($orientation <= 1) {
+                return $src;
+            }
+
+            $rotated = $src;
+            switch ($orientation) {
+                case 2:
+                    if (function_exists('imageflip')) {
+                        imageflip($rotated, IMG_FLIP_HORIZONTAL);
+                    }
+                    break;
+                case 3:
+                    $tmp = imagerotate($rotated, 180, 0);
+                    if ($tmp !== false) {
+                        imagedestroy($rotated);
+                        $rotated = $tmp;
+                    }
+                    break;
+                case 4:
+                    if (function_exists('imageflip')) {
+                        imageflip($rotated, IMG_FLIP_VERTICAL);
+                    }
+                    break;
+                case 5:
+                    if (function_exists('imageflip')) {
+                        imageflip($rotated, IMG_FLIP_HORIZONTAL);
+                    }
+                    $tmp = imagerotate($rotated, 270, 0);
+                    if ($tmp !== false) {
+                        imagedestroy($rotated);
+                        $rotated = $tmp;
+                    }
+                    break;
+                case 6:
+                    // 90° CW
+                    $tmp = imagerotate($rotated, 270, 0);
+                    if ($tmp !== false) {
+                        imagedestroy($rotated);
+                        $rotated = $tmp;
+                    }
+                    break;
+                case 7:
+                    if (function_exists('imageflip')) {
+                        imageflip($rotated, IMG_FLIP_HORIZONTAL);
+                    }
+                    $tmp = imagerotate($rotated, 90, 0);
+                    if ($tmp !== false) {
+                        imagedestroy($rotated);
+                        $rotated = $tmp;
+                    }
+                    break;
+                case 8:
+                    // 90° CCW
+                    $tmp = imagerotate($rotated, 90, 0);
+                    if ($tmp !== false) {
+                        imagedestroy($rotated);
+                        $rotated = $tmp;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            return $rotated;
+        } catch (\Throwable $t) {
+            return $src;
+        }
+    }
+
     private function uploadPatientProfileToS3($patientId, $fileToUpload)
     {
         $resizeThreshold = 1 * 1024 * 1024; // 1MB
@@ -2628,6 +2721,7 @@ class PatientController extends BaseController
                     $src = $raw !== false ? @imagecreatefromstring($raw) : false;
 
                     if ($src !== false) {
+                        $src = $this->applyExifOrientationToGdImage($src, $fileToUpload->getRealPath());
                         $srcW = imagesx($src);
                         $srcH = imagesy($src);
 
