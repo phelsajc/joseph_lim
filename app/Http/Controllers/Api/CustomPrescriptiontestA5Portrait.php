@@ -203,9 +203,9 @@ class CustomPrescriptiontestA5Portrait extends Fpdf
         $this->Cell(20, 4, $this->getPatientDisplayAptDate(), 'B', 1);
         
         $this->Image(public_path() . '/img/rx.png', 12, 53, 9, 9, 'PNG');
-        if ($this->patientProfileImagePath) {
+        /* if ($this->patientProfileImagePath) {
             $this->Image($this->patientProfileImagePath, 120, 45, 18.5, 18.5, $this->patientProfileImageType);
-        }       
+        }  */      
 
         /* if ($this->PageNo() == 1) {
             $this->Ln(15);

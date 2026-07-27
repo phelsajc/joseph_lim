@@ -186,9 +186,9 @@ class RequestprescriptionA5 extends Fpdf
         $this->Cell(11, 4, 'Date:', 0, 0);
 
         $this->Cell(20, 4, date('m/d/Y'), 'B', 1);
-        if ($this->patientProfileImagePath) {
+        /* if ($this->patientProfileImagePath) {
             $this->Image($this->patientProfileImagePath, 120, 45, 18.5, 18.5, $this->patientProfileImageType);
-        }
+        } */
 
         /* if ($this->PageNo() == 1) {
             $this->Ln(15);
@@ -468,7 +468,7 @@ class RequestprescriptionA5 extends Fpdf
             ['Fasting 10-12 hours', $getFastingMode == 2 ? true : false],
             ['Non-fasting', $getFastingMode == 3 ? true : false],
             ['*Kindly send x-ray images to email:', $this->data['appointment_detail']->send_xray_email],
-            ['rosevelleantivo23@gmail.com', false]
+            ['jplimmd@gmail.com', false]
         ];
 
         foreach ($remarks as $i => [$text, $checked]) {

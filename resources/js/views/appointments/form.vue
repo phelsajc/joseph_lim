@@ -4264,7 +4264,6 @@ export default {
       rotation: 0,
       popconfirmUpddateDiagnosis: false,
       _lastFormChangeAt: null,
-      _lastSaveStartedAt: null,
       _lastSaveCompletedAt: null,
       _saveInFlight: false,
       viewFileModel: false,
@@ -4716,9 +4715,6 @@ export default {
   },
   created() {
     this._debouncedAutoSave = debounce(() => {
-      // #region agent log
-      fetch('http://127.0.0.1:7511/ingest/848f6178-75f3-4d3a-8386-a175d0a03494', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '37c2da' }, body: JSON.stringify({ sessionId: '37c2da', location: 'form.vue:formWatcher', message: 'debounced_autosave_fired', data: { appointmentId: this.form.id, msSinceChange: this._lastFormChangeAt ? Date.now() - this._lastFormChangeAt : null }, hypothesisId: 'A', runId: 'post-fix', timestamp: Date.now() }) }).catch(() => {});
-      // #endregion
       this.onSubmit('autosave');
     }, 1000);
     this.getAllDiagnostics();
@@ -5598,24 +5594,9 @@ export default {
       }
       await this._waitForSaveComplete();
     },
-    _contentFingerprint(str) {
-      const s = String(str || '');
-      let hash = 0;
-      for (let i = 0; i < s.length; i++) {
-        hash = ((hash << 5) - hash) + s.charCodeAt(i);
-        hash |= 0;
-      }
-      return { length: s.length, hash };
-    },
     async onSubmit(source = 'manual') {
       await this._waitForSaveComplete();
       this._saveInFlight = true;
-      this._lastSaveStartedAt = Date.now();
-      const formFp = this._contentFingerprint(this.form.form_content);
-      const medcertFp = this._contentFingerprint(this.form.medcert_remarks);
-      // #region agent log
-      fetch('http://127.0.0.1:7511/ingest/848f6178-75f3-4d3a-8386-a175d0a03494', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '37c2da' }, body: JSON.stringify({ sessionId: '37c2da', location: 'form.vue:onSubmit', message: 'save_start', data: { source, appointmentId: this.form.id, formContent: formFp, medcertRemarks: medcertFp, medcertDiagnosisLen: (this.form.medcert_diagnosis || '').length }, hypothesisId: 'B', runId: 'pre-fix', timestamp: Date.now() }) }).catch(() => {});
-      // #endregion
       this.form.followup = moment
         .tz(this.form.followup, "Asia/Manila")
         .format("YYYY-MM-DD"); // moment(this.form.followup).tz('Asia/Manila').format('YYYY-MM-DD');
@@ -5663,9 +5644,6 @@ export default {
       try {
         await Patients.updateDiagnose(this.form);
         this._lastSaveCompletedAt = Date.now();
-        // #region agent log
-        fetch('http://127.0.0.1:7511/ingest/848f6178-75f3-4d3a-8386-a175d0a03494', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '37c2da' }, body: JSON.stringify({ sessionId: '37c2da', location: 'form.vue:onSubmit', message: 'save_complete', data: { source, appointmentId: this.form.id, saveDurationMs: this._lastSaveCompletedAt - this._lastSaveStartedAt, formContent: formFp, medcertRemarks: medcertFp }, hypothesisId: 'B', runId: 'pre-fix', timestamp: Date.now() }) }).catch(() => {});
-        // #endregion
         if (source === 'manual') {
           this.$message({
             message: "Diagnosis has been created successfully.",
@@ -5680,9 +5658,6 @@ export default {
           });
         }
       } catch (err) {
-        // #region agent log
-        fetch('http://127.0.0.1:7511/ingest/848f6178-75f3-4d3a-8386-a175d0a03494', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '37c2da' }, body: JSON.stringify({ sessionId: '37c2da', location: 'form.vue:onSubmit', message: 'save_error', data: { source, appointmentId: this.form.id }, hypothesisId: 'B', runId: 'pre-fix', timestamp: Date.now() }) }).catch(() => {});
-        // #endregion
         console.error("Error adding suggestions:", err);
       } finally {
         this._saveInFlight = false;
@@ -7386,11 +7361,6 @@ export default {
     },
     async printmedcert(type) {
       await this.ensureSavedBeforePrint();
-      const now = Date.now();
-      const medcertFp = this._contentFingerprint(this.form.medcert_remarks);
-      // #region agent log
-      fetch('http://127.0.0.1:7511/ingest/848f6178-75f3-4d3a-8386-a175d0a03494', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '37c2da' }, body: JSON.stringify({ sessionId: '37c2da', location: 'form.vue:printmedcert', message: 'print_after_save', data: { appointmentId: this.form.id, msSinceLastChange: this._lastFormChangeAt ? now - this._lastFormChangeAt : null, msSinceLastSave: this._lastSaveCompletedAt ? now - this._lastSaveCompletedAt : null, saveInFlight: this._saveInFlight, medcertRemarks: medcertFp, medcertDiagnosisLen: (this.form.medcert_diagnosis || '').length }, hypothesisId: 'A', runId: 'post-fix', timestamp: now }) }).catch(() => {});
-      // #endregion
       window.open("/api/printmedcert/" + this.form.id);
     },
     printfees() {
@@ -7410,11 +7380,6 @@ export default {
     },
     async printform(type) {
       await this.ensureSavedBeforePrint();
-      const now = Date.now();
-      const formFp = this._contentFingerprint(this.form.form_content);
-      // #region agent log
-      fetch('http://127.0.0.1:7511/ingest/848f6178-75f3-4d3a-8386-a175d0a03494', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '37c2da' }, body: JSON.stringify({ sessionId: '37c2da', location: 'form.vue:printform', message: 'print_after_save', data: { appointmentId: this.form.id, msSinceLastChange: this._lastFormChangeAt ? now - this._lastFormChangeAt : null, msSinceLastSave: this._lastSaveCompletedAt ? now - this._lastSaveCompletedAt : null, saveInFlight: this._saveInFlight, formContent: formFp }, hypothesisId: 'A', runId: 'post-fix', timestamp: now }) }).catch(() => {});
-      // #endregion
       window.open("/api/printform/" + this.form.id);
     },
     doneConsult() {
