@@ -18,43 +18,38 @@ class AppointmentResource extends JsonResource
      */
     public function toArray($request)
     {
-        $fee=0;
-        $discount_fee=0;
-        $getFee = Rx_service::where(['appointment_id'=>$this->id])->get();
-        foreach ($getFee as $key => $value) {
-             $fee+=$value['fee'];
-             //$discount_fee+=$value['discount'];
+        $grossFee = 0;
+        $getFee = Rx_service::where(['appointment_id' => $this->id])->get();
+        $services = [];
+        foreach ($getFee as $value) {
+            $grossFee += $value['fee'];
+            $services[] = [
+                'service' => $value['service'],
+                'fee' => $value['fee'],
+            ];
         }
-        $patient = Patients::where('patientid',$this->patientid)->first();
+        $patient = Patients::where('patientid', $this->patientid)->first();
         $fileUrl = '';
-        //if($this->profile){
-            //$fileName = $this->profile_name;
-            //$fileUrl = url('storage/app/public/pp/' . $fileName);// url('public/profiles/' . $fileName);
-            //$fileUrl = url('storage/pp/' . $fileName);
-        //}
-        $fileUrl = '';
-$fileName = $this->profile_name;
+        $fileName = $this->profile_name;
 
-if ($fileName && $patient) {
-    $localKey = 'pp/' . $fileName;
-    $s3Path = $patient->id . '/' . $fileName;
+        if ($fileName && $patient) {
+            $localKey = 'pp/' . $fileName;
+            $s3Path = $patient->id . '/' . $fileName;
 
-    if (Storage::disk('public')->exists($localKey)) {
-        // After `php artisan storage:link`, browser path is usually /storage/pp/...
-        $fileUrl = url('storage/app/public/pp/' . $fileName);
-        // If your app still uses the longer path everywhere, use:
-        // $fileUrl = url('storage/app/public/pp/' . $fileName);
-    } elseif (Storage::disk('s3')->exists($s3Path)) {
-        try {
-            $fileUrl = Storage::disk('s3')->temporaryUrl(
-                $s3Path,
-                Carbon::now()->addMinutes(180)
-            );
-        } catch (\Throwable $e) {
-            $fileUrl = '';
+            if (Storage::disk('public')->exists($localKey)) {
+                // After `php artisan storage:link`, browser path is usually /storage/pp/...
+                $fileUrl = url('storage/app/public/pp/' . $fileName);
+            } elseif (Storage::disk('s3')->exists($s3Path)) {
+                try {
+                    $fileUrl = Storage::disk('s3')->temporaryUrl(
+                        $s3Path,
+                        Carbon::now()->addMinutes(180)
+                    );
+                } catch (\Throwable $e) {
+                    $fileUrl = '';
+                }
+            }
         }
-    }
-}
         return [
             'id' => $this->id,
             'patientid' => $this->patientid,
@@ -64,11 +59,13 @@ if ($fileName && $patient) {
             'sequence' => $this->sequence,
             'type' => $this->isold_patient,
             'apt_dt' => date_format(date_create($this->appointment_dt), 'F d, Y'),
-            'flwup_dt' => $this->followup?date_format(date_create($this->followup), 'F d, Y'):'',            
-            'fee' => $fee-$this->discount,
+            'flwup_dt' => $this->followup ? date_format(date_create($this->followup), 'F d, Y') : '',
+            'services' => $services,
+            'gross_fee' => $grossFee,
+            'fee' => $grossFee - $this->discount,
             'discount' => $this->discount,
             'cancel_reason' => $this->cancel_reason,
-            'isactive' => $this->isactive, 
+            'isactive' => $this->isactive,
         ];
     }
 }

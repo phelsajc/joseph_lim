@@ -5934,6 +5934,46 @@ export default {
       }
       this.$router.push({ path: this.patientProfilePath });
     },
+    consultFieldHasValue(val) {
+      if (val === null || val === undefined) {
+        return false;
+      }
+      if (typeof val === "string") {
+        return val.trim() !== "";
+      }
+      return String(val).trim() !== "";
+    },
+    normalizePrevConsultRecord(prev) {
+      if (!prev || (Array.isArray(prev) && prev.length === 0)) {
+        return null;
+      }
+      if (Array.isArray(prev)) {
+        return prev[0] && prev[0].id != null ? prev[0] : null;
+      }
+      return prev.id != null ? prev : null;
+    },
+    applyLastConsultationChartFields(prevData) {
+      const prev = this.normalizePrevConsultRecord(prevData);
+      if (!prev) {
+        return;
+      }
+      const keys = [
+        "nurse_remarks",
+        "chiefcomplaints",
+        "history",
+        "pe",
+        "diagnosis",
+        "remarks",
+      ];
+      keys.forEach((key) => {
+        if (!this.consultFieldHasValue(prev[key])) {
+          return;
+        }
+        const value = prev[key];
+        this.form[key] =
+          typeof value === "string" ? value : String(value);
+      });
+    },
     appointments() {
       Patients.getAppointment(this.form.id)
         .then((response) => {
@@ -5960,6 +6000,7 @@ export default {
               : response.px_profile.profile; */
           this.profile.photo = response.px_profile.profile_name;
           this.form = response.data;
+          this.applyLastConsultationChartFields(response.prev_data);
           this.form_att.patientid = response.px_profile.patientid;
           this.patientid_id = response.px_profile.patientid;
           this.get_attachments(response.px_profile.patientid);

@@ -206,6 +206,13 @@
         </template>
       </el-table-column>
 
+    <div v-if="patients.length > 0" class="dues-summary">
+      <div class="dues-summary-header">
+        <span>Total for the day</span>
+        <span class="dues-summary-total">{{ formatCurrency(duesBreakdown.totalFinal) }}</span>
+      </div>
+    </div>
+
     <pagination v-show="total>0" :total="total" :page.sync="query.page" :limit.sync="query.limit" @pagination="getPatients" />
     <!--  </el-table-draggable> -->
 
