@@ -4443,7 +4443,6 @@ import {
 import moment from "moment-timezone";
 import debounce from "lodash/debounce";
 import checkRole from "@/utils/role"; // Role checking
-import { orientAndCompressImage } from "@/utils/orientImage";
 import DatePicker from "vue2-datepicker";
 import heic2any from "heic2any";
 import QuillEditor from "@/components/QuillEditor";
@@ -7894,9 +7893,42 @@ export default {
       this.form_att.files = fileList.map((fileItem) => fileItem.raw);
     },
     
-    // Image compression utility (applies EXIF orientation)
+    // Image compression utility
     compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
-      return orientAndCompressImage(file, { quality, maxWidth, maxHeight });
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+
+        img.onload = () => {
+          let { width, height } = img;
+
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width *= ratio;
+            height *= ratio;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+
+        img.src = URL.createObjectURL(file);
+      });
     },
     async submitUpload() {
       // Initialize upload progress

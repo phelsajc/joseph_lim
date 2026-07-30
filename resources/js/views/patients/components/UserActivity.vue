@@ -49,27 +49,11 @@
               </div>
             </dl>
             <div class="ua-profile-header__upload">
-              <el-upload
-                class="ua-profile-upload"
-                :on-change="handleProfileUploadChange"
-                :limit="1"
-                :auto-upload="false"
-                :show-file-list="false"
-              >
-                <el-button size="small" type="primary" plain>
-                  Change photo
-                </el-button>
-              </el-upload>
-              <el-button
-                v-if="headerPhotoSrc"
-                size="small"
-                plain
-                icon="el-icon-refresh-right"
-                :loading="profileRotateLoading"
-                @click="rotateProfilePhoto"
-              >
-                Rotate 90°
-              </el-button>
+              <PatientProfilePhotoPicker
+                variant="inline"
+                :preview-url="headerPhotoSrc"
+                @change="handleProfileUploadChange"
+              />
             </div>
           </div>
         </div>
@@ -661,16 +645,6 @@
                       <i class="el-icon-download" />
                     </button>
                     <button
-                      v-if="lightboxCurrentItem && isImageAttachment(lightboxCurrentItem.extension)"
-                      type="button"
-                      class="ua-lightbox__btn"
-                      aria-label="Rotate 90 degrees"
-                      :disabled="lightboxRotateLoading"
-                      @click="rotateLightboxAttachment"
-                    >
-                      <i class="el-icon-refresh-right" />
-                    </button>
-                    <button
                       type="button"
                       class="ua-lightbox__btn ua-lightbox__btn--danger"
                       aria-label="Delete"
@@ -770,13 +744,14 @@ import Patients from '@/api/patients';
 import Pagination from '@/components/Pagination';
 import moment from 'moment-timezone';
 import checkRole from '@/utils/role'; // Role checking
-import { orientAndCompressImage } from '@/utils/orientImage';
+import PatientProfilePhotoPicker from '@/views/components/PatientProfilePhotoPicker.vue';
 import heic2any from 'heic2any';
 export default {
   components: {
     Pagination,
     LoadingOverlay,
     ConsultationHistoryPanel,
+    PatientProfilePhotoPicker,
     PatientAppointmentActions,
     PatientRecordVitalsDialog,
   },
@@ -824,9 +799,6 @@ export default {
       isProcessingAdolecents: false,
       isProcessingVax: false,
       isUploading: false,
-      profileRotateLoading: false,
-      lightboxRotateLoading: false,
-      profilePhotoVersion: 0,
       // Upload progress tracking
       uploadProgress: 0,
       uploadStatus: '',
@@ -1132,10 +1104,6 @@ export default {
             : p.profile || '';
         }
       }
-      if (src && this.profilePhotoVersion && !src.startsWith('blob:')) {
-        const sep = src.includes('?') ? '&' : '?';
-        return src + sep + 'v=' + this.profilePhotoVersion;
-      }
       return src;
     },
     displayPatientName() {
@@ -1359,80 +1327,14 @@ export default {
       this.selectedImage = image;
       this.dialogVisible = true;
     },
-    async handleProfileUploadChange(file, fileList) {
-      let list = fileList.slice(-1);
-      const item = list[0];
-      if (item && item.raw && item.raw.type && item.raw.type.startsWith('image/')) {
-        try {
-          const normalized = await this.compressImage(item.raw, 0.92, 4096, 4096);
-          if (item.url) {
-            try {
-              URL.revokeObjectURL(item.url);
-            } catch (e) {
-              /* ignore */
-            }
-          }
-          list = [{
-            ...item,
-            raw: normalized,
-            url: URL.createObjectURL(normalized),
-          }];
-        } catch (e) {
-          console.error('Profile photo orientation fix failed:', e);
-        }
-      }
+    handleProfileUploadChange(file, fileList) {
+      const list = fileList.slice(-1);
       this.form.profile = list;
       this.$emit('return-img', list);
       this.$store.dispatch('globalvar/changeval', {
         key: 'img_val',
         value: list,
       });
-    },
-    async rotateProfilePhoto() {
-      const id = this.$route.params.id;
-      if (!id) {
-        return;
-      }
-      this.profileRotateLoading = true;
-      try {
-        const res = await Patients.rotateProfile(id);
-        const url = res && res.profile;
-        if (url) {
-          this.profilePhotoVersion = Date.now();
-          if (this.profile) {
-            this.$set(this.profile, 'profile', url);
-          }
-          this.form.profile = [];
-          this.$message.success('Photo rotated');
-        }
-      } catch (e) {
-        console.error(e);
-        this.$message.error('Could not rotate photo');
-      } finally {
-        this.profileRotateLoading = false;
-      }
-    },
-    async rotateLightboxAttachment() {
-      const item = this.lightboxCurrentItem;
-      if (!item || !this.isImageAttachment(item.extension)) {
-        return;
-      }
-      this.lightboxRotateLoading = true;
-      try {
-        await Patients.rotateAttachment(item.id);
-        this.$message.success('Image rotated');
-        const keepId = item.id;
-        await this.get_attachments();
-        const idx = this.galleryDisplayItems.findIndex((i) => i.id === keepId);
-        if (idx >= 0) {
-          this.lightboxIndex = idx;
-        }
-      } catch (e) {
-        console.error(e);
-        this.$message.error('Could not rotate image');
-      } finally {
-        this.lightboxRotateLoading = false;
-      }
     },
     computeAgeFromDate(dateString) {
       const today = new Date();
@@ -1454,7 +1356,11 @@ export default {
         formData.append(key, this.form[key]);
       }
 
-      if (this.form.profile.length > 0) {
+      if (
+        Array.isArray(this.form.profile) &&
+        this.form.profile.length > 0 &&
+        this.form.profile[0].raw
+      ) {
         formData.append('profile_pic', this.form.profile[0].raw);
       }
 
@@ -1657,7 +1563,40 @@ export default {
         .catch(() => {});
     },
     compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
-      return orientAndCompressImage(file, { quality, maxWidth, maxHeight });
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+
+        img.onload = () => {
+          let { width, height } = img;
+
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width *= ratio;
+            height *= ratio;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+
+        img.src = URL.createObjectURL(file);
+      });
     },
     async submitUpload() {
       if (!this.form_att.files || !this.form_att.files.length) {
@@ -2180,20 +2119,9 @@ export default {
 .ua-profile-header__avatar ::v-deep .el-image__inner,
 .ua-profile-header__avatar ::v-deep img {
   border-radius: 10px;
-  image-orientation: from-image;
-}
-
-.ua-drive-item__thumb img,
-.ua-lightbox__image,
-.ua-lightbox__thumb img {
-  image-orientation: from-image;
 }
 
 .ua-profile-header__upload {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
   margin-top: 8px;
 }
 
