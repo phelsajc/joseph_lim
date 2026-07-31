@@ -6130,6 +6130,12 @@ export default {
       if (s === "") {
         return false;
       }
+      const frac = s.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+      if (frac) {
+        const num = Number(frac[1]);
+        const den = Number(frac[2]);
+        return Number.isFinite(num) && Number.isFinite(den) && den !== 0 && (num / den) > 0;
+      }
       const n = Number(s);
       return Number.isFinite(n) && n > 0;
     },
