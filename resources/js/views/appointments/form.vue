@@ -4419,7 +4419,10 @@ import { listPrescriptionDiagnosisTemplates, getPrescriptionDiagnosisTemplate } 
 import { listDiagnosticTemplates, getDiagnosticTemplate } from "@/api/diagnosticTemplate";
 import { listFormTemplates, getFormTemplate, getFormTemplateCategories } from "@/api/formTemplate";
 import { replaceFormTemplatePlaceholders, buildFormTemplateContext } from "@/utils/formTemplatePlaceholders";
-import { appointmentMealTimingStringsFromFrequency } from "@/utils/medicationTemplateTiming";
+import {
+  appointmentMealTimingStringsFromFrequency,
+  isPositiveMealDoseString,
+} from "@/utils/medicationTemplateTiming";
 import { listFavoriteMedicines, createFavoriteMedicine, updateFavoriteMedicine, deleteFavoriteMedicine } from "@/api/favoriteMedicine";
 import Procedure from "@/api/procedure";
 import Services from "@/api/services";
@@ -6123,21 +6126,7 @@ export default {
       }
     },
     rxTimingDoseFilled(val) {
-      if (val === null || val === undefined) {
-        return false;
-      }
-      const s = String(val).trim();
-      if (s === "") {
-        return false;
-      }
-      const frac = s.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
-      if (frac) {
-        const num = Number(frac[1]);
-        const den = Number(frac[2]);
-        return Number.isFinite(num) && Number.isFinite(den) && den !== 0 && (num / den) > 0;
-      }
-      const n = Number(s);
-      return Number.isFinite(n) && n > 0;
+      return isPositiveMealDoseString(val);
     },
     emptyRxMealTiming() {
       return { bf_b: "", bf_a: "", l_b: "", l_a: "", s_b: "", s_a: "", bt: "" };
@@ -6731,30 +6720,38 @@ export default {
         });
     },
     addServices() {
-      Patients.add_service(this.servicesRendered)
-        .then((response) => {
-          this.getservices();
-          this.service.service = "";
-          this.service.fee = 0;
-          this.service.discount = 0;
-          this.servicesRendered.rendered = [];
-          this.servicesRenderedModel = [];
-          this.viewServicesTbl = false;
-        })
-        .catch((err) => {
-          console.error("Error adding suggestions:", err);
-        });
+      if (this.servicesRendered.rendered.length > 0) {
+        Patients.add_service(this.servicesRendered)
+          .then((response) => {
+            this.getservices();
+            this.service.service = "";
+            this.service.fee = 0;
+            this.service.discount = 0;
+            this.servicesRendered.rendered = [];
+            this.servicesRenderedModel = [];
+            this.viewServicesTbl = false;
+          })
+          .catch((err) => {
+            console.error("Error adding suggestions:", err);
+          });
+      } else {
+        this.$message.warning("Select at least one service to add.");
+      }
     },
     addNewServices(e) {
-      if (this.servicesRenderedModel.length > 0) {
-        this.servicesRendered.rendered.push({
-          service: e.description,
-          id: this.$route.params.id,
-          fee: e.fee,
-          service_id: e.service_id,
-        });
+      if (this.servicesRenderedModel.includes(e.description)) {
+        if (!this.servicesRendered.rendered.find((s) => s.service_id === e.service_id)) {
+          this.servicesRendered.rendered.push({
+            service: e.description,
+            id: this.$route.params.id,
+            fee: e.fee,
+            service_id: e.service_id,
+          });
+        }
       } else {
-        alert("Procedure is required.");
+        this.servicesRendered.rendered = this.servicesRendered.rendered.filter(
+          (s) => s.service_id !== e.service_id
+        );
       }
     },
     openRxOrderDialog() {

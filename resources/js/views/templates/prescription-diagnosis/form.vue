@@ -371,6 +371,7 @@ import {
   appointmentMealTimingStringsFromFrequency,
   serializeTimingFromAppointmentMealStrings,
   displayStoredTimingOrLegacy,
+  isPositiveMealDoseString,
 } from '@/utils/medicationTemplateTiming';
 
 function emptyMedsArr() {
@@ -473,21 +474,7 @@ export default {
       return s !== '' ? s : '';
     },
     rxTimingDoseFilled(val) {
-      if (val === null || val === undefined) {
-        return false;
-      }
-      const s = String(val).trim();
-      if (s === '') {
-        return false;
-      }
-      const frac = s.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
-      if (frac) {
-        const num = Number(frac[1]);
-        const den = Number(frac[2]);
-        return Number.isFinite(num) && Number.isFinite(den) && den !== 0 && (num / den) > 0;
-      }
-      const n = Number(s);
-      return Number.isFinite(n) && n > 0;
+      return isPositiveMealDoseString(val);
     },
     mealTimingFieldsFromMedicineRecord(item) {
       if (!item) {

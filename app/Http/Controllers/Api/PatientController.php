@@ -227,21 +227,12 @@ class PatientController extends BaseController
         $data->pmh_others = $request->pmh_others;
 
 
-        if ($data->profile_name != null) {
-            /* $oldFilePath = public_path('profiles/' . $data->profile_name);
-            if (file_exists($oldFilePath)) {
-                unlink($oldFilePath);
-            } */
-
-            $filePath = $data->id . "/" . $data->profile_name;
-            if ($filePath && Storage::disk('s3')->exists($filePath)) {
-                Storage::disk('s3')->delete($filePath);
-            }
-        }
 
         if ($request->hasFile('profile_pic')) {
             $data->profile_name = $this->uploadPatientProfileToS3($data->id, $request->file('profile_pic'));
         }
+
+        
 
         $fam = '';
         $getFam = explode(",", $request->fam);
@@ -570,18 +561,37 @@ class PatientController extends BaseController
         $vitals_data = $vitalsResponse['vitals_data'];
         $vitals_today = $vitalsResponse['vitals_today'];
         $vitals_by_day = $vitalsResponse['vitals_by_day'];
-        $fileUrl = '';
+        /* $fileUrl = '';
         if ($px_profile->profile_name != null) {
-            /* $fileName = $patient->profile_name;
-            $fileUrl = url('/storage/app/public/pp/' . $fileName); */
             $fileUrl =
                 Storage::disk('s3')->temporaryUrl(
                     $px_profile->id."/".$px_profile->profile_name,
                     Carbon::now()->addMinutes(180)
                 );  
         }
+        $px_profile->profile_name = $fileUrl; */
 
-        $px_profile->profile_name = $fileUrl;
+        $fileName = $px_profile->profile_name;
+
+        if ($fileName && $px_profile) {
+            $localKey = 'pp/' . $fileName;
+            $s3Path = $px_profile->id . '/' . $fileName;
+
+            if (Storage::disk('public')->exists($localKey)) {
+                // After `php artisan storage:link`, browser path is usually /storage/pp/...
+                $px_profile->profile_name = url('storage/app/public/pp/' . $fileName);
+            } elseif (Storage::disk('s3')->exists($s3Path)) {
+                try {
+                    $px_profile->profile_name = Storage::disk('s3')->temporaryUrl(
+                        $s3Path,
+                        Carbon::now()->addMinutes(180)
+                    );
+                } catch (\Throwable $e) {
+                    $px_profile->profile_name = '';
+                }
+            }
+        }
+        
 
         return response()->json([
             'vitals_data' => $vitals_data,

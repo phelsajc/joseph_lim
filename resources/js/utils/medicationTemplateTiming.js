@@ -50,15 +50,58 @@ function mapLabelToKey(label) {
 }
 
 /**
- * Positive finite dose for a timing slot (allows decimals e.g. 0.5, 1.25).
+ * Parse a meal-timing dose string into a positive finite number.
+ * Accepts decimals (1, 0.5, 1.5), simple fractions (1/2), and mixed numbers (1 1/2).
+ * @returns {number} or NaN if invalid
+ */
+export function parsePositiveMealDose(val) {
+  if (val === null || val === undefined || val === '') {
+    return NaN;
+  }
+  if (typeof val === 'number') {
+    return Number.isFinite(val) && val > 0 ? val : NaN;
+  }
+  const s = String(val).trim();
+  if (s === '') {
+    return NaN;
+  }
+  const mixed = s.match(/^(\d+)\s+(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+  if (mixed) {
+    const whole = Number(mixed[1]);
+    const num = Number(mixed[2]);
+    const den = Number(mixed[3]);
+    if (!Number.isFinite(whole) || !Number.isFinite(num) || !Number.isFinite(den) || den === 0) {
+      return NaN;
+    }
+    const n = whole + num / den;
+    return n > 0 ? n : NaN;
+  }
+  const frac = s.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+  if (frac) {
+    const num = Number(frac[1]);
+    const den = Number(frac[2]);
+    if (!Number.isFinite(num) || !Number.isFinite(den) || den === 0) {
+      return NaN;
+    }
+    const n = num / den;
+    return n > 0 ? n : NaN;
+  }
+  const n = Number(s);
+  return Number.isFinite(n) && n > 0 ? n : NaN;
+}
+
+/** Whether a meal-timing field value counts as a filled positive dose. */
+export function isPositiveMealDoseString(val) {
+  return Number.isFinite(parsePositiveMealDose(val));
+}
+
+/**
+ * Positive finite dose for a timing slot (allows decimals, fractions, mixed numbers).
  * @returns {number} normalized, or NaN if invalid
  */
 export function normalizeScheduleQty(q) {
-  if (q === null || q === undefined || q === '') {
-    return NaN;
-  }
-  const n = Number(q);
-  if (!Number.isFinite(n) || n <= 0) {
+  const n = parsePositiveMealDose(q);
+  if (!Number.isFinite(n)) {
     return NaN;
   }
   const capped = Math.min(999, n);

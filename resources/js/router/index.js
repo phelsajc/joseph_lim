@@ -76,7 +76,7 @@ export const constantRoutes = [
         path: 'patients',
         name: 'Patients',
         component: () => import('@/views/patients/index'),
-        meta: { title: 'Patients', icon: 'patients' },
+        meta: { title: 'Patients', icon: 'patients', affix: true },
       },
       /* {
         path: 'medicines',
@@ -125,7 +125,7 @@ export const constantRoutes = [
         path: 'appointments',
         component: () => import('@/views/appointments/index'),
         name: 'Appointments',
-        meta: { title: 'Appointments', icon: 'appointments', noCache: false, affix: false },
+        meta: { title: 'Appointments', icon: 'appointments', noCache: false, affix: true },
       },
       {
         path: 'report',
