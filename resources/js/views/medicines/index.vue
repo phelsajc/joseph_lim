@@ -1,8 +1,10 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="query.keyword" :placeholder="$t('table.keyword')" style="width: 200px" class="filter-item"
-        @keyup.enter.native="handleFilter" />
+      <el-input
+        v-model="query.keyword" :placeholder="$t('table.keyword')" style="width: 200px" class="filter-item"
+        @keyup.enter.native="handleFilter"
+      />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t("table.search") }}
       </el-button>
@@ -46,8 +48,10 @@
           <el-button type="primary" size="mini" @click="editMedicine(scope.$index, scope.row)">
             Edit
           </el-button>
-          <el-popconfirm confirm-button-text="Yes" cancel-button-text="No" icon-color="#626AEF"
-            title="Do you want to delete this medicine?" @confirm="deleteMedicine(scope.$index, scope.row)">
+          <el-popconfirm
+            confirm-button-text="Yes" cancel-button-text="No" icon-color="#626AEF"
+            title="Do you want to delete this medicine?" @confirm="deleteMedicine(scope.$index, scope.row)"
+          >
             <template #reference>
               <el-button type="danger" size="mini"> Delete </el-button>
             </template>
@@ -55,11 +59,15 @@
         </template>
       </el-table-column>
     </el-table>
-    <pagination v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
-      @pagination="getMedicines" />
+    <pagination
+      v-show="total > 0" :total="total" :page.sync="query.page" :limit.sync="query.limit"
+      @pagination="getMedicines"
+    />
 
-    <el-dialog :title="isEditForm ? 'Edit Medicine' : 'Add Medicine'" :visible.sync="dialogFormVisible"
-      :close-on-click-modal="false" :close-on-press-escape="false" width="720px">
+    <el-dialog
+      :title="isEditForm ? 'Edit Medicine' : 'Add Medicine'" :visible.sync="dialogFormVisible"
+      :close-on-click-modal="false" :close-on-press-escape="false" width="720px"
+    >
       <div class="form-container">
         <el-form ref="appForm" :model="form" :rules="rules" label-position="left" label-width="150px">
           <el-form-item label="Brand Name" prop="brand_name">
@@ -231,6 +239,9 @@ export default {
     },
     deleteMedicine(index, row) {
       Medicines.delete(row.id).then(() => {
+        if (Array.isArray(this.item_list) && index >= 0) {
+          this.item_list.splice(index, 1);
+        }
         this.$message({
           message: 'Medicine has been deleted successfully.',
           type: 'success',

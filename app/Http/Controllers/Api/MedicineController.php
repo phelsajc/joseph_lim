@@ -10,6 +10,7 @@
 namespace App\Http\Controllers\Api;
 use App\Model\Patients;
 use App\Model\Medicine;
+use App\Model\UserFavoriteMedicine;
 use App\Model\Generics;
 use App\Model\Appointments;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class MedicineController extends BaseController
         $limit = Arr::get($searchParams, 'limit', static::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'keyword', '');
 
-        $userQuery = Medicine::query();
+        $userQuery = Medicine::query()->where('isincluded', 1);
 
         if (!empty($keyword)) {
             $kw = '%' . addcslashes($keyword, '%_\\') . '%';
@@ -129,8 +130,12 @@ class MedicineController extends BaseController
     function delete($id)
     {
         $field = Medicine::find($id);
+        if (!$field) {
+            return response()->json(['message' => 'Medicine not found'], 404);
+        }
         $field->isincluded = 0;
         $field->save();
+        UserFavoriteMedicine::where('medicine_id', $id)->delete();
         return response()->json($field);
     }
 

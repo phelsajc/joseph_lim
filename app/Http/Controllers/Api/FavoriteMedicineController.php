@@ -17,8 +17,16 @@ class FavoriteMedicineController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $rows = UserFavoriteMedicine::where('user_id', $user->id)
-            ->orderBy('drug_name')
+        $rows = UserFavoriteMedicine::query()
+            ->from('user_favorite_medicines')
+            ->leftJoin('medicines', 'user_favorite_medicines.medicine_id', '=', 'medicines.id')
+            ->where('user_favorite_medicines.user_id', $user->id)
+            ->where(function ($q) {
+                $q->whereNull('user_favorite_medicines.medicine_id')
+                    ->orWhere('medicines.isincluded', 1);
+            })
+            ->orderBy('user_favorite_medicines.drug_name')
+            ->select('user_favorite_medicines.*')
             ->get();
 
         return response()->json(['data' => $rows]);
