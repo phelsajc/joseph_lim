@@ -13,6 +13,7 @@ class PrescriptionDiagnosisTemplateItem extends Model
         'generic_name',
         'medicine_id',
         'quantity',
+        'dosage',
         'frequency',
         'duration',
         'instructions',

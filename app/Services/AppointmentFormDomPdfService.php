@@ -57,8 +57,7 @@ class AppointmentFormDomPdfService
             'contentWidthMm' => 148 - $pagePadding['left'] - $pagePadding['right'],
             'patientPhotoUrl' => self::resolvePatientPhotoUrl($patient),
             'paths' => [
-                'lim_fb' => self::safePublicImg('img/lim_fb.png'),
-                'lim_rhuema' => self::safePublicImg('img/lim_rhuema.jpg'),
+                'ant_logo' => self::safePublicImg('img/ant_logo.jpg'),
                 'rx' => self::safePublicImg('img/rx.png'),
             ],
         ])

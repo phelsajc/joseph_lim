@@ -28,18 +28,6 @@
           <span>{{ scope.row.generic_name || scope.row.generic }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Included" width="90">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.isincluded ? 'success' : 'info'" size="small">
-            {{ scope.row.isincluded ? 'Yes' : 'No' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="Created" width="110">
-        <template slot-scope="scope">
-          <span>{{ formatDate(scope.row.createddate) }}</span>
-        </template>
-      </el-table-column>
       <el-table-column align="center" label="Qty" width="64" prop="default_qty" />
       <el-table-column align="left" label="Dosage" width="100" show-overflow-tooltip prop="unit" />
       <el-table-column align="left" label="Remarks" min-width="140" show-overflow-tooltip prop="default_remarks" />
@@ -150,16 +138,6 @@ export default {
     this.getMedicines();
   },
   methods: {
-    formatDate(val) {
-      if (!val) {
-        return '—';
-      }
-      const d = new Date(val);
-      if (Number.isNaN(d.getTime())) {
-        return String(val).slice(0, 10);
-      }
-      return d.toLocaleDateString();
-    },
     buildPayload() {
       return {
         id: this.form.id,

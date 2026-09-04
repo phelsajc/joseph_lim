@@ -18,6 +18,12 @@ class MedicineResource extends JsonResource
             'id' => $this->id,
             'medicine' => Str::title($this->medicine_name),
             'generic' => Str::title($this->generic_name),
+            'brand_name' => $this->medicine_name,
+            'generic_name' => $this->generic_name,
+            'isincluded' => $this->isincluded,
+            'default_qty' => $this->default_qty,
+            'unit' => $this->unit,
+            'default_remarks' => $this->default_remarks,
         ];
     }
 }

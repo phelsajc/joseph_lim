@@ -542,7 +542,7 @@ class PatientController extends BaseController
         $getPreviousRecords = DB::table('appointments')
             ->where('patientid', $data->patientid)
             ->where('is_cancel', 0)
-            ->where('isdone', 1)
+            //->where('isdone', 1)
             ->where('id', '!=', $id) // Exclude current appointment
             ->where('appointment_dt', '<', $data->appointment_dt) // Get appointments before current date
             ->orderBy('appointment_dt', 'desc')
@@ -896,7 +896,8 @@ class PatientController extends BaseController
         /* $data['query_prescriptions'] = Rx::where(['appointment_id'=>$id])->get();
         $data['query_diagnostics'] = Ancillary::where(['appointment_id'=>$id])->get(); */
         $data['profile'] = Profile::where(['id' => 1])->first();
-        $data['getHistory'] = Appointments::where(['patientid' => $data['patient_detail']->patientid, 'isdone' => 1])->orderby('id', 'desc')->get();
+        //$data['getHistory'] = Appointments::where(['patientid' => $data['patient_detail']->patientid, 'isdone' => 1])->orderby('id', 'desc')->get();
+        $data['getHistory'] = Appointments::where(['patientid' => $data['patient_detail']->patientid, 'is_cancel' => 0])->orderby('id', 'desc')->get();
         $myPdf = new ChartRecordPdf($data);
         $myPdf->Output('I', time() . "-.pdf", true);
         exit;
@@ -926,7 +927,7 @@ class PatientController extends BaseController
 
         $query = Appointments::where([
             'patientid' => $id,
-            'isdone' => 1,
+            //'isdone' => 1,
             'is_cancel' => 0,
         ])->orderBy('appointment_dt', 'desc');
 

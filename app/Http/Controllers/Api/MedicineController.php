@@ -67,12 +67,12 @@ class MedicineController extends BaseController
                 m.default_bt, m.default_remarks
             FROM medicines m
             JOIN (
-                /* Prefer latest row per brand so defaults edited in admin match search/get-meds. */
+                /* Prefer latest row per brand+dosage so strength variants stay distinct. */
                 SELECT MAX(id) AS id
                 FROM medicines
                 WHERE (medicine_name LIKE ? OR generic_name LIKE ?)
                   AND isincluded = 1
-                GROUP BY medicine_name
+                GROUP BY medicine_name, unit
             ) AS filtered
             ON m.id = filtered.id
             ORDER BY m.medicine_name ASC

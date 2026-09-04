@@ -1,158 +1,160 @@
 <template>
-  <div class="app-container loading-container" v-loading="pageloading" element-loading-text="Loading...">
+  <div v-loading="pageloading" class="app-container loading-container" element-loading-text="Loading...">
     <div ref="toolbarWrap" class="action-toolbar-wrap">
-      <div ref="toolbarSentinel" class="action-toolbar-sentinel" aria-hidden="true"></div>
+      <div ref="toolbarSentinel" class="action-toolbar-sentinel" aria-hidden="true" />
       <div
         ref="actionToolbar"
         class="action-toolbar"
         :class="{ 'is-pinned': toolbarPinned }"
         :style="pinnedToolbarStyle"
       >
-      <div class="action-buttons">
-        <el-dropdown @command="handleCommand" trigger="click">
-          <el-button type="primary" size="large" class="action-btn">
-            <i class="el-icon-menu"></i>
-            Actions
-            <i class="el-icon-arrow-down el-icon--right" />
-          </el-button>
-          <el-dropdown-menu slot="dropdown" class="action-menu">
-            <el-dropdown-item command="update_diagnosis" class="action-item">
-              <i class="el-icon-edit"></i>
-              Update Diagnosis
-            </el-dropdown-item>
-            <el-dropdown-item command="share_pdf" class="action-item">
-              <i class="el-icon-share"></i>
-              Share PDF
-            </el-dropdown-item>
-            <el-dropdown-item command="print_rx_current" class="action-item">
-              <i class="el-icon-printer"></i>
-              Print Rx (current group)
-            </el-dropdown-item>
-            <el-dropdown-item command="print_rx_all" class="action-item">
-              <i class="el-icon-printer"></i>
-              Print Rx (all groups)
-            </el-dropdown-item>
-            <el-dropdown-item command="print_dx_current" class="action-item">
-              <i class="el-icon-document"></i>
-              Print Diagnostics (current group)
-            </el-dropdown-item>
-            <el-dropdown-item command="print_dx_all" class="action-item">
-              <i class="el-icon-document"></i>
-              Print Diagnostics (all groups)
-            </el-dropdown-item>
-            <el-dropdown-item command="print_referral" class="action-item">
-              <i class="el-icon-s-promotion"></i>
-              Print Referral
-            </el-dropdown-item>
-            <el-dropdown-item command="print_form" class="action-item">
-              <i class="el-icon-s-promotion"></i>
-              Print Form
-            </el-dropdown-item>
-            <el-dropdown-item command="load_form_template" class="action-item">
-              <i class="el-icon-document"></i>
-              Load form template
-            </el-dropdown-item>
-            <el-dropdown-item command="print_medcert" class="action-item">
-              <i class="el-icon-document-copy"></i>
-              Print Med Cert
-            </el-dropdown-item>
-            <el-dropdown-item command="print_fees" class="action-item">
-              <i class="el-icon-money"></i>
-              Print Fees
-            </el-dropdown-item>
-            <el-dropdown-item v-role="['secretary', 'admin', 'doctor']" command="done_consult" class="action-item success">
-              <i class="el-icon-check"></i>
-              Done Consultation
-            </el-dropdown-item>
-            <el-dropdown-item command="cancel_apt" class="action-item danger">
-              <i class="el-icon-close"></i>
-              Cancel Appointment
-            </el-dropdown-item>
-            <el-dropdown-item v-role="['doctor', 'admin']" command="view_chart" class="action-item">
-              <i class="el-icon-view"></i>
-              View Chart
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-
-        <el-button
-          type="primary"
-          plain
-          size="large"
-          class="action-btn"
-          :disabled="!hasPatientProfileLink"
-          @click="goToPatientProfile"
-        >
-          <i class="el-icon-user"></i>
-          Patient profile
-        </el-button>
-
-        <el-button
-          type="info"
-          size="large"
-          class="action-btn"
-          :disabled="!patientid_id"
-          @click="openCompareDrawer"
-        >
-          <i class="el-icon-copy-document"></i>
-          Compare previous
-        </el-button>
-
-        <el-popconfirm v-model="popconfirmUpddateDiagnosis" title="Are you done with this appointment?"
-          @confirm="onSubmit">
-          <template #reference>
-            <el-button ref="updateDiagnosisBtn" type="success" size="large" class="action-btn">
-              <i class="el-icon-check"></i>
-              Update Diagnosis
+        <div class="action-buttons">
+          <el-dropdown trigger="click" @command="handleCommand">
+            <el-button type="primary" size="large" class="action-btn">
+              <i class="el-icon-menu" />
+              Actions
+              <i class="el-icon-arrow-down el-icon--right" />
             </el-button>
-          </template>
-        </el-popconfirm>
+            <el-dropdown-menu slot="dropdown" class="action-menu">
+              <el-dropdown-item command="update_diagnosis" class="action-item">
+                <i class="el-icon-edit" />
+                Update Diagnosis
+              </el-dropdown-item>
+              <el-dropdown-item command="share_pdf" class="action-item">
+                <i class="el-icon-share" />
+                Share PDF
+              </el-dropdown-item>
+              <el-dropdown-item command="print_rx_current" class="action-item">
+                <i class="el-icon-printer" />
+                Print Rx (current group)
+              </el-dropdown-item>
+              <el-dropdown-item command="print_rx_all" class="action-item">
+                <i class="el-icon-printer" />
+                Print Rx (all groups)
+              </el-dropdown-item>
+              <el-dropdown-item command="print_dx_current" class="action-item">
+                <i class="el-icon-document" />
+                Print Diagnostics (current group)
+              </el-dropdown-item>
+              <el-dropdown-item command="print_dx_all" class="action-item">
+                <i class="el-icon-document" />
+                Print Diagnostics (all groups)
+              </el-dropdown-item>
+              <el-dropdown-item command="print_referral" class="action-item">
+                <i class="el-icon-s-promotion" />
+                Print Referral
+              </el-dropdown-item>
+              <el-dropdown-item command="print_form" class="action-item">
+                <i class="el-icon-s-promotion" />
+                Print Form
+              </el-dropdown-item>
+              <el-dropdown-item command="load_form_template" class="action-item">
+                <i class="el-icon-document" />
+                Load form template
+              </el-dropdown-item>
+              <el-dropdown-item command="print_medcert" class="action-item">
+                <i class="el-icon-document-copy" />
+                Print Med Cert
+              </el-dropdown-item>
+              <el-dropdown-item command="print_fees" class="action-item">
+                <i class="el-icon-money" />
+                Print Fees
+              </el-dropdown-item>
+              <el-dropdown-item v-role="['secretary', 'admin', 'doctor']" command="done_consult" class="action-item success">
+                <i class="el-icon-check" />
+                Done Consultation
+              </el-dropdown-item>
+              <el-dropdown-item command="cancel_apt" class="action-item danger">
+                <i class="el-icon-close" />
+                Cancel Appointment
+              </el-dropdown-item>
+              <el-dropdown-item v-role="['doctor', 'admin']" command="view_chart" class="action-item">
+                <i class="el-icon-view" />
+                View Chart
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
 
-        <el-button
-          v-role="['secretary', 'admin', 'doctor']"
-          type="success"
-          plain
-          size="large"
-          class="action-btn"
-          @click="doneConsult"
-        >
-          <i class="el-icon-check"></i>
-          Done Consultation
-        </el-button>
+          <el-button
+            type="primary"
+            plain
+            size="large"
+            class="action-btn"
+            :disabled="!hasPatientProfileLink"
+            @click="goToPatientProfile"
+          >
+            <i class="el-icon-user" />
+            Patient profile
+          </el-button>
 
-        <el-button
-          v-role="['doctor', 'admin']"
-          type="primary"
-          plain
-          size="large"
-          class="action-btn"
-          @click="printChart"
-        >
-          <i class="el-icon-view"></i>
-          View Chart
-        </el-button>
+          <el-button
+            type="info"
+            size="large"
+            class="action-btn"
+            :disabled="!patientid_id"
+            @click="openCompareDrawer"
+          >
+            <i class="el-icon-copy-document" />
+            Compare previous
+          </el-button>
 
-        <el-button
-          type="danger"
-          plain
-          size="large"
-          class="action-btn"
-          @click="cancelAppointment"
-        >
-          <i class="el-icon-close"></i>
-          Cancel Appointment
-        </el-button>
+          <el-popconfirm
+            v-model="popconfirmUpddateDiagnosis" title="Are you done with this appointment?"
+            @confirm="onSubmit"
+          >
+            <template #reference>
+              <el-button ref="updateDiagnosisBtn" type="success" size="large" class="action-btn">
+                <i class="el-icon-check" />
+                Update Diagnosis
+              </el-button>
+            </template>
+          </el-popconfirm>
 
-        <el-button
-          type="primary"
-          size="large"
-          class="action-btn"
-          @click="openSharePdfDialog"
-        >
-          <i class="el-icon-share"></i>
-          Share PDF
-        </el-button>
-      </div>
+          <el-button
+            v-role="['secretary', 'admin', 'doctor']"
+            type="success"
+            plain
+            size="large"
+            class="action-btn"
+            @click="doneConsult"
+          >
+            <i class="el-icon-check" />
+            Done Consultation
+          </el-button>
+
+          <el-button
+            v-role="['doctor', 'admin']"
+            type="primary"
+            plain
+            size="large"
+            class="action-btn"
+            @click="printChart"
+          >
+            <i class="el-icon-view" />
+            View Chart
+          </el-button>
+
+          <el-button
+            type="danger"
+            plain
+            size="large"
+            class="action-btn"
+            @click="cancelAppointment"
+          >
+            <i class="el-icon-close" />
+            Cancel Appointment
+          </el-button>
+
+          <el-button
+            type="primary"
+            size="large"
+            class="action-btn"
+            @click="openSharePdfDialog"
+          >
+            <i class="el-icon-share" />
+            Share PDF
+          </el-button>
+        </div>
       </div>
     </div>
 
@@ -196,9 +198,9 @@
             :sm="12"
           >
             <el-card
+              v-loading="col.loading"
               shadow="never"
               class="compare-column"
-              v-loading="col.loading"
             >
               <div slot="header" class="compare-column__header">
                 <strong>{{ col.title }}</strong>
@@ -300,17 +302,23 @@
       </div>
     </el-drawer>
 
-    <el-dialog :title="'Historical Records'" class="compact-table" width="100%" :visible.sync="historyDiaglog"
-      :close-on-click-modal="false" :close-on-press-escape="false">
-      <el-table :data="old_records" border :default-sort="{ prop: 'date', order: 'descending' }"
-        @row-click="handleRowClick">
+    <el-dialog
+      :title="'Historical Records'" class="compact-table" width="100%" :visible.sync="historyDiaglog"
+      :close-on-click-modal="false" :close-on-press-escape="false"
+    >
+      <el-table
+        :data="old_records" border :default-sort="{ prop: 'date', order: 'descending' }"
+        @row-click="handleRowClick"
+      >
         <el-table-column prop="desc" label="Description" />
         <el-table-column prop="date" sortable label="Date" />
       </el-table>
     </el-dialog>
 
-    <el-dialog :title="'HistorVitalsical Records'" class="compact-table" width="100%" :visible.sync="vitalsDiaglog"
-      :close-on-click-modal="false" :close-on-press-escape="false">
+    <el-dialog
+      :title="'HistorVitalsical Records'" class="compact-table" width="100%" :visible.sync="vitalsDiaglog"
+      :close-on-click-modal="false" :close-on-press-escape="false"
+    >
       <el-table :data="vitals_records" border :default-sort="{ prop: 'date', order: 'descending' }">
         <el-table-column prop="date" sortable label="Date" />
         <el-table-column prop="bp" label="BP" />
@@ -446,7 +454,7 @@
       :close-on-click-modal="false"
       custom-class="form-template-load-dialog"
     >
-      <p class="rx-template-dialog__hint" v-pre>
+      <p v-pre class="rx-template-dialog__hint">
         Inserts rich HTML into the Form tab (formatting preserved). Placeholders like {{patient_name}}, {{diagnosis}}, {{gender}} fill from the chart. You can edit after loading.
       </p>
       <div v-if="formTemplateRecent.length" class="form-template-recent">
@@ -880,214 +888,246 @@
         class="diagnostics-select-dialog__search"
       />
       <div class="diagnostics-select-dialog__body">
-      <div v-if="diagnosticsFilterQuery && !hasFilteredDiagnostics" class="compare-empty">
-        No diagnostics match your search.
-      </div>
-      <el-row :gutter="20">
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedChem).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>BLOOD CHEMISTRY</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedChem)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedHema).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>HEMATOLOGY</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedHema)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedMicroscopy).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>CLINICAL MICROSCOPY</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedMicroscopy)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-      </el-row>
-      <el-divider />
-      <el-row :gutter="20">
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedXray).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>X-RAY</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedXray)" :key="item.lab_test_id" :label="item.lab_test"
-                  @change="addNewProcedure(item)">
-                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
-                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
-                    class="diagnostics-remark-input" />
-                  {{ item.lab_test.toUpperCase() }}
-                </el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedUtz).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>ULTRASOUND</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedUtz)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
-                  <el-input
-                    v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
-                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
-                    class="diagnostics-remark-input" />
-                </el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-      </el-row>
-      <el-divider />
-      <el-row :gutter="20">
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedImmonulogy).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>IMMUNOLOGY</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedImmonulogy)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedMirco).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>MICROBIOLOGY</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedMirco)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">
-                  {{ item.lab_test.toUpperCase() }}
-                  <el-input
-                    v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
-                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
-                    class="diagnostics-remark-input" />
-                </el-checkbox>
-              </el-checkbox-group>
-              <!-- <el-input v-model="lab_micro_remarks" clearable placeholder="Remarks" /> -->
-            </el-col>
-          </el-row>
-        </el-col>
-      </el-row>
-      <el-divider />
-
-      <el-row :gutter="20">
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedCt).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>CT SCAN</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedCt)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
-                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
-                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
-                    class="diagnostics-remark-input" />
-                </el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedMri).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>MRI</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedMri)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
-                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
-                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
-                    class="diagnostics-remark-input" />
-                </el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-          </el-row>
-        </el-col>
-      </el-row>
-      <el-divider />
-
-      <el-row :gutter="20">
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedOth).length || !diagnosticsFilterQuery" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>Others</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedOth)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}</el-checkbox>
-              </el-checkbox-group>
-              <el-input v-model="form.lab_others" clearable placeholder="Others (comma-separated for multiple)" @change="addLabOthers" />
-            </el-col>
-          </el-row>
-        </el-col>
-
-
-        <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedCrystal).length" :xs="24" :sm="24" :md="12" :lg="12">
-          <strong>
-            <p>CRYSTAL ANALYSIS</p>
-          </strong>
-          <el-row>
-            <el-col :span="24">
-              <el-checkbox-group v-model="diagnosticsRenderedModel">
-                <el-checkbox v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedCrystal)" @change="addNewProcedure(item)"
-                  :key="item.lab_test" :label="item.lab_test">{{ item.lab_test.toUpperCase() }}
-                  <el-input v-if="diagnosticsRenderedModel.includes(item.lab_test) &&  item.with_remarks == 1"
-                    v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
-                    class="diagnostics-remark-input" /></el-checkbox>
-              </el-checkbox-group>
-              <!-- Synovial Fluid Extra Options -->
-              <div v-if="isSynovialFluidSelected" class="diagnostics-synovial-extra">
-                <p class="diagnostics-synovial-extra__title">Additional Options:</p>
-                <el-checkbox-group v-model="synovialFluidExtraOptions">
-                  <el-checkbox 
-                    v-for="option in synovialFluidOptions" 
-                    :key="option.label" 
-                    :label="option.label"
-                    @change="handleSynovialFluidExtraOption(option)">
-                    {{ option.label.toUpperCase() }}
+        <div v-if="diagnosticsFilterQuery && !hasFilteredDiagnostics" class="compare-empty">
+          No diagnostics match your search.
+        </div>
+        <el-row :gutter="20">
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedChem).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>BLOOD CHEMISTRY</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedChem)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >{{ item.lab_test.toUpperCase() }}</el-checkbox>
+                </el-checkbox-group>
+              </el-col>
+            </el-row>
+          </el-col>
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedHema).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>HEMATOLOGY</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedHema)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >{{ item.lab_test.toUpperCase() }}</el-checkbox>
+                </el-checkbox-group>
+              </el-col>
+            </el-row>
+          </el-col>
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedMicroscopy).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>CLINICAL MICROSCOPY</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedMicroscopy)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >{{ item.lab_test.toUpperCase() }}</el-checkbox>
+                </el-checkbox-group>
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-row>
+        <el-divider />
+        <el-row :gutter="20">
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedXray).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>X-RAY</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedXray)" :key="item.lab_test_id" :label="item.lab_test"
+                    @change="addNewProcedure(item)"
+                  >
+                    <el-input
+                      v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
+                      v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                      class="diagnostics-remark-input"
+                    />
+                    {{ item.lab_test.toUpperCase() }}
                   </el-checkbox>
                 </el-checkbox-group>
-              </div>
-            </el-col>
-          </el-row>
-        </el-col>
-      </el-row>
+              </el-col>
+            </el-row>
+          </el-col>
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedUtz).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>ULTRASOUND</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedUtz)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >{{ item.lab_test.toUpperCase() }}
+                    <el-input
+                      v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
+                      v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                      class="diagnostics-remark-input"
+                    />
+                  </el-checkbox>
+                </el-checkbox-group>
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-row>
+        <el-divider />
+        <el-row :gutter="20">
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedImmonulogy).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>IMMUNOLOGY</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedImmonulogy)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >{{ item.lab_test.toUpperCase() }}</el-checkbox>
+                </el-checkbox-group>
+              </el-col>
+            </el-row>
+          </el-col>
+
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedMirco).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>MICROBIOLOGY</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedMirco)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >
+                    {{ item.lab_test.toUpperCase() }}
+                    <el-input
+                      v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
+                      v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                      class="diagnostics-remark-input"
+                    />
+                  </el-checkbox>
+                </el-checkbox-group>
+              <!-- <el-input v-model="lab_micro_remarks" clearable placeholder="Remarks" /> -->
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-row>
+        <el-divider />
+
+        <el-row :gutter="20">
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedCt).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>CT SCAN</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedCt)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >{{ item.lab_test.toUpperCase() }}
+                    <el-input
+                      v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
+                      v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                      class="diagnostics-remark-input"
+                    />
+                  </el-checkbox>
+                </el-checkbox-group>
+              </el-col>
+            </el-row>
+          </el-col>
+
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedMri).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>MRI</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedMri)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >{{ item.lab_test.toUpperCase() }}
+                    <el-input
+                      v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
+                      v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                      class="diagnostics-remark-input"
+                    />
+                  </el-checkbox>
+                </el-checkbox-group>
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-row>
+        <el-divider />
+
+        <el-row :gutter="20">
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedOth).length || !diagnosticsFilterQuery" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>Others</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedOth)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >{{ item.lab_test.toUpperCase() }}</el-checkbox>
+                </el-checkbox-group>
+                <el-input v-model="form.lab_others" clearable placeholder="Others (comma-separated for multiple)" @change="addLabOthers" />
+              </el-col>
+            </el-row>
+          </el-col>
+
+          <el-col v-if="filterDiagnosticsList(getAllDiagnosticsOfferedCrystal).length" :xs="24" :sm="24" :md="12" :lg="12">
+            <strong>
+              <p>CRYSTAL ANALYSIS</p>
+            </strong>
+            <el-row>
+              <el-col :span="24">
+                <el-checkbox-group v-model="diagnosticsRenderedModel">
+                  <el-checkbox
+                    v-for="item in filterDiagnosticsList(getAllDiagnosticsOfferedCrystal)" :key="item.lab_test"
+                    :label="item.lab_test" @change="addNewProcedure(item)"
+                  >{{ item.lab_test.toUpperCase() }}
+                    <el-input
+                      v-if="diagnosticsRenderedModel.includes(item.lab_test) && item.with_remarks == 1"
+                      v-model="findProcedure(item.lab_test_id).remarks" clearable placeholder="Remarks"
+                      class="diagnostics-remark-input"
+                    /></el-checkbox>
+                </el-checkbox-group>
+                <!-- Synovial Fluid Extra Options -->
+                <div v-if="isSynovialFluidSelected" class="diagnostics-synovial-extra">
+                  <p class="diagnostics-synovial-extra__title">Additional Options:</p>
+                  <el-checkbox-group v-model="synovialFluidExtraOptions">
+                    <el-checkbox
+                      v-for="option in synovialFluidOptions"
+                      :key="option.label"
+                      :label="option.label"
+                      @change="handleSynovialFluidExtraOption(option)"
+                    >
+                      {{ option.label.toUpperCase() }}
+                    </el-checkbox>
+                  </el-checkbox-group>
+                </div>
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-row>
       </div>
       <span slot="footer" class="dialog-footer diagnostics-select-dialog__footer">
         <el-button type="success" @click="addProcedure">Add</el-button>
@@ -1103,21 +1143,29 @@
       <p><strong>Recommendations:</strong> {{ selectedOldRecords.recom }}</p>
     </el-dialog>
 
-    <el-dialog :title="'Select Services'" class="compact-table" width="100%" :visible.sync="viewServicesTbl"
-      :close-on-click-modal="false" :close-on-press-escape="false">
-      <el-checkbox v-for="e in getAllServicesOffered" :key="e.description" v-model="servicesRenderedModel"
-        :label="e.description" :value="e.description" @change="addNewServices(e)" />
+    <el-dialog
+      :title="'Select Services'" class="compact-table" width="100%" :visible.sync="viewServicesTbl"
+      :close-on-click-modal="false" :close-on-press-escape="false"
+    >
+      <el-checkbox
+        v-for="e in getAllServicesOffered" :key="e.description" v-model="servicesRenderedModel"
+        :label="e.description" :value="e.description" @change="addNewServices(e)"
+      />
       <el-divider />
       <el-button v-role="['doctor', 'admin']" type="success" @click="addServices()">
         Add
       </el-button>
     </el-dialog>
 
-    <el-dialog :title="'Cancel Appointment'" :visible.sync="dialogFormVisible" :close-on-click-modal="false"
-      :close-on-press-escape="false">
+    <el-dialog
+      :title="'Cancel Appointment'" :visible.sync="dialogFormVisible" :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
       <div class="form-container">
-        <el-form ref="appForm" :model="form_cancel" :rules="rules" label-position="left" label-width="150px"
-          style="max-width: 500px">
+        <el-form
+          ref="appForm" :model="form_cancel" :rules="rules" label-position="left" label-width="150px"
+          style="max-width: 500px"
+        >
           <el-form-item :label="'Reason'" prop="cancel_reason">
             <el-input v-model="form_cancel.cancel_reason" type="textarea" maxlength="100" />
           </el-form-item>
@@ -1132,31 +1180,31 @@
         </div>
       </div>
     </el-dialog>
-    <br />
+    <br>
 
     <el-card class="profile-card modern-profile-card" shadow="hover">
       <div slot="header" class="profile-header">
         <div class="profile-title">
-          <i class="el-icon-user"></i>
+          <i class="el-icon-user" />
           <span>Patient Profile</span>
         </div>
         <div class="profile-date">
-          <i class="el-icon-date"></i>
+          <i class="el-icon-date" />
           <span>{{ currentDt() }}</span>
         </div>
       </div>
       <div class="profile-content">
         <div class="profile-photo-section">
           <div class="profile-photo-container">
-            <el-image 
-              :src="profile.photo" 
-              alt="Profile Photo" 
-              fit="cover" 
+            <el-image
+              :src="profile.photo"
+              alt="Profile Photo"
+              fit="cover"
               class="profile-photo"
               :preview-src-list="[profile.photo]"
             >
               <div slot="error" class="image-slot">
-                <i class="el-icon-user-solid"></i>
+                <i class="el-icon-user-solid" />
               </div>
             </el-image>
             <div class="profile-status">
@@ -1172,35 +1220,35 @@
             <div class="profile-grid">
               <div class="profile-item">
                 <div class="profile-label">
-                  <i class="el-icon-user"></i>
+                  <i class="el-icon-user" />
                   <span>Name</span>
                 </div>
                 <div class="profile-value">{{ profile.patientname }}</div>
               </div>
               <div class="profile-item">
                 <div class="profile-label">
-                  <i class="el-icon-time"></i>
+                  <i class="el-icon-time" />
                   <span>Age</span>
                 </div>
                 <div class="profile-value">{{ profile.age }} years old</div>
               </div>
               <div class="profile-item">
                 <div class="profile-label">
-                  <i class="el-icon-calendar"></i>
+                  <i class="el-icon-calendar" />
                   <span>Birth Date</span>
                 </div>
                 <div class="profile-value">{{ dateFormat(profile.birthdate) }}</div>
               </div>
               <div class="profile-item">
                 <div class="profile-label">
-                  <i class="el-icon-s-custom"></i>
+                  <i class="el-icon-s-custom" />
                   <span>Civil Status</span>
                 </div>
                 <div class="profile-value">{{ profile.civil_status }}</div>
               </div>
               <div class="profile-item">
                 <div class="profile-label">
-                  <i class="el-icon-user"></i>
+                  <i class="el-icon-user" />
                   <span>Gender</span>
                 </div>
                 <div class="profile-value">
@@ -1216,21 +1264,21 @@
             <div class="profile-grid">
               <div class="profile-item">
                 <div class="profile-label">
-                  <i class="el-icon-phone"></i>
+                  <i class="el-icon-phone" />
                   <span>Contact</span>
                 </div>
                 <div class="profile-value">{{ profile.contactno }}</div>
               </div>
               <div class="profile-item">
                 <div class="profile-label">
-                  <i class="el-icon-location"></i>
+                  <i class="el-icon-location" />
                   <span>Address</span>
                 </div>
                 <div class="profile-value">{{ profile.address }}</div>
               </div>
               <div class="profile-item">
                 <div class="profile-label">
-                  <i class="el-icon-medicine"></i>
+                  <i class="el-icon-medicine" />
                   <span>Blood Type</span>
                 </div>
                 <div class="profile-value">
@@ -1245,7 +1293,7 @@
         </div>
       </div>
     </el-card>
-    <br />
+    <br>
 
     <!-- Sidebar-driven form sections (replaces tab navigation) -->
     <div class="appointment-form-page">
@@ -1275,219 +1323,433 @@
               :index="tabOption.name"
             >
               <span>{{ tabOption.label }}</span>
-              <i v-if="tabOption.hasContent" class="el-icon-check sidebar-check"></i>
+              <i v-if="tabOption.hasContent" class="el-icon-check sidebar-check" />
             </el-menu-item>
           </el-menu>
         </aside>
 
         <!-- Main content -->
         <main class="appointment-form-container">
-        <!-- Histories -->
-        <div v-show="tab === 'history'">
-          <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-document"></i>
-              <span>Histories</span>
-            </div>
-          </div>
-          <el-card style="max-width: 100%" shadow="never">
-            <el-form label-position="top">
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Previous Admission">
-                    <el-input v-model="profile.prev_admission" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Previous Surgeries">
-                    <el-input v-model="profile.prev_surgeries" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Allergies">
-                    <el-input v-model="profile.allergies" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Asthma/Allergic Rhinitis/Atopic Dermatitis">
-                    <el-input v-model="profile.asthma" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </el-form>
+          <!-- Histories -->
+          <div v-show="tab === 'history'">
+            <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-document" />
+                  <span>Histories</span>
+                </div>
+              </div>
+              <el-card style="max-width: 100%" shadow="never">
+                <el-form label-position="top">
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Previous Admission">
+                        <el-input v-model="profile.prev_admission" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Previous Surgeries">
+                        <el-input v-model="profile.prev_surgeries" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Allergies">
+                        <el-input v-model="profile.allergies" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Asthma/Allergic Rhinitis/Atopic Dermatitis">
+                        <el-input v-model="profile.asthma" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
 
-            <el-form label-position="top">
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Hypertension">
-                    <el-input v-model="profile.hypertension" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="TB">
-                    <el-input v-model="profile.tb" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Seizure">
-                    <el-input v-model="profile.seizure" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Diabetes">
-                    <el-input v-model="profile.diabetes" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </el-form>
+                <el-form label-position="top">
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Hypertension">
+                        <el-input v-model="profile.hypertension" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="TB">
+                        <el-input v-model="profile.tb" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Seizure">
+                        <el-input v-model="profile.seizure" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Diabetes">
+                        <el-input v-model="profile.diabetes" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
 
-            <el-form label-position="top">
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="24" :md="12" :lg="12">
-                  <el-form-item label="COPD">
-                    <el-input v-model="profile.copd" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="12" :lg="12">
-                  <el-form-item label="Others">
-                    <el-input v-model="profile.pmh_others" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </el-form>
-          </el-card>
-          </el-card>
-        </div>
+                <el-form label-position="top">
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="24" :md="12" :lg="12">
+                      <el-form-item label="COPD">
+                        <el-input v-model="profile.copd" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="24" :md="12" :lg="12">
+                      <el-form-item label="Others">
+                        <el-input v-model="profile.pmh_others" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
+              </el-card>
+            </el-card>
+          </div>
 
-        <!-- Family History -->
-        <div v-show="tab === 'family'">
-          <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-collection"></i>
-              <span>Family History</span>
-            </div>
-          </div>
-          <div class="block">
-            <el-form :inline="true" label-position="top" class="demo-form-inline">
-              <el-form-item label="History">
-                <el-checkbox-group v-model="fam" size="large">
-                  <el-checkbox-button label="Hypertension">Hypertension</el-checkbox-button>
-                  <el-checkbox-button label="Diabetes Mellitus">Diabetes Mellitus</el-checkbox-button>
-                  <el-checkbox-button label="Stroke">Stroke</el-checkbox-button>
-                  <el-checkbox-button label="CAD">CAD</el-checkbox-button>
-                </el-checkbox-group>
-              </el-form-item>
-              <el-form-item label="Others" class="w-100">
-                <el-input v-model="profile.fam_others" :autosize="{ minRows: 2, maxRows: 4 }"
-                  :rows="2" type="textarea" placeholder="Please input" />
-              </el-form-item>
-            </el-form>
-            <el-form label-position="top" style="margin-top: 20px;">
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="24" :md="12" :lg="12">
-                  <el-form-item label="Mother Details">
-                    <el-input v-model="profile.mother_details" type="textarea" rows="6"
-                      placeholder="Enter mother's medical history, age, health conditions, etc." />
+          <!-- Family History -->
+          <div v-show="tab === 'family'">
+            <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-collection" />
+                  <span>Family History</span>
+                </div>
+              </div>
+              <div class="block">
+                <el-form :inline="true" label-position="top" class="demo-form-inline">
+                  <el-form-item label="History">
+                    <el-checkbox-group v-model="fam" size="large">
+                      <el-checkbox-button label="Hypertension">Hypertension</el-checkbox-button>
+                      <el-checkbox-button label="Diabetes Mellitus">Diabetes Mellitus</el-checkbox-button>
+                      <el-checkbox-button label="Stroke">Stroke</el-checkbox-button>
+                      <el-checkbox-button label="CAD">CAD</el-checkbox-button>
+                    </el-checkbox-group>
                   </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="12" :lg="12">
-                  <el-form-item label="Father Details">
-                    <el-input v-model="profile.father_details" type="textarea" rows="6"
-                      placeholder="Enter father's medical history, age, health conditions, etc." />
+                  <el-form-item label="Others" class="w-100">
+                    <el-input
+                      v-model="profile.fam_others" :autosize="{ minRows: 2, maxRows: 4 }"
+                      :rows="2" type="textarea" placeholder="Please input"
+                    />
                   </el-form-item>
-                </el-col>
-              </el-row>
-            </el-form>
+                </el-form>
+                <el-form label-position="top" style="margin-top: 20px;">
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="24" :md="12" :lg="12">
+                      <el-form-item label="Mother Details">
+                        <el-input
+                          v-model="profile.mother_details" type="textarea" rows="6"
+                          placeholder="Enter mother's medical history, age, health conditions, etc."
+                        />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="24" :md="12" :lg="12">
+                      <el-form-item label="Father Details">
+                        <el-input
+                          v-model="profile.father_details" type="textarea" rows="6"
+                          placeholder="Enter father's medical history, age, health conditions, etc."
+                        />
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
+              </div>
+            </el-card>
           </div>
-          </el-card>
-        </div>
 
-        <!-- Social / Environment History -->
-        <div v-show="tab === 'soc'">
-          <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-s-flag"></i>
-              <span>Social / Environment History</span>
-            </div>
+          <!-- Social / Environment History -->
+          <div v-show="tab === 'soc'">
+            <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-s-flag" />
+                  <span>Social / Environment History</span>
+                </div>
+              </div>
+              <div class="block">
+                <el-form :inline="true" label-position="top" class="demo-form-inline">
+                  <el-form-item label="History">
+                    <el-checkbox-group v-model="soc" size="large">
+                      <el-checkbox-button label="Smoking">Smoking</el-checkbox-button>
+                      <el-checkbox-button label="Alcoholic Beverage Drinking">Alcoholic Beverage Drinking</el-checkbox-button>
+                    </el-checkbox-group>
+                  </el-form-item>
+                  <el-form-item v-if="soc.includes('Smoking')" label="Smoking Details" class="w-100">
+                    <el-input
+                      v-model="profile.smoking_details" :autosize="{ minRows: 2, maxRows: 4 }"
+                      :rows="2" type="textarea" placeholder="Please provide details about smoking habits"
+                    />
+                  </el-form-item>
+                  <el-form-item v-if="soc.includes('Alcoholic Beverage Drinking')" label="Alcoholic Beverage Drinking Details" class="w-100">
+                    <el-input
+                      v-model="profile.alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }"
+                      :rows="2" type="textarea" placeholder="Please provide details about alcoholic beverage drinking habits"
+                    />
+                  </el-form-item>
+                  <el-form-item label="Others" class="w-100">
+                    <el-input
+                      v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }"
+                      :rows="2" type="textarea" placeholder="Please input"
+                    />
+                  </el-form-item>
+                  <el-form-item label="Vaccinations" class="w-100">
+                    <el-input
+                      v-model="profile.vaccination_sup" :autosize="{ minRows: 2, maxRows: 4 }"
+                      :rows="2" type="textarea" placeholder="Please input"
+                    />
+                  </el-form-item>
+                </el-form>
+              </div>
+            </el-card>
           </div>
-          <div class="block">
-            <el-form :inline="true" label-position="top" class="demo-form-inline">
-              <el-form-item label="History">
-                <el-checkbox-group v-model="soc" size="large">
-                  <el-checkbox-button label="Smoking">Smoking</el-checkbox-button>
-                  <el-checkbox-button label="Alcoholic Beverage Drinking">Alcoholic Beverage Drinking</el-checkbox-button>
-                </el-checkbox-group>
-              </el-form-item>
-              <el-form-item label="Smoking Details" v-if="soc.includes('Smoking')" class="w-100">
-                <el-input v-model="profile.smoking_details" :autosize="{ minRows: 2, maxRows: 4 }"
-                  :rows="2" type="textarea" placeholder="Please provide details about smoking habits" />
-              </el-form-item>
-              <el-form-item label="Alcoholic Beverage Drinking Details" v-if="soc.includes('Alcoholic Beverage Drinking')" class="w-100">
-                <el-input v-model="profile.alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }"
-                  :rows="2" type="textarea" placeholder="Please provide details about alcoholic beverage drinking habits" />
-              </el-form-item>
-              <el-form-item label="Others" class="w-100">
-                <el-input v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }"
-                  :rows="2" type="textarea" placeholder="Please input" />
-              </el-form-item>
-              <el-form-item label="Vaccinations" class="w-100">
-                <el-input v-model="profile.vaccination_sup" :autosize="{ minRows: 2, maxRows: 4 }"
-                  :rows="2" type="textarea" placeholder="Please input" />
-              </el-form-item>
-            </el-form>
-          </div>
-          </el-card>
-        </div>
 
-        <!-- Diagnosis -->
-        <div v-show="tab === 'first'">
-          <el-card class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-edit"></i>
-              <span>Diagnosis</span>
-            </div>
-          </div>
-          <el-form ref="form" label-width="120px" class="demo-form-inline">
-            <el-form-item label="Secretary's Remarks">
-              <el-input v-model="form.nurse_remarks" type="textarea" />
-            </el-form-item>
-            <el-form-item label="CC" v-if="checkRole(['admin', 'doctor'])">
-              <el-input v-model="form.chiefcomplaints" type="textarea" rows="2" />
-            </el-form-item>
-            <el-form-item label="History" v-if="checkRole(['admin', 'doctor'])">
-              <el-input v-model="form.history" type="textarea" rows="5" />
-            </el-form-item>
-          </el-form>
-          <el-form ref="form" :model="form" label-width="120px" class="demo-form-inline"
-            v-if="checkRole(['admin', 'doctor'])">
-            <el-form-item label="P.E.">
-              <div class="pe-template-section">
-                <el-row :gutter="20" style="margin-bottom: 15px;">
-                  <el-col :span="24">
-                    <div class="template-buttons">
-                      <el-button v-for="template in peTemplates" :key="template.id" size="small"
-                        :type="template.type === 'default' ? 'primary' : 'success'" plain
-                        @click="insertPETemplate(template.content)" class="template-btn">
-                        {{ template.name }}
-                        <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
-                          circle @click.stop="deleteTemplate(template.id)" class="delete-template-btn"></el-button>
-                      </el-button>
+          <!-- Diagnosis -->
+          <div v-show="tab === 'first'">
+            <el-card class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-edit" />
+                  <span>Diagnosis</span>
+                </div>
+              </div>
+              <el-form ref="form" label-width="120px" class="demo-form-inline">
+                <el-form-item label="Secretary's Remarks">
+                  <el-input v-model="form.nurse_remarks" type="textarea" />
+                </el-form-item>
+                <el-form-item v-if="checkRole(['admin', 'doctor'])" label="CC">
+                  <el-input v-model="form.chiefcomplaints" type="textarea" rows="2" />
+                </el-form-item>
+                <el-form-item v-if="checkRole(['admin', 'doctor'])" label="History">
+                  <el-input v-model="form.history" type="textarea" rows="5" />
+                </el-form-item>
+              </el-form>
+              <el-form
+                v-if="checkRole(['admin', 'doctor'])" ref="form" :model="form" label-width="120px"
+                class="demo-form-inline"
+              >
+                <el-form-item label="P.E.">
+                  <div class="pe-template-section">
+                    <el-row :gutter="20" style="margin-bottom: 15px;">
+                      <el-col :span="24">
+                        <div class="template-buttons">
+                          <el-button
+                            v-for="template in peTemplates" :key="template.id" size="small"
+                            :type="template.type === 'default' ? 'primary' : 'success'" plain
+                            class="template-btn" @click="insertPETemplate(template.content)"
+                          >
+                            {{ template.name }}
+                            <el-button
+                              v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                              circle class="delete-template-btn" @click.stop="deleteTemplate(template.id)"
+                            />
+                          </el-button>
+                        </div>
+                        <el-button
+                          size="small" type="success" style="margin-left: 10px;"
+                          @click="showCustomTemplateDialog = true"
+                        >
+                          Custom Template
+                        </el-button>
+                      </el-col>
+                    </el-row>
+                    <el-input ref="peInput" v-model="form.pe" type="textarea" rows="10" @input="autoResize" />
+                    <div class="pe-latest-vitals">
+                      <div class="pe-latest-vitals__header">
+                        <i class="el-icon-data-line" />
+                        <span class="pe-latest-vitals__title">Latest Vitals</span>
+                        <span v-if="latestTodayVitals.time_display" class="pe-latest-vitals__time">{{ latestTodayVitals.time_display }}</span>
+                        <span class="pe-latest-vitals__date">{{ currentDt() }}</span>
+                      </div>
+                      <div v-if="hasCurrentVisitVitals" class="pe-latest-vitals__values compare-vitals">
+                        <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('bp', latestTodayVitals) }">BP: {{ latestTodayVitals.vit_sys || "-" }}/{{ latestTodayVitals.vit_dia || "-" }} mmHg</span>
+                        <span>Weight: {{ latestTodayVitals.weight || "-" }} kg</span>
+                        <span>Height: {{ latestTodayVitals.height || "-" }} cm</span>
+                        <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('bmi', latestTodayVitals) }">BMI: {{ latestTodayVitals.bmi || "-" }}</span>
+                        <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('temp', latestTodayVitals) }">Temp: {{ latestTodayVitals.vit_temp || "-" }} °C</span>
+                        <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('hr', latestTodayVitals) }">HR: {{ latestTodayVitals.vit_cr || "-" }} bpm</span>
+                        <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('rr', latestTodayVitals) }">RR: {{ latestTodayVitals.vit_rr || "-" }} rpm</span>
+                        <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('o2', latestTodayVitals) }">O2 Sat: {{ latestTodayVitals.o2_stat || "-" }} %</span>
+                      </div>
+                      <p v-else class="pe-latest-vitals__empty">No vitals recorded for this visit yet.</p>
+                      <button
+                        v-if="hasMoreTodayVitals"
+                        type="button"
+                        class="pe-latest-vitals__toggle"
+                        @click="showTodayVitalsMore = !showTodayVitalsMore"
+                      >
+                        {{ showTodayVitalsMore ? "See less" : `See more (${otherTodayVitals.length})` }}
+                      </button>
+                      <div v-if="showTodayVitalsMore && hasMoreTodayVitals" class="pe-latest-vitals__more">
+                        <div
+                          v-for="reading in otherTodayVitals"
+                          :key="reading.id"
+                          class="pe-latest-vitals__reading"
+                        >
+                          <div class="pe-latest-vitals__reading-time">{{ reading.time_display }}</div>
+                          <div class="pe-latest-vitals__values compare-vitals">
+                            <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('bp', reading) }">BP: {{ reading.vit_sys || "-" }}/{{ reading.vit_dia || "-" }} mmHg</span>
+                            <span>Weight: {{ reading.weight || "-" }} kg</span>
+                            <span>Height: {{ reading.height || "-" }} cm</span>
+                            <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('bmi', reading) }">BMI: {{ reading.bmi || "-" }}</span>
+                            <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('temp', reading) }">Temp: {{ reading.vit_temp || "-" }} °C</span>
+                            <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('hr', reading) }">HR: {{ reading.vit_cr || "-" }} bpm</span>
+                            <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('rr', reading) }">RR: {{ reading.vit_rr || "-" }} rpm</span>
+                            <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('o2', reading) }">O2 Sat: {{ reading.o2_stat || "-" }} %</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <el-button size="small" type="success" @click="showCustomTemplateDialog = true"
-                      style="margin-left: 10px;">
-                      Custom Template
-                    </el-button>
-                  </el-col>
-                </el-row>
-                <el-input v-model="form.pe" type="textarea" ref="peInput" rows="10" @input="autoResize" />
-                <div class="pe-latest-vitals">
+                  </div>
+                </el-form-item>
+
+                <!-- Custom Template Dialog -->
+                <el-dialog
+                  title="Custom Physical Examination Template" :visible.sync="showCustomTemplateDialog" width="60%"
+                  :close-on-click-modal="false"
+                >
+                  <el-form :model="customTemplateForm" label-width="120px">
+                    <el-form-item label="Template Name">
+                      <el-input v-model="customTemplateForm.name" placeholder="Enter template name" />
+                    </el-form-item>
+                    <el-form-item label="Template Content">
+                      <el-input
+                        v-model="customTemplateForm.content" type="textarea" :rows="8"
+                        placeholder="Enter your custom P.E. template content..."
+                      />
+                    </el-form-item>
+                  </el-form>
+                  <div slot="footer" class="dialog-footer">
+                    <el-button @click="showCustomTemplateDialog = false">Cancel</el-button>
+                    <el-button type="primary" @click="saveCustomTemplate">Save Template</el-button>
+                  </div>
+                </el-dialog>
+
+                <el-form-item label="Diagnosis">
+                  <div class="pe-template-section">
+                    <el-row :gutter="20" style="margin-bottom: 15px;">
+                      <el-col :span="24">
+                        <div class="template-buttons">
+                          <el-button
+                            v-for="template in diagnosisTemplates" :key="template.id" size="small"
+                            :type="template.type === 'default' ? 'primary' : 'success'" plain
+                            class="template-btn" @click="insertDiagnosisTemplate(template.content)"
+                          >
+                            {{ template.name }}
+                            <el-button
+                              v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                              circle class="delete-template-btn" @click.stop="deleteDiagnosisTemplate(template.id)"
+                            />
+                          </el-button>
+                        </div>
+                        <el-button
+                          size="small" type="success" style="margin-left: 10px;"
+                          @click="showDiagnosisCustomTemplateDialog = true"
+                        >
+                          Custom Template
+                        </el-button>
+                      </el-col>
+                    </el-row>
+                    <el-input ref="diagnosisInput" v-model="form.diagnosis" type="textarea" rows="5" @input="autoResize" />
+                  </div>
+                </el-form-item>
+
+                <el-dialog
+                  title="Custom Diagnosis Template" :visible.sync="showDiagnosisCustomTemplateDialog" width="60%"
+                  :close-on-click-modal="false"
+                >
+                  <el-form :model="diagnosisCustomTemplateForm" label-width="120px">
+                    <el-form-item label="Template Name">
+                      <el-input v-model="diagnosisCustomTemplateForm.name" placeholder="Enter template name" />
+                    </el-form-item>
+                    <el-form-item label="Template Content">
+                      <el-input
+                        v-model="diagnosisCustomTemplateForm.content" type="textarea" :rows="8"
+                        placeholder="Enter your custom diagnosis template content..."
+                      />
+                    </el-form-item>
+                  </el-form>
+                  <div slot="footer" class="dialog-footer">
+                    <el-button @click="showDiagnosisCustomTemplateDialog = false">Cancel</el-button>
+                    <el-button type="primary" @click="saveDiagnosisCustomTemplate">Save Template</el-button>
+                  </div>
+                </el-dialog>
+
+                <el-form-item label="Plans">
+                  <div class="pe-template-section">
+                    <el-row :gutter="20" style="margin-bottom: 15px;">
+                      <el-col :span="24">
+                        <div class="template-buttons">
+                          <el-button
+                            v-for="template in plansTemplates" :key="template.id" size="small"
+                            :type="template.type === 'default' ? 'primary' : 'success'" plain
+                            class="template-btn" @click="insertPlansTemplate(template.content)"
+                          >
+                            {{ template.name }}
+                            <el-button
+                              v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                              circle class="delete-template-btn" @click.stop="deletePlansTemplate(template.id)"
+                            />
+                          </el-button>
+                        </div>
+                        <el-button
+                          size="small" type="success" style="margin-left: 10px;"
+                          @click="showPlansCustomTemplateDialog = true"
+                        >
+                          Custom Template
+                        </el-button>
+                      </el-col>
+                    </el-row>
+                    <el-input ref="plansInput" v-model="form.remarks" type="textarea" rows="10" @input="autoResize" />
+                  </div>
+                </el-form-item>
+
+                <el-dialog
+                  title="Custom Plans Template" :visible.sync="showPlansCustomTemplateDialog" width="60%"
+                  :close-on-click-modal="false"
+                >
+                  <el-form :model="plansCustomTemplateForm" label-width="120px">
+                    <el-form-item label="Template Name">
+                      <el-input v-model="plansCustomTemplateForm.name" placeholder="Enter template name" />
+                    </el-form-item>
+                    <el-form-item label="Template Content">
+                      <el-input
+                        v-model="plansCustomTemplateForm.content" type="textarea" :rows="8"
+                        placeholder="Enter your custom plans template content..."
+                      />
+                    </el-form-item>
+                  </el-form>
+                  <div slot="footer" class="dialog-footer">
+                    <el-button @click="showPlansCustomTemplateDialog = false">Cancel</el-button>
+                    <el-button type="primary" @click="savePlansCustomTemplate">Save Template</el-button>
+                  </div>
+                </el-dialog>
+                <el-form-item label="Follow Up Date">
+                  <date-picker v-model="form.followup" value-type="format" />
+                </el-form-item>
+              </el-form>
+            </el-card>
+          </div>
+
+          <!-- Vitals -->
+          <div v-show="tab === 'second'">
+            <el-card v-if="checkRole(['admin','secretary','doctor'])" class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-data-line" />
+                  <span>Vitals</span>
+                </div>
+              </div>
+              <el-card class="vitals-today-card mb-4" shadow="never">
+                <div slot="header" class="section-card__header">
+                  <div class="section-card__title">
+                    <i class="el-icon-time" />
+                    <span>Today's Readings</span>
+                  </div>
+                </div>
+                <div class="pe-latest-vitals pe-latest-vitals--inline">
                   <div class="pe-latest-vitals__header">
-                    <i class="el-icon-data-line"></i>
-                    <span class="pe-latest-vitals__title">Latest Vitals</span>
+                    <span class="pe-latest-vitals__title">Latest</span>
                     <span v-if="latestTodayVitals.time_display" class="pe-latest-vitals__time">{{ latestTodayVitals.time_display }}</span>
                     <span class="pe-latest-vitals__date">{{ currentDt() }}</span>
                   </div>
@@ -1506,14 +1768,14 @@
                     v-if="hasMoreTodayVitals"
                     type="button"
                     class="pe-latest-vitals__toggle"
-                    @click="showTodayVitalsMore = !showTodayVitalsMore"
+                    @click="showVitalsTabMore = !showVitalsTabMore"
                   >
-                    {{ showTodayVitalsMore ? "See less" : `See more (${otherTodayVitals.length})` }}
+                    {{ showVitalsTabMore ? "See less" : `See more (${otherTodayVitals.length})` }}
                   </button>
-                  <div v-if="showTodayVitalsMore && hasMoreTodayVitals" class="pe-latest-vitals__more">
+                  <div v-if="showVitalsTabMore && hasMoreTodayVitals" class="pe-latest-vitals__more">
                     <div
                       v-for="reading in otherTodayVitals"
-                      :key="reading.id"
+                      :key="'tab-' + reading.id"
                       class="pe-latest-vitals__reading"
                     >
                       <div class="pe-latest-vitals__reading-time">{{ reading.time_display }}</div>
@@ -1530,1012 +1792,865 @@
                     </div>
                   </div>
                 </div>
-              </div>
-            </el-form-item>
+              </el-card>
+              <el-card style="max-width: 100%" shadow="never">
+                <el-form label-position="top" class="demo-form-inline">
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="12" :md="12" :lg="8">
+                      <el-form-item label="Systolic">
+                        <el-input v-model="form.vit_sys" autosize clearable />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="8">
+                      <el-form-item label="Diastolic">
+                        <el-input v-model="form.vit_dia" clearable />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="8">
+                      <el-form-item label="Weight">
+                        <el-input v-model="form.weight" clearable placeholder="kilograms" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="8">
+                      <el-form-item label="Height">
+                        <el-input v-model="form.height" clearable placeholder="centimeters" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="8">
+                      <el-form-item label="BMI">
+                        <el-input v-model="form.bmi" clearable />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="8">
+                      <el-form-item label="Temperature">
+                        <el-input v-model="form.vit_temp" clearable />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="8">
+                      <el-form-item label="Cardiac Rate">
+                        <el-input v-model="form.vit_cr" clearable />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="8">
+                      <el-form-item label="Respiratory Rate">
+                        <el-input v-model="form.vit_rr" clearable />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="8">
+                      <el-form-item label="O2 Stat">
+                        <el-input v-model="form.o2_stat" clearable />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24">
+                      <el-form-item v-role="['secretary', 'admin']" label="">
+                        <el-button type="primary" @click="upDateBP()">Update</el-button>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
+              </el-card>
 
-            <!-- Custom Template Dialog -->
-            <el-dialog title="Custom Physical Examination Template" :visible.sync="showCustomTemplateDialog" width="60%"
-              :close-on-click-modal="false">
-              <el-form :model="customTemplateForm" label-width="120px">
-                <el-form-item label="Template Name">
-                  <el-input v-model="customTemplateForm.name" placeholder="Enter template name" />
-                </el-form-item>
-                <el-form-item label="Template Content">
-                  <el-input v-model="customTemplateForm.content" type="textarea" :rows="8"
-                    placeholder="Enter your custom P.E. template content..." />
-                </el-form-item>
-              </el-form>
-              <div slot="footer" class="dialog-footer">
-                <el-button @click="showCustomTemplateDialog = false">Cancel</el-button>
-                <el-button type="primary" @click="saveCustomTemplate">Save Template</el-button>
-              </div>
-            </el-dialog>
-
-            <el-form-item label="Diagnosis">
-              <div class="pe-template-section">
-                <el-row :gutter="20" style="margin-bottom: 15px;">
-                  <el-col :span="24">
-                    <div class="template-buttons">
-                      <el-button v-for="template in diagnosisTemplates" :key="template.id" size="small"
-                        :type="template.type === 'default' ? 'primary' : 'success'" plain
-                        @click="insertDiagnosisTemplate(template.content)" class="template-btn">
-                        {{ template.name }}
-                        <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
-                          circle @click.stop="deleteDiagnosisTemplate(template.id)" class="delete-template-btn"></el-button>
-                      </el-button>
-                    </div>
-                    <el-button size="small" type="success" @click="showDiagnosisCustomTemplateDialog = true"
-                      style="margin-left: 10px;">
-                      Custom Template
-                    </el-button>
-                  </el-col>
-                </el-row>
-                <el-input v-model="form.diagnosis" type="textarea" ref="diagnosisInput" rows="5" @input="autoResize" />
-              </div>
-            </el-form-item>
-
-            <el-dialog title="Custom Diagnosis Template" :visible.sync="showDiagnosisCustomTemplateDialog" width="60%"
-              :close-on-click-modal="false">
-              <el-form :model="diagnosisCustomTemplateForm" label-width="120px">
-                <el-form-item label="Template Name">
-                  <el-input v-model="diagnosisCustomTemplateForm.name" placeholder="Enter template name" />
-                </el-form-item>
-                <el-form-item label="Template Content">
-                  <el-input v-model="diagnosisCustomTemplateForm.content" type="textarea" :rows="8"
-                    placeholder="Enter your custom diagnosis template content..." />
-                </el-form-item>
-              </el-form>
-              <div slot="footer" class="dialog-footer">
-                <el-button @click="showDiagnosisCustomTemplateDialog = false">Cancel</el-button>
-                <el-button type="primary" @click="saveDiagnosisCustomTemplate">Save Template</el-button>
-              </div>
-            </el-dialog>
-
-            <el-form-item label="Plans">
-              <div class="pe-template-section">
-                <el-row :gutter="20" style="margin-bottom: 15px;">
-                  <el-col :span="24">
-                    <div class="template-buttons">
-                      <el-button v-for="template in plansTemplates" :key="template.id" size="small"
-                        :type="template.type === 'default' ? 'primary' : 'success'" plain
-                        @click="insertPlansTemplate(template.content)" class="template-btn">
-                        {{ template.name }}
-                        <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
-                          circle @click.stop="deletePlansTemplate(template.id)" class="delete-template-btn"></el-button>
-                      </el-button>
-                    </div>
-                    <el-button size="small" type="success" @click="showPlansCustomTemplateDialog = true"
-                      style="margin-left: 10px;">
-                      Custom Template
-                    </el-button>
-                  </el-col>
-                </el-row>
-                <el-input v-model="form.remarks" type="textarea" ref="plansInput" rows="10" @input="autoResize" />
-              </div>
-            </el-form-item>
-
-            <el-dialog title="Custom Plans Template" :visible.sync="showPlansCustomTemplateDialog" width="60%"
-              :close-on-click-modal="false">
-              <el-form :model="plansCustomTemplateForm" label-width="120px">
-                <el-form-item label="Template Name">
-                  <el-input v-model="plansCustomTemplateForm.name" placeholder="Enter template name" />
-                </el-form-item>
-                <el-form-item label="Template Content">
-                  <el-input v-model="plansCustomTemplateForm.content" type="textarea" :rows="8"
-                    placeholder="Enter your custom plans template content..." />
-                </el-form-item>
-              </el-form>
-              <div slot="footer" class="dialog-footer">
-                <el-button @click="showPlansCustomTemplateDialog = false">Cancel</el-button>
-                <el-button type="primary" @click="savePlansCustomTemplate">Save Template</el-button>
-              </div>
-            </el-dialog>
-            <el-form-item label="Follow Up Date">
-              <date-picker v-model="form.followup" valueType="format"></date-picker>
-            </el-form-item>
-          </el-form>
-          </el-card>
-        </div>
-
-        <!-- Vitals -->
-        <div v-show="tab === 'second'">
-          <el-card v-if="checkRole(['admin','secretary','doctor'])" class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-data-line"></i>
-              <span>Vitals</span>
-            </div>
-          </div>
-          <el-card class="vitals-today-card mb-4" shadow="never">
-            <div slot="header" class="section-card__header">
-              <div class="section-card__title">
-                <i class="el-icon-time"></i>
-                <span>Today's Readings</span>
-              </div>
-            </div>
-            <div class="pe-latest-vitals pe-latest-vitals--inline">
-              <div class="pe-latest-vitals__header">
-                <span class="pe-latest-vitals__title">Latest</span>
-                <span v-if="latestTodayVitals.time_display" class="pe-latest-vitals__time">{{ latestTodayVitals.time_display }}</span>
-                <span class="pe-latest-vitals__date">{{ currentDt() }}</span>
-              </div>
-              <div v-if="hasCurrentVisitVitals" class="pe-latest-vitals__values compare-vitals">
-                <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('bp', latestTodayVitals) }">BP: {{ latestTodayVitals.vit_sys || "-" }}/{{ latestTodayVitals.vit_dia || "-" }} mmHg</span>
-                <span>Weight: {{ latestTodayVitals.weight || "-" }} kg</span>
-                <span>Height: {{ latestTodayVitals.height || "-" }} cm</span>
-                <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('bmi', latestTodayVitals) }">BMI: {{ latestTodayVitals.bmi || "-" }}</span>
-                <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('temp', latestTodayVitals) }">Temp: {{ latestTodayVitals.vit_temp || "-" }} °C</span>
-                <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('hr', latestTodayVitals) }">HR: {{ latestTodayVitals.vit_cr || "-" }} bpm</span>
-                <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('rr', latestTodayVitals) }">RR: {{ latestTodayVitals.vit_rr || "-" }} rpm</span>
-                <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('o2', latestTodayVitals) }">O2 Sat: {{ latestTodayVitals.o2_stat || "-" }} %</span>
-              </div>
-              <p v-else class="pe-latest-vitals__empty">No vitals recorded for this visit yet.</p>
-              <button
-                v-if="hasMoreTodayVitals"
-                type="button"
-                class="pe-latest-vitals__toggle"
-                @click="showVitalsTabMore = !showVitalsTabMore"
-              >
-                {{ showVitalsTabMore ? "See less" : `See more (${otherTodayVitals.length})` }}
-              </button>
-              <div v-if="showVitalsTabMore && hasMoreTodayVitals" class="pe-latest-vitals__more">
-                <div
-                  v-for="reading in otherTodayVitals"
-                  :key="'tab-' + reading.id"
-                  class="pe-latest-vitals__reading"
-                >
-                  <div class="pe-latest-vitals__reading-time">{{ reading.time_display }}</div>
-                  <div class="pe-latest-vitals__values compare-vitals">
-                    <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('bp', reading) }">BP: {{ reading.vit_sys || "-" }}/{{ reading.vit_dia || "-" }} mmHg</span>
-                    <span>Weight: {{ reading.weight || "-" }} kg</span>
-                    <span>Height: {{ reading.height || "-" }} cm</span>
-                    <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('bmi', reading) }">BMI: {{ reading.bmi || "-" }}</span>
-                    <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('temp', reading) }">Temp: {{ reading.vit_temp || "-" }} °C</span>
-                    <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('hr', reading) }">HR: {{ reading.vit_cr || "-" }} bpm</span>
-                    <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('rr', reading) }">RR: {{ reading.vit_rr || "-" }} rpm</span>
-                    <span :class="{ 'pe-latest-vitals__abnormal': isPeVitalAbnormal('o2', reading) }">O2 Sat: {{ reading.o2_stat || "-" }} %</span>
+              <el-card class="vitals-history-card mt-4" shadow="never">
+                <div slot="header" class="section-card__header">
+                  <div class="section-card__title">
+                    <i class="el-icon-time" />
+                    <span>Vitals History</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </el-card>
-          <el-card style="max-width: 100%" shadow="never">
-            <el-form label-position="top" class="demo-form-inline">
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="12" :md="12" :lg="8">
-                  <el-form-item label="Systolic">
-                    <el-input v-model="form.vit_sys" autosize clearable />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="8">
-                  <el-form-item label="Diastolic">
-                    <el-input v-model="form.vit_dia" clearable />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="8">
-                  <el-form-item label="Weight">
-                    <el-input v-model="form.weight" clearable placeholder="kilograms" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="8">
-                  <el-form-item label="Height">
-                    <el-input v-model="form.height" clearable placeholder="centimeters" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="8">
-                  <el-form-item label="BMI">
-                    <el-input v-model="form.bmi" clearable />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="8">
-                  <el-form-item label="Temperature">
-                    <el-input v-model="form.vit_temp" clearable />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="8">
-                  <el-form-item label="Cardiac Rate">
-                    <el-input v-model="form.vit_cr" clearable />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="8">
-                  <el-form-item label="Respiratory Rate">
-                    <el-input v-model="form.vit_rr" clearable />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="8">
-                  <el-form-item label="O2 Stat">
-                    <el-input v-model="form.o2_stat" clearable />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24">
-                  <el-form-item v-role="['secretary', 'admin']" label="">
-                    <el-button type="primary" @click="upDateBP()">Update</el-button>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </el-form>
-          </el-card>
+                <el-table
+                  v-if="vitals_records.length"
+                  :data="vitals_records"
+                  border
+                  stripe
+                  size="small"
+                  class="compact-table vitals-history-table"
+                  :row-class-name="vitalsHistoryRowClass"
+                  :default-sort="{ prop: 'date_sort', order: 'descending' }"
+                  max-height="420"
+                >
+                  <el-table-column type="expand">
+                    <template slot-scope="props">
+                      <div v-if="props.row.reading_count > 1" class="vitals-history-expand">
+                        <p class="vitals-history-expand__title">All readings for {{ props.row.date }}</p>
+                        <el-table
+                          :data="vitals_by_day[props.row.day_key] || []"
+                          border
+                          size="mini"
+                          class="vitals-history-expand__table"
+                        >
+                          <el-table-column prop="time_display" label="Time" width="90" />
+                          <el-table-column prop="bp" label="BP (mmHg)" width="110" />
+                          <el-table-column prop="weight" label="Weight (kg)" width="100" />
+                          <el-table-column prop="height" label="Height (cm)" width="100" />
+                          <el-table-column prop="bmi" label="BMI" width="70" />
+                          <el-table-column prop="vit_temp" label="Temp (°C)" width="90" />
+                          <el-table-column prop="vit_cr" label="HR (bpm)" width="90" />
+                          <el-table-column prop="vit_rr" label="RR (rpm)" width="90" />
+                          <el-table-column prop="o2_stat" label="O2 Sat (%)" width="95" />
+                          <el-table-column label="" width="80">
+                            <template slot-scope="scope">
+                              <el-tag v-if="scope.row.is_latest" size="mini" type="success">Latest</el-tag>
+                            </template>
+                          </el-table-column>
+                        </el-table>
+                      </div>
+                      <p v-else class="vitals-history-expand__empty">Only one reading recorded for this day.</p>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="date" label="Date" sortable width="120" />
+                  <el-table-column label="Readings" width="95">
+                    <template slot-scope="scope">
+                      <span>{{ scope.row.reading_count || 1 }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="bp" label="BP (mmHg)" width="110" />
+                  <el-table-column prop="weight" label="Weight (kg)" width="100" />
+                  <el-table-column prop="height" label="Height (cm)" width="100" />
+                  <el-table-column prop="bmi" label="BMI" width="70" />
+                  <el-table-column prop="vit_temp" label="Temp (°C)" width="90" />
+                  <el-table-column prop="vit_cr" label="HR (bpm)" width="90" />
+                  <el-table-column prop="vit_rr" label="RR (rpm)" width="90" />
+                  <el-table-column prop="o2_stat" label="O2 Sat (%)" width="95" />
+                </el-table>
+                <p v-else class="vitals-history-empty">No past vitals recorded for this patient yet.</p>
+              </el-card>
+            </el-card>
+          </div>
 
-          <el-card class="vitals-history-card mt-4" shadow="never">
-            <div slot="header" class="section-card__header">
-              <div class="section-card__title">
-                <i class="el-icon-time"></i>
-                <span>Vitals History</span>
+          <!-- OB-GYN -->
+          <div v-show="tab === 'obgyn'">
+            <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-female" />
+                  <span>OB-GYN</span>
+                </div>
               </div>
-            </div>
-            <el-table
-              v-if="vitals_records.length"
-              :data="vitals_records"
-              border
-              stripe
-              size="small"
-              class="compact-table vitals-history-table"
-              :row-class-name="vitalsHistoryRowClass"
-              :default-sort="{ prop: 'date_sort', order: 'descending' }"
-              max-height="420"
-            >
-              <el-table-column type="expand">
-                <template slot-scope="props">
-                  <div v-if="props.row.reading_count > 1" class="vitals-history-expand">
-                    <p class="vitals-history-expand__title">All readings for {{ props.row.date }}</p>
-                    <el-table
-                      :data="vitals_by_day[props.row.day_key] || []"
-                      border
-                      size="mini"
-                      class="vitals-history-expand__table"
+              <el-card style="max-width: 100%" shadow="never">
+                <el-form label-position="top">
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Pregnancy">
+                        <el-input v-model="form.pregnancy" type="textarea" rows="4" placeholder="Enter pregnancy history" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="LMP (Last Menstrual Period)">
+                        <el-date-picker
+                          v-model="form.lmp"
+                          type="date"
+                          placeholder="Select LMP date"
+                          format="yyyy-MM-dd"
+                          value-format="yyyy-MM-dd"
+                          style="width: 100%"
+                        />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Contraceptive Use">
+                        <el-input v-model="form.contraceptive_use" type="textarea" rows="4" placeholder="Enter contraceptive use history" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Menopause">
+                        <el-input v-model="form.menopause" type="textarea" rows="4" placeholder="Enter menopause information" />
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
+              </el-card>
+            </el-card>
+          </div>
+
+          <!-- Medicines -->
+          <div v-show="tab === 'fourth'">
+            <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-medicine" />
+                  <span>Medicines</span>
+                </div>
+              </div>
+              <el-card style="max-width: 100%" shadow="never">
+                <div class="rx-prescription-groups-bar">
+                  <div class="rx-prescription-groups-tabs-wrap">
+                    <el-tabs
+                      v-model="activePrescriptionGroupId"
+                      type="card"
+                      class="rx-prescription-tabs"
                     >
-                      <el-table-column prop="time_display" label="Time" width="90" />
-                      <el-table-column prop="bp" label="BP (mmHg)" width="110" />
-                      <el-table-column prop="weight" label="Weight (kg)" width="100" />
-                      <el-table-column prop="height" label="Height (cm)" width="100" />
-                      <el-table-column prop="bmi" label="BMI" width="70" />
-                      <el-table-column prop="vit_temp" label="Temp (°C)" width="90" />
-                      <el-table-column prop="vit_cr" label="HR (bpm)" width="90" />
-                      <el-table-column prop="vit_rr" label="RR (rpm)" width="90" />
-                      <el-table-column prop="o2_stat" label="O2 Sat (%)" width="95" />
-                      <el-table-column label="" width="80">
+                      <el-tab-pane
+                        v-for="g in prescription_groups"
+                        :key="g.id"
+                        :name="String(g.id)"
+                      >
+                        <span slot="label" class="rx-prescription-tab-label">
+                          <span>{{ g.title }}</span>
+                          <i
+                            v-role="['doctor', 'admin']"
+                            class="el-icon-edit rx-prescription-tab-edit"
+                            title="Rename prescription group"
+                            @click.stop="renamePrescriptionGroup(g)"
+                          />
+                        </span>
+                      </el-tab-pane>
+                    </el-tabs>
+                    <el-button
+                      v-role="['doctor', 'admin']"
+                      class="rx-prescription-add-btn"
+                      type="primary"
+                      plain
+                      icon="el-icon-plus"
+                      size="small"
+                      :loading="rxGroupActionLoading"
+                      @click="addPrescriptionGroup"
+                    >
+                      Add Prescription
+                    </el-button>
+                    <el-button
+                      v-if="prescription_groups.length > 1"
+                      v-role="['doctor', 'admin']"
+                      type="danger"
+                      plain
+                      icon="el-icon-delete"
+                      size="small"
+                      :loading="rxGroupActionLoading"
+                      @click="deleteActivePrescriptionGroup"
+                    >
+                      Delete group
+                    </el-button>
+                  </div>
+                </div>
+                <el-row :gutter="20" class="rx-med-toolbar" style="margin-bottom: 16px;">
+                  <el-button v-role="['doctor', 'admin']" type="primary" @click="openRxOrderDialog">
+                    Add order
+                  </el-button>
+                  <el-button v-role="['doctor', 'admin']" type="warning" plain @click="openRxTemplateDialog">
+                    Load template
+                  </el-button>
+                  <el-button v-role="['doctor', 'admin']" type="info" plain @click="openRxPastPrescriptionDialog">
+                    Load previous prescription
+                  </el-button>
+                  <el-button v-role="['doctor', 'admin']" plain @click="openRxFavoritesDialog">
+                    <i class="el-icon-star-on" style="margin-right: 4px" />
+                    Favorites
+                  </el-button>
+                  <el-button
+                    v-role="['doctor', 'admin']"
+                    plain
+                    icon="el-icon-refresh"
+                    :loading="rxListRefreshLoading"
+                    @click="refreshRxList"
+                  >
+                    Refresh
+                  </el-button>
+                  <el-dropdown v-role="['doctor', 'admin']" trigger="click" @command="handlePrintRxCommand">
+                    <el-button type="success" plain>
+                      Print Rx
+                      <i class="el-icon-arrow-down el-icon--right" />
+                    </el-button>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item command="current">Print current group</el-dropdown-item>
+                      <el-dropdown-item command="all">Print all groups</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                  <el-button
+                    v-role="['doctor', 'admin']"
+                    type="danger"
+                    plain
+                    icon="el-icon-delete"
+                    :disabled="!rxListSelection.length"
+                    :loading="rxListDeleteLoading"
+                    @click="deleteSelectedMeds"
+                  >
+                    Delete selected
+                  </el-button>
+                </el-row>
+                <el-row :gutter="24">
+                  <el-table
+                    ref="rxMedTable"
+                    :key="'rx-med-' + rxMedTableKey + '-' + activePrescriptionGroupId"
+                    row-key="id"
+                    :data="activeRxList"
+                    style="width: 100%"
+                    class="compact-table rx-med-table"
+                    size="small"
+                    @selection-change="handleRxListSelectionChange"
+                  >
+                    <el-table-column type="selection" width="48" align="center" />
+                    <el-table-column label="" width="40" align="center" class-name="rx-drag-col">
+                      <template slot-scope="scope">
+                        <span
+                          v-role="['doctor', 'admin']"
+                          class="rx-drag-handle"
+                          title="Drag to reorder"
+                        >
+                          <i class="el-icon-rank" />
+                        </span>
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="generic" label="Generic" min-width="160" show-overflow-tooltip />
+                    <el-table-column prop="brand" label="Brand" min-width="160" show-overflow-tooltip />
+                    <el-table-column prop="dosage" label="Dosage" width="90" align="center" show-overflow-tooltip />
+                    <el-table-column prop="qty" label="Qty" width="56" align="center" />
+                    <el-table-column label="Breakfast" width="120">
+                      <el-table-column label="B" width="60" align="center">
                         <template slot-scope="scope">
-                          <el-tag v-if="scope.row.is_latest" size="mini" type="success">Latest</el-tag>
+                          <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_b) }">{{ scope.row.bf_b }}</span>
                         </template>
                       </el-table-column>
-                    </el-table>
-                  </div>
-                  <p v-else class="vitals-history-expand__empty">Only one reading recorded for this day.</p>
-                </template>
-              </el-table-column>
-              <el-table-column prop="date" label="Date" sortable width="120" />
-              <el-table-column label="Readings" width="95">
-                <template slot-scope="scope">
-                  <span>{{ scope.row.reading_count || 1 }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="bp" label="BP (mmHg)" width="110" />
-              <el-table-column prop="weight" label="Weight (kg)" width="100" />
-              <el-table-column prop="height" label="Height (cm)" width="100" />
-              <el-table-column prop="bmi" label="BMI" width="70" />
-              <el-table-column prop="vit_temp" label="Temp (°C)" width="90" />
-              <el-table-column prop="vit_cr" label="HR (bpm)" width="90" />
-              <el-table-column prop="vit_rr" label="RR (rpm)" width="90" />
-              <el-table-column prop="o2_stat" label="O2 Sat (%)" width="95" />
-            </el-table>
-            <p v-else class="vitals-history-empty">No past vitals recorded for this patient yet.</p>
-          </el-card>
-          </el-card>
-        </div>
-
-        <!-- OB-GYN -->
-        <div v-show="tab === 'obgyn'">
-          <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-female"></i>
-              <span>OB-GYN</span>
-            </div>
+                      <el-table-column label="A" width="60" align="center">
+                        <template slot-scope="scope">
+                          <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_a) }">{{ scope.row.bf_a }}</span>
+                        </template>
+                      </el-table-column>
+                    </el-table-column>
+                    <el-table-column label="Lunch" width="120">
+                      <el-table-column label="B" width="60" align="center">
+                        <template slot-scope="scope">
+                          <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_b) }">{{ scope.row.l_b }}</span>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="A" width="60" align="center">
+                        <template slot-scope="scope">
+                          <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_a) }">{{ scope.row.l_a }}</span>
+                        </template>
+                      </el-table-column>
+                    </el-table-column>
+                    <el-table-column label="Dinner" width="120">
+                      <el-table-column label="B" width="60" align="center">
+                        <template slot-scope="scope">
+                          <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_b) }">{{ scope.row.s_b }}</span>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="A" width="60" align="center">
+                        <template slot-scope="scope">
+                          <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_a) }">{{ scope.row.s_a }}</span>
+                        </template>
+                      </el-table-column>
+                    </el-table-column>
+                    <el-table-column label="Bed" width="56" align="center">
+                      <template slot-scope="scope">
+                        <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bt) }">{{ scope.row.bt }}</span>
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="remarks" label="Remarks" min-width="180" show-overflow-tooltip />
+                    <el-table-column align="center" label="Actions" width="180">
+                      <template slot-scope="scope">
+                        <el-button
+                          v-role="['doctor', 'admin']" type="primary" size="mini" icon="el-icon-edit"
+                          @click="editMed(scope.row)"
+                        />
+                        <el-button
+                          v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
+                          type="warning" size="mini" icon="el-icon-close" @click="cancelEdit()"
+                        />
+                        <el-button
+                          v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
+                          @click="deleteMed(scope.row.id)"
+                        />
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </el-row>
+                <el-form label-position="top" style="margin-top: 16px;">
+                  <el-form-item label="Follow Up Date">
+                    <date-picker v-model="form.followup" value-type="format" />
+                  </el-form-item>
+                </el-form>
+              </el-card>
+            </el-card>
           </div>
-          <el-card style="max-width: 100%" shadow="never">
-            <el-form label-position="top">
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Pregnancy">
-                    <el-input v-model="form.pregnancy" type="textarea" rows="4" placeholder="Enter pregnancy history" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="LMP (Last Menstrual Period)">
-                    <el-date-picker
-                      v-model="form.lmp"
-                      type="date"
-                      placeholder="Select LMP date"
-                      format="yyyy-MM-dd"
-                      value-format="yyyy-MM-dd"
-                      style="width: 100%"
-                    />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Contraceptive Use">
-                    <el-input v-model="form.contraceptive_use" type="textarea" rows="4" placeholder="Enter contraceptive use history" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Menopause">
-                    <el-input v-model="form.menopause" type="textarea" rows="4" placeholder="Enter menopause information" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </el-form>
-          </el-card>
-          </el-card>
-        </div>
 
-        <!-- Medicines -->
-        <div v-show="tab === 'fourth'">
-          <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-medicine"></i>
-              <span>Medicines</span>
-            </div>
-          </div>
-          <el-card style="max-width: 100%" shadow="never">
-            <div class="rx-prescription-groups-bar">
-              <div class="rx-prescription-groups-tabs-wrap">
-                <el-tabs
-                  v-model="activePrescriptionGroupId"
-                  type="card"
-                  class="rx-prescription-tabs"
-                >
-                  <el-tab-pane
-                    v-for="g in prescription_groups"
-                    :key="g.id"
-                    :name="String(g.id)"
-                  >
-                    <span slot="label" class="rx-prescription-tab-label">
-                      <span>{{ g.title }}</span>
-                      <i
-                        v-role="['doctor', 'admin']"
-                        class="el-icon-edit rx-prescription-tab-edit"
-                        title="Rename prescription group"
-                        @click.stop="renamePrescriptionGroup(g)"
-                      />
-                    </span>
-                  </el-tab-pane>
-                </el-tabs>
-                <el-button
-                  v-role="['doctor', 'admin']"
-                  class="rx-prescription-add-btn"
-                  type="primary"
-                  plain
-                  icon="el-icon-plus"
-                  size="small"
-                  :loading="rxGroupActionLoading"
-                  @click="addPrescriptionGroup"
-                >
-                  Add Prescription
-                </el-button>
-                <el-button
-                  v-if="prescription_groups.length > 1"
-                  v-role="['doctor', 'admin']"
-                  type="danger"
-                  plain
-                  icon="el-icon-delete"
-                  size="small"
-                  :loading="rxGroupActionLoading"
-                  @click="deleteActivePrescriptionGroup"
-                >
-                  Delete group
-                </el-button>
+          <!-- Diagnostics -->
+          <div v-show="tab === 'fifth'">
+            <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-data-analysis" />
+                  <span>Diagnostics</span>
+                </div>
               </div>
-            </div>
-            <el-row :gutter="20" class="rx-med-toolbar" style="margin-bottom: 16px;">
-              <el-button v-role="['doctor', 'admin']" type="primary" @click="openRxOrderDialog">
-                Add order
-              </el-button>
-              <el-button v-role="['doctor', 'admin']" type="warning" plain @click="openRxTemplateDialog">
-                Load template
-              </el-button>
-              <el-button v-role="['doctor', 'admin']" type="info" plain @click="openRxPastPrescriptionDialog">
-                Load previous prescription
-              </el-button>
-              <el-button v-role="['doctor', 'admin']" plain @click="openRxFavoritesDialog">
-                <i class="el-icon-star-on" style="margin-right: 4px" />
-                Favorites
-              </el-button>
-              <el-button
-                v-role="['doctor', 'admin']"
-                plain
-                icon="el-icon-refresh"
-                :loading="rxListRefreshLoading"
-                @click="refreshRxList"
-              >
-                Refresh
-              </el-button>
-              <el-dropdown v-role="['doctor', 'admin']" trigger="click" @command="handlePrintRxCommand">
-                <el-button type="success" plain>
-                  Print Rx
-                  <i class="el-icon-arrow-down el-icon--right" />
-                </el-button>
-                <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item command="current">Print current group</el-dropdown-item>
-                  <el-dropdown-item command="all">Print all groups</el-dropdown-item>
-                </el-dropdown-menu>
-              </el-dropdown>
-              <el-button
-                v-role="['doctor', 'admin']"
-                type="danger"
-                plain
-                icon="el-icon-delete"
-                :disabled="!rxListSelection.length"
-                :loading="rxListDeleteLoading"
-                @click="deleteSelectedMeds"
-              >
-                Delete selected
-              </el-button>
-            </el-row>
-            <el-row :gutter="24">
-              <el-table
-                ref="rxMedTable"
-                :key="'rx-med-' + rxMedTableKey + '-' + activePrescriptionGroupId"
-                row-key="id"
-                :data="activeRxList"
-                style="width: 100%"
-                class="compact-table rx-med-table"
-                size="small"
-                @selection-change="handleRxListSelectionChange"
-              >
-                <el-table-column type="selection" width="48" align="center" />
-                <el-table-column label="" width="40" align="center" class-name="rx-drag-col">
-                  <template slot-scope="scope">
-                    <span
-                      v-role="['doctor', 'admin']"
-                      class="rx-drag-handle"
-                      title="Drag to reorder"
+              <el-card style="max-width: 100%" shadow="never">
+                <div class="rx-prescription-groups-bar">
+                  <div class="rx-prescription-groups-tabs-wrap">
+                    <el-tabs
+                      v-model="activeDiagnosticGroupId"
+                      type="card"
+                      class="rx-prescription-tabs"
+                      @tab-click="onDiagnosticGroupTabClick"
                     >
-                      <i class="el-icon-rank" />
-                    </span>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="generic" label="Generic" min-width="160" show-overflow-tooltip />
-                <el-table-column prop="brand" label="Brand" min-width="160" show-overflow-tooltip />
-                <el-table-column prop="dosage" label="Dosage" width="90" align="center" show-overflow-tooltip />
-                <el-table-column prop="qty" label="Qty" width="56" align="center" />
-                <el-table-column label="Breakfast" width="120">
-                  <el-table-column label="B" width="60" align="center">
-                    <template slot-scope="scope">
-                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_b) }">{{ scope.row.bf_b }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="A" width="60" align="center">
-                    <template slot-scope="scope">
-                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bf_a) }">{{ scope.row.bf_a }}</span>
-                    </template>
-                  </el-table-column>
-                </el-table-column>
-                <el-table-column label="Lunch" width="120">
-                  <el-table-column label="B" width="60" align="center">
-                    <template slot-scope="scope">
-                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_b) }">{{ scope.row.l_b }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="A" width="60" align="center">
-                    <template slot-scope="scope">
-                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.l_a) }">{{ scope.row.l_a }}</span>
-                    </template>
-                  </el-table-column>
-                </el-table-column>
-                <el-table-column label="Dinner" width="120">
-                  <el-table-column label="B" width="60" align="center">
-                    <template slot-scope="scope">
-                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_b) }">{{ scope.row.s_b }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="A" width="60" align="center">
-                    <template slot-scope="scope">
-                      <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.s_a) }">{{ scope.row.s_a }}</span>
-                    </template>
-                  </el-table-column>
-                </el-table-column>
-                <el-table-column label="Bed" width="56" align="center">
-                  <template slot-scope="scope">
-                    <span :class="{ 'rx-timing-dose-filled': rxTimingDoseFilled(scope.row.bt) }">{{ scope.row.bt }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="remarks" label="Remarks" min-width="180" show-overflow-tooltip />
-                <el-table-column align="center" label="Actions" width="180">
-                  <template slot-scope="scope">
-                    <el-button v-role="['doctor', 'admin']" type="primary" size="mini" icon="el-icon-edit"
-                      @click="editMed(scope.row)"></el-button>
-                    <el-button v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
-                      type="warning" size="mini" icon="el-icon-close" @click="cancelEdit()"></el-button>
-                    <el-button v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
-                      @click="deleteMed(scope.row.id)"></el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </el-row>
-            <el-form label-position="top" style="margin-top: 16px;">
-              <el-form-item label="Follow Up Date">
-                <date-picker v-model="form.followup" valueType="format"></date-picker>
-              </el-form-item>
-            </el-form>
-          </el-card>
-          </el-card>
-        </div>
-
-        <!-- Diagnostics -->
-        <div v-show="tab === 'fifth'">
-          <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-data-analysis"></i>
-              <span>Diagnostics</span>
-            </div>
-          </div>
-          <el-card style="max-width: 100%" shadow="never">
-            <div class="rx-prescription-groups-bar">
-              <div class="rx-prescription-groups-tabs-wrap">
-                <el-tabs
-                  v-model="activeDiagnosticGroupId"
-                  type="card"
-                  class="rx-prescription-tabs"
-                  @tab-click="onDiagnosticGroupTabClick"
-                >
-                  <el-tab-pane
-                    v-for="g in diagnostic_groups"
-                    :key="g.id"
-                    :name="String(g.id)"
-                  >
-                    <span slot="label" class="rx-prescription-tab-label">
-                      <span>{{ g.title }}</span>
-                      <i
-                        v-role="['doctor', 'admin']"
-                        class="el-icon-edit rx-prescription-tab-edit"
-                        title="Rename diagnostic group"
-                        @click.stop="renameDiagnosticGroup(g)"
-                      />
-                    </span>
-                  </el-tab-pane>
-                </el-tabs>
-                <el-button
-                  v-role="['doctor', 'admin']"
-                  class="rx-prescription-add-btn"
-                  type="primary"
-                  plain
-                  icon="el-icon-plus"
-                  size="small"
-                  :loading="dxGroupActionLoading"
-                  @click="addDiagnosticGroup"
-                >
-                  Add Diagnostic Group
-                </el-button>
-                <el-button
-                  v-if="diagnostic_groups.length > 1"
-                  v-role="['doctor', 'admin']"
-                  type="danger"
-                  plain
-                  icon="el-icon-delete"
-                  size="small"
-                  :loading="dxGroupActionLoading"
-                  @click="deleteActiveDiagnosticGroup"
-                >
-                  Delete group
-                </el-button>
-              </div>
-            </div>
-            <el-radio-group v-model="form.fasting_mode">
-              <el-radio label="1">Fasting 8-10 hours </el-radio>
-              <el-radio label="2">Fasting 10-12 hours </el-radio>
-              <el-radio label="3">Non-fasting</el-radio>
-            </el-radio-group>
-            <el-checkbox v-model="form.sendXrayToEmail" label="Send X-ray images" size="large" />
-            <el-row v-if="activeDiagnosticGroup">
-              <el-form :inline="true" label-position="top" class="demo-form-inline">
-                <el-form-item label="Request date">
-                  <el-date-picker
-                    v-model="activeDiagnosticGroup.request_date"
-                    type="date"
-                    value-format="yyyy-MM-dd"
-                    format="MM/dd/yyyy"
-                    placeholder="Select date"
-                    @change="saveActiveDiagnosticGroupMeta"
-                  />
-                </el-form-item>
-                <el-form-item label="Remarks" class="w-100">
-                  <el-input
-                    v-model="activeDiagnosticGroup.lab_remarks"
-                    type="textarea"
-                    style="width: 100%"
-                    @blur="saveActiveDiagnosticGroupMeta"
-                  />
-                </el-form-item>
-              </el-form>
-            </el-row>
-            <div class="mb-4" />
-            <el-button type="primary" @click="viewDiagnosticsTbl = true">View Diagnostics</el-button>
-            <el-button v-role="['doctor', 'admin']" type="warning" plain @click="openDxTemplateDialog">
-              Load template
-            </el-button>
-            <el-dropdown v-role="['doctor', 'admin']" trigger="click" @command="handlePrintDxCommand">
-              <el-button type="success" plain>
-                Print Diagnostics
-                <i class="el-icon-arrow-down el-icon--right" />
-              </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="current">Print current group</el-dropdown-item>
-                <el-dropdown-item command="all">Print all groups</el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-            <el-button
-              v-role="['doctor', 'admin']"
-              type="danger"
-              plain
-              icon="el-icon-delete"
-              :disabled="!dxListSelection.length"
-              :loading="dxListDeleteLoading"
-              @click="deleteSelectedDiagnostics"
-            >
-              Delete selected
-            </el-button>
-            <el-row :gutter="20">
-              <el-table
-                ref="dxTable"
-                row-key="id"
-                :key="'dx-table-' + activeDiagnosticGroupId"
-                :data="activeDiagnosticList"
-                style="width: 100%"
-                class="compact-table dx-table"
-                size="small"
-                @selection-change="handleDxListSelectionChange"
-              >
-                <el-table-column type="selection" width="48" align="center" />
-                <el-table-column label="" width="40" align="center" class-name="rx-drag-col">
-                  <template slot-scope="scope">
-                    <span
-                      v-role="['doctor', 'admin']"
-                      class="rx-drag-handle"
-                      title="Drag to reorder"
-                    >
-                      <i class="el-icon-rank" />
-                    </span>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="diagnostic" label="Procedure" />
-                <el-table-column prop="remarks" label="Remarks" />
-                <el-table-column align="center" label="Actions" width="350">
-                  <template slot-scope="scope">
-                    <el-button v-role="['doctor', 'admin']" type="danger" size="small" icon="el-icon-delete"
-                      @click="removeProcedure(scope.row.id)">
-                      Delete
-                    </el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </el-row>
-          </el-card>
-          </el-card>
-        </div>
-
-        <!-- Services -->
-        <div v-show="tab === 'sixth'">
-          <el-card class="section-card mb-6 services-card" shadow="never">
-          <div slot="header" class="section-header">
-            <div class="section-card__title">
-              <i class="el-icon-service"></i>
-              <span>Services & Billing</span>
-            </div>
-            <div class="header-actions">
-              <el-button type="default" size="small" @click="printfees">
-                <i class="el-icon-printer"></i>
-                Print Fees
-              </el-button>
-              <el-button type="primary" size="small" @click="viewServicesTbl = true">
-                <i class="el-icon-plus"></i>
-                Add Services
-              </el-button>
-            </div>
-          </div>
-          <div class="services-form-section">
-            <el-form :inline="true" label-position="top" class="enhanced-form">
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="12" :md="12" :lg="6">
-                  <el-form-item label="Discount" class="form-item-enhanced">
-                    <el-input v-model="form.discount" placeholder="Discount amount" class="enhanced-input" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </el-form>
-          </div>
-          <div class="services-list-section">
-            <el-table :data="services_list" class="enhanced-table" v-if="services_list.length > 0">
-              <el-table-column prop="service" label="Service" min-width="200">
-                <template slot-scope="scope">
-                  <div class="service-cell">
-                    <i class="el-icon-service"></i>
-                    <span>{{ scope.row.service }}</span>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column prop="fee" label="Fee" width="120" align="right">
-                <template slot-scope="scope">
-                  <span class="fee-amount">₱{{ scope.row.fee }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column align="center" label="Actions" width="200">
-                <template slot-scope="scope">
-                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
-                    @click="removeService(scope.row.id)" class="delete-btn">
-                    Delete
-                  </el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-            <div v-else class="empty-state">
-              <i class="el-icon-service"></i>
-              <p>No services added yet</p>
-              <p class="empty-subtitle">Click "Add Services" to add procedures</p>
-            </div>
-          </div>
-          </el-card>
-        </div>
-
-        <!-- Med Cert -->
-        <div v-show="tab === 'medcert'">
-          <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-document-copy"></i>
-              <span>Med Cert</span>
-            </div>
-            <el-button v-role="['doctor', 'admin']" type="default" size="small" @click="printmedcert">
-              <i class="el-icon-printer"></i>
-              Print Med Cert
-            </el-button>
-          </div>
-          <el-card style="max-width: 100%" shadow="never">
-            <el-form label-position="top">
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="12" :md="6" :lg="6">
-                  <el-form-item label="Undersigned Date">
-                    <date-picker v-model="form.medcert_undersigned" valueType="format"></date-picker>
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="24" :lg="24">
-                  <el-form-item label="Diagnosis">
-                    <!-- <p class="medcert-field-hint">Copied from the Diagnosis tab</p> -->
-                    <el-input v-model="form.medcert_diagnosis" type="textarea" rows="10" readonly />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="24" :lg="24">
-                  <el-form-item label="Remarks">
-                    <div class="pe-template-section">
-                      <el-row :gutter="20" style="margin-bottom: 15px;">
-                        <el-col :span="24">
-                          <div class="template-buttons">
-                            <el-button v-for="template in medcertRemarksTemplates" :key="template.id" size="small"
-                              :type="template.type === 'default' ? 'primary' : 'success'" plain
-                              @click="insertMedcertRemarksTemplate(template.content)" class="template-btn">
-                              {{ template.name }}
-                              <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
-                                circle @click.stop="deleteMedcertRemarksTemplate(template.id)" class="delete-template-btn"></el-button>
-                            </el-button>
-                          </div>
-                          <el-button size="small" type="success" @click="showMedcertRemarksCustomTemplateDialog = true"
-                            style="margin-left: 10px;">
-                            Custom Template
-                          </el-button>
-                        </el-col>
-                      </el-row>
-                      <el-input v-model="form.medcert_remarks" type="textarea" rows="10" />
-                    </div>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </el-form>
-          </el-card>
-          </el-card>
-        </div>
-
-        <!-- Referral -->
-        <div v-show="tab === 'referral'">
-          <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-s-promotion"></i>
-              <span>Referral</span>
-            </div>
-            <el-button v-role="['doctor', 'admin']" type="default" size="small" @click="printreferral">
-              <i class="el-icon-printer"></i>
-              Print Referral
-            </el-button>
-          </div>
-          <el-card style="max-width: 100%" shadow="never">
-            <el-form label-position="top">
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="12" :md="6" :lg="6">
-                  <el-form-item label="Doctor"><el-input v-model="form.referral_doctor" /></el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="6" :lg="6">
-                  <el-form-item label="Address 1"><el-input v-model="form.referral_addr1" /></el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="6" :lg="6">
-                  <el-form-item label="Address 2"><el-input v-model="form.referral_addr2" /></el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="6" :lg="6">
-                  <el-form-item label="Undersigned Date">
-                    <date-picker v-model="form.referral_undersigned" valueType="format"></date-picker>
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              <el-row :gutter="20">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24">
-                  <el-form-item label="History">
-                    <el-input v-model="form.history" type="textarea" rows="5" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="12" :lg="12">
-                  <el-form-item label="Diagnosis">
-                    <el-input v-model="form.referral_diagnosis" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="12" :lg="12">
-                  <el-form-item label="Remarks">
-                    <el-input v-model="form.referral_remarks" type="textarea" rows="10" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-            </el-form>
-          </el-card>
-          </el-card>
-        </div>
-
-        <!-- Attachments -->
-        <div v-show="tab === 'attachments'">
-          <el-card class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-paperclip"></i>
-              <span>Attachments</span>
-            </div>
-          </div>
-          <div class="mb-4">
-            <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange" :disabled="isUploading">
-              <template #trigger>
-                <el-button ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
-                  :on-change="handleChange" :disabled="isUploading">Select attachments</el-button>
-              </template>
-              <el-button size="small" type="primary" @click="submitUpload" :loading="isUploading" :disabled="isUploading">
-                {{ isUploading ? 'Uploading...' : 'Submit' }}
-              </el-button>
-            </el-upload>
-            <div v-if="isUploading" class="mt-3">
-              <el-progress :percentage="uploadProgress" :status="uploadProgress === 100 ? 'success' : ''"></el-progress>
-              <p class="text-sm text-gray-600 mt-2">{{ uploadStatus }}</p>
-            </div>
-          </div>
-          <el-card style="max-width: 100%" shadow="never">
-            <el-dialog :visible.sync="dialogVisible" width="50%">
-              <el-image :src="selectedImage.file" :alt="selectedImage.alt" fit="contain" class="popup-image" />
-              <span slot="footer" class="dialog-footer">
-                <el-button @click="dialogVisible = false">Close</el-button>
-              </span>
-            </el-dialog>
-            <div v-for="group in attachmentGroups" :key="group.key" style="margin-bottom: 18px;">
-              <div style="font-weight: 600; margin: 6px 0 10px; color: #303133;">
-                {{ group.label }}
-              </div>
-              <div class="att-gallery">
-                <div v-for="item in group.items" :key="item.id || item.newfile || item.fname" class="att-tile">
-                  <div class="att-tile__media">
-                    <el-image
-                      v-if="item.isImage"
-                      class="att-tile__image"
-                      :src="item.src"
-                      fit="cover"
-                      :preview-src-list="group.previewList"
-                      :initial-index="item.previewIndex"
-                    />
-                    <div v-else class="att-tile__file" @click="viewFile(item.raw.newfile, item.raw.extension)">
-                      <i class="el-icon-document" style="font-size: 24px;"></i>
-                      <div class="att-tile__fileext">{{ (item.raw.extension || '').toUpperCase() }}</div>
-                    </div>
+                      <el-tab-pane
+                        v-for="g in diagnostic_groups"
+                        :key="g.id"
+                        :name="String(g.id)"
+                      >
+                        <span slot="label" class="rx-prescription-tab-label">
+                          <span>{{ g.title }}</span>
+                          <i
+                            v-role="['doctor', 'admin']"
+                            class="el-icon-edit rx-prescription-tab-edit"
+                            title="Rename diagnostic group"
+                            @click.stop="renameDiagnosticGroup(g)"
+                          />
+                        </span>
+                      </el-tab-pane>
+                    </el-tabs>
                     <el-button
-                      class="att-tile__delete"
+                      v-role="['doctor', 'admin']"
+                      class="rx-prescription-add-btn"
+                      type="primary"
+                      plain
+                      icon="el-icon-plus"
+                      size="small"
+                      :loading="dxGroupActionLoading"
+                      @click="addDiagnosticGroup"
+                    >
+                      Add Diagnostic Group
+                    </el-button>
+                    <el-button
+                      v-if="diagnostic_groups.length > 1"
+                      v-role="['doctor', 'admin']"
                       type="danger"
+                      plain
                       icon="el-icon-delete"
-                      circle
-                      size="mini"
-                      @click.stop="deleteAtt(item.raw.id)"
-                    />
-                  </div>
-                  <div class="att-tile__meta">
-                    <div class="att-tile__name" :title="item.raw.description || item.raw.fname">
-                      {{ item.raw.description || item.raw.fname }}
-                    </div>
-                    <div class="att-tile__date">
-                      {{ item.raw.created_dt }}
-                    </div>
+                      size="small"
+                      :loading="dxGroupActionLoading"
+                      @click="deleteActiveDiagnosticGroup"
+                    >
+                      Delete group
+                    </el-button>
                   </div>
                 </div>
-              </div>
-            </div>
-            <el-dialog :visible.sync="viewFileModel" :fullscreen="false" :close-on-click-modal="false">
-              <template #default>
-                <div class="iframe-wrapper">
-                  <iframe v-if="isPdf" :src="sourceFile" :style="transformStyle" frameborder="0"
-                    class="iframe-full"></iframe>
-                  <el-image v-if="!isPdf" style="width: 100px; height: 100px" :src="sourceFile" :zoom-rate="1.2"
-                    :max-scale="7" :min-scale="0.2" :preview-src-list="[sourceFile]" show-progress :initial-index="4"
-                    fit="cover" />
-                </div>
-              </template>
-            </el-dialog>
-          </el-card>
-          </el-card>
-        </div>
-
-        <!-- Form -->
-        <div v-show="tab === 'form'">
-          <el-card class="section-card mb-6" shadow="never">
-          <div slot="header" class="section-card__header">
-            <div class="section-card__title">
-              <i class="el-icon-edit-outline"></i>
-              <span>Form</span>
-            </div>
-            <el-button type="default" size="small" @click="printform">
-              <i class="el-icon-printer"></i>
-              Print Form
-            </el-button>
-          </div>
-          <el-card style="max-width: 100%" shadow="never">
-            <div class="form-editor-container">
-              <div class="form-editor-title-row">
-                <h3 class="form-editor-title">Form Editor</h3>
-                <el-button type="primary" size="small" plain icon="el-icon-document" @click="openFormTemplateDialog">
+                <el-radio-group v-model="form.fasting_mode">
+                  <el-radio label="1">Fasting 8-10 hours </el-radio>
+                  <el-radio label="2">Fasting 10-12 hours </el-radio>
+                  <el-radio label="3">Non-fasting</el-radio>
+                </el-radio-group>
+                <el-checkbox v-model="form.sendXrayToEmail" label="Send X-ray images" size="large" />
+                <el-row v-if="activeDiagnosticGroup">
+                  <el-form :inline="true" label-position="top" class="demo-form-inline">
+                    <el-form-item label="Request date">
+                      <el-date-picker
+                        v-model="activeDiagnosticGroup.request_date"
+                        type="date"
+                        value-format="yyyy-MM-dd"
+                        format="MM/dd/yyyy"
+                        placeholder="Select date"
+                        @change="saveActiveDiagnosticGroupMeta"
+                      />
+                    </el-form-item>
+                    <el-form-item label="Remarks" class="w-100">
+                      <el-input
+                        v-model="activeDiagnosticGroup.lab_remarks"
+                        type="textarea"
+                        style="width: 100%"
+                        @blur="saveActiveDiagnosticGroupMeta"
+                      />
+                    </el-form-item>
+                  </el-form>
+                </el-row>
+                <div class="mb-4" />
+                <el-button type="primary" @click="viewDiagnosticsTbl = true">View Diagnostics</el-button>
+                <el-button v-role="['doctor', 'admin']" type="warning" plain @click="openDxTemplateDialog">
                   Load template
                 </el-button>
+                <el-dropdown v-role="['doctor', 'admin']" trigger="click" @command="handlePrintDxCommand">
+                  <el-button type="success" plain>
+                    Print Diagnostics
+                    <i class="el-icon-arrow-down el-icon--right" />
+                  </el-button>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="current">Print current group</el-dropdown-item>
+                    <el-dropdown-item command="all">Print all groups</el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+                <el-button
+                  v-role="['doctor', 'admin']"
+                  type="danger"
+                  plain
+                  icon="el-icon-delete"
+                  :disabled="!dxListSelection.length"
+                  :loading="dxListDeleteLoading"
+                  @click="deleteSelectedDiagnostics"
+                >
+                  Delete selected
+                </el-button>
+                <el-row :gutter="20">
+                  <el-table
+                    ref="dxTable"
+                    :key="'dx-table-' + activeDiagnosticGroupId"
+                    row-key="id"
+                    :data="activeDiagnosticList"
+                    style="width: 100%"
+                    class="compact-table dx-table"
+                    size="small"
+                    @selection-change="handleDxListSelectionChange"
+                  >
+                    <el-table-column type="selection" width="48" align="center" />
+                    <el-table-column label="" width="40" align="center" class-name="rx-drag-col">
+                      <template slot-scope="scope">
+                        <span
+                          v-role="['doctor', 'admin']"
+                          class="rx-drag-handle"
+                          title="Drag to reorder"
+                        >
+                          <i class="el-icon-rank" />
+                        </span>
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="diagnostic" label="Procedure" />
+                    <el-table-column prop="remarks" label="Remarks" />
+                    <el-table-column align="center" label="Actions" width="350">
+                      <template slot-scope="scope">
+                        <el-button
+                          v-role="['doctor', 'admin']" type="danger" size="small" icon="el-icon-delete"
+                          @click="removeProcedure(scope.row.id)"
+                        >
+                          Delete
+                        </el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </el-row>
+              </el-card>
+            </el-card>
+          </div>
+
+          <!-- Services -->
+          <div v-show="tab === 'sixth'">
+            <el-card class="section-card mb-6 services-card" shadow="never">
+              <div slot="header" class="section-header">
+                <div class="section-card__title">
+                  <i class="el-icon-service" />
+                  <span>Services & Billing</span>
+                </div>
+                <div class="header-actions">
+                  <el-button type="default" size="small" @click="printfees">
+                    <i class="el-icon-printer" />
+                    Print Fees
+                  </el-button>
+                  <el-button type="primary" size="small" @click="viewServicesTbl = true">
+                    <i class="el-icon-plus" />
+                    Add Services
+                  </el-button>
+                </div>
               </div>
-              <QuillEditor
-                v-model="form.form_content"
-                :height="420"
-                preset="full"
-                :font-sizes="formEditorFontSizes"
-                placeholder="Enter form content here..."
-              />
-            </div>
-          </el-card>
-          </el-card>
-        </div>
+              <div class="services-form-section">
+                <el-form :inline="true" label-position="top" class="enhanced-form">
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="12" :md="12" :lg="6">
+                      <el-form-item label="Discount" class="form-item-enhanced">
+                        <el-input v-model="form.discount" placeholder="Discount amount" class="enhanced-input" />
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
+              </div>
+              <div class="services-list-section">
+                <el-table v-if="services_list.length > 0" :data="services_list" class="enhanced-table">
+                  <el-table-column prop="service" label="Service" min-width="200">
+                    <template slot-scope="scope">
+                      <div class="service-cell">
+                        <i class="el-icon-service" />
+                        <span>{{ scope.row.service }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="fee" label="Fee" width="120" align="right">
+                    <template slot-scope="scope">
+                      <span class="fee-amount">₱{{ scope.row.fee }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column align="center" label="Actions" width="200">
+                    <template slot-scope="scope">
+                      <el-button
+                        v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
+                        class="delete-btn" @click="removeService(scope.row.id)"
+                      >
+                        Delete
+                      </el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+                <div v-else class="empty-state">
+                  <i class="el-icon-service" />
+                  <p>No services added yet</p>
+                  <p class="empty-subtitle">Click "Add Services" to add procedures</p>
+                </div>
+              </div>
+            </el-card>
+          </div>
+
+          <!-- Med Cert -->
+          <div v-show="tab === 'medcert'">
+            <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-document-copy" />
+                  <span>Med Cert</span>
+                </div>
+                <el-button v-role="['doctor', 'admin']" type="default" size="small" @click="printmedcert">
+                  <i class="el-icon-printer" />
+                  Print Med Cert
+                </el-button>
+              </div>
+              <el-card style="max-width: 100%" shadow="never">
+                <el-form label-position="top">
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="12" :md="6" :lg="6">
+                      <el-form-item label="Undersigned Date">
+                        <date-picker v-model="form.medcert_undersigned" value-type="format" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="24" :md="24" :lg="24">
+                      <el-form-item label="Diagnosis">
+                        <!-- <p class="medcert-field-hint">Copied from the Diagnosis tab</p> -->
+                        <el-input v-model="form.medcert_diagnosis" type="textarea" rows="10" readonly />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="24" :md="24" :lg="24">
+                      <el-form-item label="Remarks">
+                        <div class="pe-template-section">
+                          <el-row :gutter="20" style="margin-bottom: 15px;">
+                            <el-col :span="24">
+                              <div class="template-buttons">
+                                <el-button
+                                  v-for="template in medcertRemarksTemplates" :key="template.id" size="small"
+                                  :type="template.type === 'default' ? 'primary' : 'success'" plain
+                                  class="template-btn" @click="insertMedcertRemarksTemplate(template.content)"
+                                >
+                                  {{ template.name }}
+                                  <el-button
+                                    v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                                    circle class="delete-template-btn" @click.stop="deleteMedcertRemarksTemplate(template.id)"
+                                  />
+                                </el-button>
+                              </div>
+                              <el-button
+                                size="small" type="success" style="margin-left: 10px;"
+                                @click="showMedcertRemarksCustomTemplateDialog = true"
+                              >
+                                Custom Template
+                              </el-button>
+                            </el-col>
+                          </el-row>
+                          <el-input v-model="form.medcert_remarks" type="textarea" rows="10" />
+                        </div>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
+              </el-card>
+            </el-card>
+          </div>
+
+          <!-- Referral -->
+          <div v-show="tab === 'referral'">
+            <el-card v-if="checkRole(['admin', 'doctor'])" class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-s-promotion" />
+                  <span>Referral</span>
+                </div>
+                <el-button v-role="['doctor', 'admin']" type="default" size="small" @click="printreferral">
+                  <i class="el-icon-printer" />
+                  Print Referral
+                </el-button>
+              </div>
+              <el-card style="max-width: 100%" shadow="never">
+                <el-form label-position="top">
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="12" :md="6" :lg="6">
+                      <el-form-item label="Doctor"><el-input v-model="form.referral_doctor" /></el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="6" :lg="6">
+                      <el-form-item label="Address 1"><el-input v-model="form.referral_addr1" /></el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="6" :lg="6">
+                      <el-form-item label="Address 2"><el-input v-model="form.referral_addr2" /></el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="12" :md="6" :lg="6">
+                      <el-form-item label="Undersigned Date">
+                        <date-picker v-model="form.referral_undersigned" value-type="format" />
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                  <el-row :gutter="20">
+                    <el-col :xs="24" :sm="24" :md="24" :lg="24">
+                      <el-form-item label="History">
+                        <el-input v-model="form.history" type="textarea" rows="5" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="24" :md="12" :lg="12">
+                      <el-form-item label="Diagnosis">
+                        <el-input v-model="form.referral_diagnosis" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="24" :md="12" :lg="12">
+                      <el-form-item label="Remarks">
+                        <el-input v-model="form.referral_remarks" type="textarea" rows="10" />
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </el-form>
+              </el-card>
+            </el-card>
+          </div>
+
+          <!-- Attachments -->
+          <div v-show="tab === 'attachments'">
+            <el-card class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-paperclip" />
+                  <span>Attachments</span>
+                </div>
+              </div>
+              <div class="mb-4">
+                <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange" :disabled="isUploading">
+                  <template #trigger>
+                    <el-button
+                      ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
+                      :on-change="handleChange" :disabled="isUploading"
+                    >Select attachments</el-button>
+                  </template>
+                  <el-button size="small" type="primary" :loading="isUploading" :disabled="isUploading" @click="submitUpload">
+                    {{ isUploading ? 'Uploading...' : 'Submit' }}
+                  </el-button>
+                </el-upload>
+                <div v-if="isUploading" class="mt-3">
+                  <el-progress :percentage="uploadProgress" :status="uploadProgress === 100 ? 'success' : ''" />
+                  <p class="text-sm text-gray-600 mt-2">{{ uploadStatus }}</p>
+                </div>
+              </div>
+              <el-card style="max-width: 100%" shadow="never">
+                <el-dialog :visible.sync="dialogVisible" width="50%">
+                  <el-image :src="selectedImage.file" :alt="selectedImage.alt" fit="contain" class="popup-image" />
+                  <span slot="footer" class="dialog-footer">
+                    <el-button @click="dialogVisible = false">Close</el-button>
+                  </span>
+                </el-dialog>
+                <div v-for="group in attachmentGroups" :key="group.key" style="margin-bottom: 18px;">
+                  <div style="font-weight: 600; margin: 6px 0 10px; color: #303133;">
+                    {{ group.label }}
+                  </div>
+                  <div class="att-gallery">
+                    <div v-for="item in group.items" :key="item.id || item.newfile || item.fname" class="att-tile">
+                      <div class="att-tile__media">
+                        <el-image
+                          v-if="item.isImage"
+                          class="att-tile__image"
+                          :src="item.src"
+                          fit="cover"
+                          :preview-src-list="group.previewList"
+                          :initial-index="item.previewIndex"
+                        />
+                        <div v-else class="att-tile__file" @click="viewFile(item.raw.newfile, item.raw.extension)">
+                          <i class="el-icon-document" style="font-size: 24px;" />
+                          <div class="att-tile__fileext">{{ (item.raw.extension || '').toUpperCase() }}</div>
+                        </div>
+                        <el-button
+                          class="att-tile__delete"
+                          type="danger"
+                          icon="el-icon-delete"
+                          circle
+                          size="mini"
+                          @click.stop="deleteAtt(item.raw.id)"
+                        />
+                      </div>
+                      <div class="att-tile__meta">
+                        <div class="att-tile__name" :title="item.raw.description || item.raw.fname">
+                          {{ item.raw.description || item.raw.fname }}
+                        </div>
+                        <div class="att-tile__date">
+                          {{ item.raw.created_dt }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <el-dialog :visible.sync="viewFileModel" :fullscreen="false" :close-on-click-modal="false">
+                  <template #default>
+                    <div class="iframe-wrapper">
+                      <iframe
+                        v-if="isPdf" :src="sourceFile" :style="transformStyle" frameborder="0"
+                        class="iframe-full"
+                      />
+                      <el-image
+                        v-if="!isPdf" style="width: 100px; height: 100px" :src="sourceFile" :zoom-rate="1.2"
+                        :max-scale="7" :min-scale="0.2" :preview-src-list="[sourceFile]" show-progress :initial-index="4"
+                        fit="cover"
+                      />
+                    </div>
+                  </template>
+                </el-dialog>
+              </el-card>
+            </el-card>
+          </div>
+
+          <!-- Form -->
+          <div v-show="tab === 'form'">
+            <el-card class="section-card mb-6" shadow="never">
+              <div slot="header" class="section-card__header">
+                <div class="section-card__title">
+                  <i class="el-icon-edit-outline" />
+                  <span>Form</span>
+                </div>
+                <el-button type="default" size="small" @click="printform">
+                  <i class="el-icon-printer" />
+                  Print Form
+                </el-button>
+              </div>
+              <el-card style="max-width: 100%" shadow="never">
+                <div class="form-editor-container">
+                  <div class="form-editor-title-row">
+                    <h3 class="form-editor-title">Form Editor</h3>
+                    <el-button type="primary" size="small" plain icon="el-icon-document" @click="openFormTemplateDialog">
+                      Load template
+                    </el-button>
+                  </div>
+                  <QuillEditor
+                    v-model="form.form_content"
+                    :height="420"
+                    preset="full"
+                    :font-sizes="formEditorFontSizes"
+                    placeholder="Enter form content here..."
+                  />
+                </div>
+              </el-card>
+            </el-card>
+          </div>
 
         </main>
       </div>
 
-    
     </div>
 
     <!-- Mobile Tab Navigation -->
     <div v-if="false && isMobile" class="mobile-tab-navigation">
       <el-select v-model="tab" placeholder="Select Section" style="width: 100%; margin-bottom: 20px;" size="large">
-        <el-option 
-          v-for="tabOption in availableTabs" 
-          :key="tabOption.name" 
-          :label="tabOption.label" 
+        <el-option
+          v-for="tabOption in availableTabs"
+          :key="tabOption.name"
+          :label="tabOption.label"
           :value="tabOption.name"
           :disabled="!tabOption.available"
         >
           <span style="float: left">{{ tabOption.label }}</span>
           <span v-if="tabOption.hasContent" style="float: right; color: #67c23a; font-size: 12px;">
-            <i class="el-icon-check"></i>
+            <i class="el-icon-check" />
           </span>
         </el-option>
       </el-select>
     </div>
 
     <!-- Desktop Tab Navigation -->
-    <el-tabs v-model="tab" type="card" class="modern-tabs" v-if="false && !isMobile">
-      <el-tab-pane name="history" v-if="checkRole(['admin', 'doctor'])">
+    <el-tabs v-if="false && !isMobile" v-model="tab" type="card" class="modern-tabs">
+      <el-tab-pane v-if="checkRole(['admin', 'doctor'])" name="history">
         <template #label>
           <span class="tab-label">
-            <i class="el-icon-document"></i>
+            <i class="el-icon-document" />
             Histories
           </span>
         </template>
@@ -2606,7 +2721,7 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane label="Family History" name="family" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane v-if="checkRole(['admin', 'doctor'])" label="Family History" name="family">
         <div class="block">
           <el-form :inline="true" label-position="top" class="demo-form-inline">
             <el-form-item label="History">
@@ -2622,8 +2737,10 @@
               </el-checkbox-group>
             </el-form-item>
             <el-form-item label="Others">
-              <el-input v-model="profile.fam_others" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
-                :rows="2" type="textarea" placeholder="Please input" />
+              <el-input
+                v-model="profile.fam_others" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please input"
+              />
             </el-form-item>
           </el-form>
           <el-form label-position="top" style="margin-top: 20px;">
@@ -2642,7 +2759,7 @@
           </el-form>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="Social / Environment History" name="soc" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane v-if="checkRole(['admin', 'doctor'])" label="Social / Environment History" name="soc">
         <div class="block">
           <el-form :inline="true" label-position="top" class="demo-form-inline">
             <el-form-item label="History">
@@ -2653,21 +2770,29 @@
                 </el-checkbox-button>
               </el-checkbox-group>
             </el-form-item>
-            <el-form-item label="Smoking Details" v-if="soc.includes('Smoking')">
-              <el-input v-model="profile.smoking_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
-                :rows="2" type="textarea" placeholder="Please provide details about smoking habits" />
+            <el-form-item v-if="soc.includes('Smoking')" label="Smoking Details">
+              <el-input
+                v-model="profile.smoking_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please provide details about smoking habits"
+              />
             </el-form-item>
-            <el-form-item label="Alcoholic Beverage Drinking Details" v-if="soc.includes('Alcoholic Beverage Drinking')">
-              <el-input v-model="profile.alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
-                :rows="2" type="textarea" placeholder="Please provide details about alcoholic beverage drinking habits" />
+            <el-form-item v-if="soc.includes('Alcoholic Beverage Drinking')" label="Alcoholic Beverage Drinking Details">
+              <el-input
+                v-model="profile.alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please provide details about alcoholic beverage drinking habits"
+              />
             </el-form-item>
             <el-form-item label="Others">
-              <el-input v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
-                :rows="2" type="textarea" placeholder="Please input" />
+              <el-input
+                v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please input"
+              />
             </el-form-item>
             <el-form-item label="Vaccinations">
-              <el-input v-model="profile.vaccination_sup" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
-                :rows="2" type="textarea" placeholder="Please input" />
+              <el-input
+                v-model="profile.vaccination_sup" :autosize="{ minRows: 2, maxRows: 4 }" style="width: 540px"
+                :rows="2" type="textarea" placeholder="Please input"
+              />
             </el-form-item>
           </el-form>
         </div>
@@ -2677,48 +2802,60 @@
           <el-form-item label="Secretary's Remarks">
             <el-input v-model="form.nurse_remarks" type="textarea" />
           </el-form-item>
-          <el-form-item label="CC" v-if="checkRole(['admin', 'doctor'])">
+          <el-form-item v-if="checkRole(['admin', 'doctor'])" label="CC">
             <el-input v-model="form.chiefcomplaints" type="textarea" rows="2" />
           </el-form-item>
-          <el-form-item label="History" v-if="checkRole(['admin', 'doctor'])">
+          <el-form-item v-if="checkRole(['admin', 'doctor'])" label="History">
             <el-input v-model="form.history" type="textarea" rows="5" />
           </el-form-item>
         </el-form>
-        <el-form ref="form" :model="form" label-width="120px" class="demo-form-inline"
-          v-if="checkRole(['admin', 'doctor'])">
+        <el-form
+          v-if="checkRole(['admin', 'doctor'])" ref="form" :model="form" label-width="120px"
+          class="demo-form-inline"
+        >
           <el-form-item label="P.E.">
             <div class="pe-template-section">
               <el-row :gutter="20" style="margin-bottom: 15px;">
                 <el-col :span="24">
                   <div class="template-buttons">
-                    <el-button v-for="template in peTemplates" :key="template.id" size="small"
+                    <el-button
+                      v-for="template in peTemplates" :key="template.id" size="small"
                       :type="template.type === 'default' ? 'primary' : 'success'" plain
-                      @click="insertPETemplate(template.content)" class="template-btn">
+                      class="template-btn" @click="insertPETemplate(template.content)"
+                    >
                       {{ template.name }}
-                      <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
-                        circle @click.stop="deleteTemplate(template.id)" class="delete-template-btn"></el-button>
+                      <el-button
+                        v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                        circle class="delete-template-btn" @click.stop="deleteTemplate(template.id)"
+                      />
                     </el-button>
                   </div>
-                  <el-button size="small" type="success" @click="showCustomTemplateDialog = true"
-                    style="margin-left: 10px;">
+                  <el-button
+                    size="small" type="success" style="margin-left: 10px;"
+                    @click="showCustomTemplateDialog = true"
+                  >
                     Custom Template
                   </el-button>
                 </el-col>
               </el-row>
-              <el-input v-model="form.pe" type="textarea" ref="peInput" rows="10" @input="autoResize" />
+              <el-input ref="peInput" v-model="form.pe" type="textarea" rows="10" @input="autoResize" />
             </div>
           </el-form-item>
 
           <!-- Custom Template Dialog -->
-          <el-dialog title="Custom Physical Examination Template" :visible.sync="showCustomTemplateDialog" width="60%"
-            :close-on-click-modal="false">
+          <el-dialog
+            title="Custom Physical Examination Template" :visible.sync="showCustomTemplateDialog" width="60%"
+            :close-on-click-modal="false"
+          >
             <el-form :model="customTemplateForm" label-width="120px">
               <el-form-item label="Template Name">
                 <el-input v-model="customTemplateForm.name" placeholder="Enter template name" />
               </el-form-item>
               <el-form-item label="Template Content">
-                <el-input v-model="customTemplateForm.content" type="textarea" :rows="8"
-                  placeholder="Enter your custom P.E. template content..." />
+                <el-input
+                  v-model="customTemplateForm.content" type="textarea" :rows="8"
+                  placeholder="Enter your custom P.E. template content..."
+                />
               </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -2731,7 +2868,7 @@
             <el-input v-model="form.diagnosis" type="textarea" />
           </el-form-item>
           <el-form-item label="Plans">
-            <el-input v-model="form.remarks" type="textarea" ref="plansInput" rows="10" @input="autoResize" />
+            <el-input ref="plansInput" v-model="form.remarks" type="textarea" rows="10" @input="autoResize" />
           </el-form-item>
           <el-form-item label="Follow Up Date">
             <!-- <el-date-picker
@@ -2740,18 +2877,18 @@
               :clearable="false"
               placeholder="Pick a day"
             /> -->
-            <date-picker v-model="form.followup" valueType="format"></date-picker>
+            <date-picker v-model="form.followup" value-type="format" />
           </el-form-item>
           <!-- <el-form-item label="Email">
             <el-input v-model="form.email" autosize clearable />
           </el-form-item> -->
         </el-form>
       </el-tab-pane>
-      
-      <el-tab-pane name="obgyn" v-if="checkRole(['admin', 'doctor'])">
+
+      <el-tab-pane v-if="checkRole(['admin', 'doctor'])" name="obgyn">
         <template #label>
           <span class="tab-label">
-            <i class="el-icon-female"></i>
+            <i class="el-icon-female" />
             OB-GYN
           </span>
         </template>
@@ -2807,8 +2944,8 @@
                 <h4 class="group-title">Blood Pressure</h4>
                 <div class="vital-inputs">
                   <el-form-item label="Systolic" class="vital-item">
-                    <el-input 
-                      v-model="form.vit_sys" 
+                    <el-input
+                      v-model="form.vit_sys"
                       placeholder="mmHg"
                       size="large"
                       class="vital-input"
@@ -2817,8 +2954,8 @@
                     </el-input>
                   </el-form-item>
                   <el-form-item label="Diastolic" class="vital-item">
-                    <el-input 
-                      v-model="form.vit_dia" 
+                    <el-input
+                      v-model="form.vit_dia"
                       placeholder="mmHg"
                       size="large"
                       class="vital-input"
@@ -2828,13 +2965,13 @@
                   </el-form-item>
                 </div>
               </div>
-              
+
               <div class="vital-group">
                 <h4 class="group-title">Body Measurements</h4>
                 <div class="vital-inputs">
                   <el-form-item label="Weight" class="vital-item">
-                    <el-input 
-                      v-model="form.weight" 
+                    <el-input
+                      v-model="form.weight"
                       placeholder="kg"
                       size="large"
                       class="vital-input"
@@ -2843,8 +2980,8 @@
                     </el-input>
                   </el-form-item>
                   <el-form-item label="Height" class="vital-item">
-                    <el-input 
-                      v-model="form.height" 
+                    <el-input
+                      v-model="form.height"
                       placeholder="cm"
                       size="large"
                       class="vital-input"
@@ -2853,8 +2990,8 @@
                     </el-input>
                   </el-form-item>
                   <el-form-item label="BMI" class="vital-item">
-                    <el-input 
-                      v-model="form.bmi" 
+                    <el-input
+                      v-model="form.bmi"
                       placeholder="Auto-calculated"
                       size="large"
                       class="vital-input"
@@ -2865,13 +3002,13 @@
                   </el-form-item>
                 </div>
               </div>
-              
+
               <div class="vital-group">
                 <h4 class="group-title">Vital Signs</h4>
                 <div class="vital-inputs">
                   <el-form-item label="Temperature" class="vital-item">
-                    <el-input 
-                      v-model="form.vit_temp" 
+                    <el-input
+                      v-model="form.vit_temp"
                       placeholder="°C"
                       size="large"
                       class="vital-input"
@@ -2880,8 +3017,8 @@
                     </el-input>
                   </el-form-item>
                   <el-form-item label="Heart Rate" class="vital-item">
-                    <el-input 
-                      v-model="form.vit_cr" 
+                    <el-input
+                      v-model="form.vit_cr"
                       placeholder="bpm"
                       size="large"
                       class="vital-input"
@@ -2890,8 +3027,8 @@
                     </el-input>
                   </el-form-item>
                   <el-form-item label="Respiratory Rate" class="vital-item">
-                    <el-input 
-                      v-model="form.vit_rr" 
+                    <el-input
+                      v-model="form.vit_rr"
                       placeholder="rpm"
                       size="large"
                       class="vital-input"
@@ -2902,11 +3039,11 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="vitals-actions">
-              <el-button 
-                v-role="['secretary', 'admin']" 
-                type="primary" 
+              <el-button
+                v-role="['secretary', 'admin']"
+                type="primary"
                 size="large"
                 icon="el-icon-check"
                 @click="upDateBP()"
@@ -2919,7 +3056,7 @@
         </el-card>
       </el-tab-pane> -->
 
-      <el-tab-pane label="Vitals" name="second" v-if="checkRole(['admin','secretary','doctor'])">
+      <el-tab-pane v-if="checkRole(['admin','secretary','doctor'])" label="Vitals" name="second">
         <el-card style="max-width: 100%">
           <el-form :inline="true" label-position="top" class="demo-form-inline">
             <el-form-item label="Systolic">
@@ -2950,18 +3087,17 @@
               <el-input v-model="form.o2_stat" clearable />
             </el-form-item>
             <el-form-item v-role="['secretary', 'admin']" label="">
-              <br />
+              <br>
               <el-button type="primary" @click="upDateBP()">Update</el-button>
             </el-form-item>
           </el-form>
         </el-card>
       </el-tab-pane>
 
-
-      <el-tab-pane name="fourth" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane v-if="checkRole(['admin', 'doctor'])" name="fourth">
         <template #label>
           <span class="tab-label">
-            <i class="el-icon-medicine"></i>
+            <i class="el-icon-medicine" />
             Medicines
           </span>
         </template>
@@ -3130,27 +3266,33 @@
               <el-table-column prop="remarks" label="Remarks" width="150" show-overflow-tooltip />
               <el-table-column align="center" label="Actions" width="180">
                 <template slot-scope="scope">
-                  <el-button v-role="['doctor', 'admin']" type="primary" size="mini" icon="el-icon-edit"
-                    @click="editMed(scope.row)"></el-button>
-                  <el-button v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
-                    type="warning" size="mini" icon="el-icon-close" @click="cancelEdit()"></el-button>
-                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
-                    @click="deleteMed(scope.row.id)"></el-button>
+                  <el-button
+                    v-role="['doctor', 'admin']" type="primary" size="mini" icon="el-icon-edit"
+                    @click="editMed(scope.row)"
+                  />
+                  <el-button
+                    v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
+                    type="warning" size="mini" icon="el-icon-close" @click="cancelEdit()"
+                  />
+                  <el-button
+                    v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
+                    @click="deleteMed(scope.row.id)"
+                  />
                 </template>
               </el-table-column>
             </el-table>
           </el-row>
           <el-form label-position="top" style="margin-top: 16px;">
             <el-form-item label="Follow Up Date">
-              <date-picker v-model="form.followup" valueType="format"></date-picker>
+              <date-picker v-model="form.followup" value-type="format" />
             </el-form-item>
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane name="fifth" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane v-if="checkRole(['admin', 'doctor'])" name="fifth">
         <template #label>
           <span class="tab-label">
-            <i class="el-icon-data-analysis"></i>
+            <i class="el-icon-data-analysis" />
             Diagnostics
           </span>
         </template>
@@ -3257,9 +3399,9 @@
               </el-form-item>
             </el-form>
           </el-row>
-          <br />
-          <br />
-          <br />
+          <br>
+          <br>
+          <br>
           <el-button type="primary" @click="viewDiagnosticsTbl = true">View Diagnostics</el-button>
           <el-button v-role="['doctor', 'admin']" type="warning" plain @click="openDxTemplateDialog">
             Load template
@@ -3288,8 +3430,8 @@
           <el-row :gutter="20">
             <el-table
               ref="dxTable"
-              row-key="id"
               :key="'dx-table-tab-' + activeDiagnosticGroupId"
+              row-key="id"
               :data="activeDiagnosticList"
               style="width: 100%"
               class="compact-table dx-table"
@@ -3312,8 +3454,10 @@
               <el-table-column prop="remarks" label="Remarks" />
               <el-table-column align="center" label="Actions" width="350">
                 <template slot-scope="scope">
-                  <el-button v-role="['doctor', 'admin']" type="danger" size="small" icon="el-icon-delete"
-                    @click="removeProcedure(scope.row.id)">
+                  <el-button
+                    v-role="['doctor', 'admin']" type="danger" size="small" icon="el-icon-delete"
+                    @click="removeProcedure(scope.row.id)"
+                  >
                     Delete
                   </el-button>
                 </template>
@@ -3325,21 +3469,21 @@
       </el-tab-pane>
       <el-tab-pane name="sixth"">
         <span slot="label" class="tab-label">
-          <i class="el-icon-service"></i>
+          <i class="el-icon-service" />
           Services
         </span>
         <div class="tab-content">
           <el-card class="services-card">
             <div slot="header" class="section-header">
-              <i class="el-icon-service"></i>
+              <i class="el-icon-service" />
               <span>Services & Billing</span>
               <div class="header-actions">
                 <el-button type="default" size="small" @click="printfees">
-                  <i class="el-icon-printer"></i>
+                  <i class="el-icon-printer" />
                   Print Fees
                 </el-button>
                 <el-button type="primary" size="small" @click="viewServicesTbl = true">
-                  <i class="el-icon-plus"></i>
+                  <i class="el-icon-plus" />
                   Add Services
                 </el-button>
               </div>
@@ -3358,11 +3502,11 @@
             </div>
 
             <div class="services-list-section">
-              <el-table :data="services_list" class="enhanced-table" v-if="services_list.length > 0">
+              <el-table v-if="services_list.length > 0" :data="services_list" class="enhanced-table">
                 <el-table-column prop="service" label="Service" min-width="200">
                   <template slot-scope="scope">
                     <div class="service-cell">
-                      <i class="el-icon-service"></i>
+                      <i class="el-icon-service" />
                       <span>{{ scope.row.service }}</span>
                     </div>
                   </template>
@@ -3378,8 +3522,10 @@
                       @click="editService(scope.row.id)" class="edit-btn">
                       Edit
                     </el-button> -->
-                    <el-button v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
-                      @click="removeService(scope.row.id)" class="delete-btn">
+                    <el-button
+                      v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
+                      class="delete-btn" @click="removeService(scope.row.id)"
+                    >
                       Delete
                     </el-button>
                   </template>
@@ -3387,7 +3533,7 @@
               </el-table>
 
               <div v-else class="empty-state">
-                <i class="el-icon-service"></i>
+                <i class="el-icon-service" />
                 <p>No services added yet</p>
                 <p class="empty-subtitle">Click "Add Services" to add procedures</p>
               </div>
@@ -3395,10 +3541,10 @@
           </el-card>
         </div>
       </el-tab-pane>
-      <el-tab-pane name="medcert" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane v-if="checkRole(['admin', 'doctor'])" name="medcert">
         <template #label>
           <span class="tab-label">
-            <i class="el-icon-document-copy"></i>
+            <i class="el-icon-document-copy" />
             Med Cert
           </span>
         </template>
@@ -3413,7 +3559,7 @@
                       :clearable="false"
                       placeholder="Pick a day"
                     />   -->
-                  <date-picker v-model="form.medcert_undersigned" valueType="format"></date-picker>
+                  <date-picker v-model="form.medcert_undersigned" value-type="format" />
                 </el-form-item>
               </el-col>
               <el-col :span="9">
@@ -3428,16 +3574,22 @@
                     <el-row :gutter="20" style="margin-bottom: 15px;">
                       <el-col :span="24">
                         <div class="template-buttons">
-                          <el-button v-for="template in medcertRemarksTemplates" :key="template.id" size="small"
+                          <el-button
+                            v-for="template in medcertRemarksTemplates" :key="template.id" size="small"
                             :type="template.type === 'default' ? 'primary' : 'success'" plain
-                            @click="insertMedcertRemarksTemplate(template.content)" class="template-btn">
+                            class="template-btn" @click="insertMedcertRemarksTemplate(template.content)"
+                          >
                             {{ template.name }}
-                            <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
-                              circle @click.stop="deleteMedcertRemarksTemplate(template.id)" class="delete-template-btn"></el-button>
+                            <el-button
+                              v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                              circle class="delete-template-btn" @click.stop="deleteMedcertRemarksTemplate(template.id)"
+                            />
                           </el-button>
                         </div>
-                        <el-button size="small" type="success" @click="showMedcertRemarksCustomTemplateDialog = true"
-                          style="margin-left: 10px;">
+                        <el-button
+                          size="small" type="success" style="margin-left: 10px;"
+                          @click="showMedcertRemarksCustomTemplateDialog = true"
+                        >
                           Custom Template
                         </el-button>
                       </el-col>
@@ -3450,10 +3602,10 @@
           </el-form>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane name="referral" v-if="checkRole(['admin', 'doctor'])">
+      <el-tab-pane v-if="checkRole(['admin', 'doctor'])" name="referral">
         <template #label>
           <span class="tab-label">
-            <i class="el-icon-s-promotion"></i>
+            <i class="el-icon-s-promotion" />
             Referral
           </span>
         </template>
@@ -3474,7 +3626,7 @@
               </el-col>
               <el-col :span="4">
                 <el-form-item label="Undersigned Date">
-                  <date-picker v-model="form.referral_undersigned" valueType="format"></date-picker>
+                  <date-picker v-model="form.referral_undersigned" value-type="format" />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -3501,24 +3653,26 @@
       <el-tab-pane name="attachments">
         <template #label>
           <span class="tab-label">
-            <i class="el-icon-paperclip"></i>
+            <i class="el-icon-paperclip" />
             Attachments
           </span>
         </template>
         <div class="mb-4">
           <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange" :disabled="isUploading">
             <template #trigger>
-              <el-button ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
-                :on-change="handleChange" :disabled="isUploading">Select attachments</el-button>
+              <el-button
+                ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
+                :on-change="handleChange" :disabled="isUploading"
+              >Select attachments</el-button>
             </template>
-            <el-button size="small" type="primary" @click="submitUpload" :loading="isUploading" :disabled="isUploading">
+            <el-button size="small" type="primary" :loading="isUploading" :disabled="isUploading" @click="submitUpload">
               {{ isUploading ? 'Uploading...' : 'Submit' }}
             </el-button>
           </el-upload>
-          
+
           <!-- Upload Progress -->
           <div v-if="isUploading" class="mt-3">
-            <el-progress :percentage="uploadProgress" :status="uploadProgress === 100 ? 'success' : ''"></el-progress>
+            <el-progress :percentage="uploadProgress" :status="uploadProgress === 100 ? 'success' : ''" />
             <p class="text-sm text-gray-600 mt-2">{{ uploadStatus }}</p>
           </div>
         </div>
@@ -3546,7 +3700,7 @@
                     :initial-index="item.previewIndex"
                   />
                   <div v-else class="att-tile__file" @click="viewFile(item.raw.newfile, item.raw.extension)">
-                    <i class="el-icon-document" style="font-size: 24px;"></i>
+                    <i class="el-icon-document" style="font-size: 24px;" />
                     <div class="att-tile__fileext">{{ (item.raw.extension || '').toUpperCase() }}</div>
                   </div>
                   <el-button
@@ -3573,11 +3727,15 @@
           <el-dialog :visible.sync="viewFileModel" :fullscreen="false" :close-on-click-modal="false">
             <template #default>
               <div class="iframe-wrapper">
-                <iframe v-if="isPdf" :src="sourceFile" :style="transformStyle" frameborder="0"
-                  class="iframe-full"></iframe>
-                <el-image v-if="!isPdf" style="width: 100px; height: 100px" :src="sourceFile" :zoom-rate="1.2"
+                <iframe
+                  v-if="isPdf" :src="sourceFile" :style="transformStyle" frameborder="0"
+                  class="iframe-full"
+                />
+                <el-image
+                  v-if="!isPdf" style="width: 100px; height: 100px" :src="sourceFile" :zoom-rate="1.2"
                   :max-scale="7" :min-scale="0.2" :preview-src-list="[sourceFile]" show-progress :initial-index="4"
-                  fit="cover" />
+                  fit="cover"
+                />
               </div>
             </template>
           </el-dialog>
@@ -3586,7 +3744,7 @@
       <el-tab-pane name="form">
         <template #label>
           <span class="tab-label">
-            <i class="el-icon-edit-outline"></i>
+            <i class="el-icon-edit-outline" />
             Form
           </span>
         </template>
@@ -3687,8 +3845,10 @@
               </el-checkbox-group>
             </el-form-item>
             <el-form-item label="Others">
-              <el-input v-model="profile.fam_others" :autosize="{ minRows: 2, maxRows: 4 }" 
-                type="textarea" placeholder="Please input" />
+              <el-input
+                v-model="profile.fam_others" :autosize="{ minRows: 2, maxRows: 4 }"
+                type="textarea" placeholder="Please input"
+              />
             </el-form-item>
           </el-form>
           <el-form label-position="top" style="margin-top: 20px;">
@@ -3720,19 +3880,19 @@
               </el-checkbox-group>
             </el-form-item>
             <el-form-item label="Smoking Details" v-if="soc.includes('Smoking')">
-              <el-input v-model="profile.smoking_details" :autosize="{ minRows: 2, maxRows: 4 }" 
+              <el-input v-model="profile.smoking_details" :autosize="{ minRows: 2, maxRows: 4 }"
                 type="textarea" placeholder="Please provide details about smoking habits" />
             </el-form-item>
             <el-form-item label="Alcoholic Beverage Drinking Details" v-if="soc.includes('Alcoholic Beverage Drinking')">
-              <el-input v-model="profile.alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }" 
+              <el-input v-model="profile.alcohol_details" :autosize="{ minRows: 2, maxRows: 4 }"
                 type="textarea" placeholder="Please provide details about alcoholic beverage drinking habits" />
             </el-form-item>
             <el-form-item label="Others">
-              <el-input v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }" 
+              <el-input v-model="profile.soc_others" :autosize="{ minRows: 2, maxRows: 4 }"
                 type="textarea" placeholder="Please input" />
             </el-form-item>
             <el-form-item label="Vaccinations">
-              <el-input v-model="profile.vaccination_sup" :autosize="{ minRows: 2, maxRows: 4 }" 
+              <el-input v-model="profile.vaccination_sup" :autosize="{ minRows: 2, maxRows: 4 }"
                 type="textarea" placeholder="Please input" />
             </el-form-item>
           </el-form>
@@ -3746,42 +3906,48 @@
           <el-form-item label="Secretary's Remarks">
             <el-input v-model="form.nurse_remarks" type="textarea" />
           </el-form-item>
-          <el-form-item label="CC" v-if="checkRole(['admin', 'doctor'])">
+          <el-form-item v-if="checkRole(['admin', 'doctor'])" label="CC">
             <el-input v-model="form.chiefcomplaints" type="textarea" rows="2" />
           </el-form-item>
-          <el-form-item label="History" v-if="checkRole(['admin', 'doctor'])">
+          <el-form-item v-if="checkRole(['admin', 'doctor'])" label="History">
             <el-input v-model="form.history" type="textarea" rows="5" />
           </el-form-item>
-          <el-form-item label="P.E." v-if="checkRole(['admin', 'doctor'])">
+          <el-form-item v-if="checkRole(['admin', 'doctor'])" label="P.E.">
             <div class="pe-template-section">
               <el-row :gutter="20" style="margin-bottom: 15px;">
                 <el-col :span="24">
                   <div class="template-buttons">
-                    <el-button v-for="template in peTemplates" :key="template.id" size="small"
+                    <el-button
+                      v-for="template in peTemplates" :key="template.id" size="small"
                       :type="template.type === 'default' ? 'primary' : 'success'" plain
-                      @click="insertPETemplate(template.content)" class="template-btn">
+                      class="template-btn" @click="insertPETemplate(template.content)"
+                    >
                       {{ template.name }}
-                      <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
-                        circle @click.stop="deleteTemplate(template.id)" class="delete-template-btn"></el-button>
+                      <el-button
+                        v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                        circle class="delete-template-btn" @click.stop="deleteTemplate(template.id)"
+                      />
                     </el-button>
                   </div>
-                  <el-button size="small" type="success" @click="showCustomTemplateDialog = true"
-                    style="margin-left: 10px;">
+                  <el-button
+                    size="small" type="success" style="margin-left: 10px;"
+                    @click="showCustomTemplateDialog = true"
+                  >
                     Custom Template
                   </el-button>
                 </el-col>
               </el-row>
-              <el-input v-model="form.pe" type="textarea" ref="peInput" rows="10" @input="autoResize" />
+              <el-input ref="peInput" v-model="form.pe" type="textarea" rows="10" @input="autoResize" />
             </div>
           </el-form-item>
-          <el-form-item label="Diagnosis" v-if="checkRole(['admin', 'doctor'])">
+          <el-form-item v-if="checkRole(['admin', 'doctor'])" label="Diagnosis">
             <el-input v-model="form.diagnosis" type="textarea" />
           </el-form-item>
-          <el-form-item label="Plans" v-if="checkRole(['admin', 'doctor'])">
-            <el-input v-model="form.remarks" type="textarea" ref="plansInput" rows="10" @input="autoResize" />
+          <el-form-item v-if="checkRole(['admin', 'doctor'])" label="Plans">
+            <el-input ref="plansInput" v-model="form.remarks" type="textarea" rows="10" @input="autoResize" />
           </el-form-item>
-          <el-form-item label="Follow Up Date" v-if="checkRole(['admin', 'doctor'])">
-            <date-picker v-model="form.followup" valueType="format"></date-picker>
+          <el-form-item v-if="checkRole(['admin', 'doctor'])" label="Follow Up Date">
+            <date-picker v-model="form.followup" value-type="format" />
           </el-form-item>
         </el-form>
       </div>
@@ -4010,19 +4176,25 @@
               <el-table-column prop="remarks" label="Remarks" min-width="180" show-overflow-tooltip />
               <el-table-column align="center" label="Actions" width="120">
                 <template slot-scope="scope">
-                  <el-button v-role="['doctor', 'admin']" type="primary" size="mini" icon="el-icon-edit"
-                    @click="editMed(scope.row)"></el-button>
-                  <el-button v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
-                    type="warning" size="mini" icon="el-icon-close" @click="cancelEdit()"></el-button>
-                  <el-button v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
-                    @click="deleteMed(scope.row.id)"></el-button>
+                  <el-button
+                    v-role="['doctor', 'admin']" type="primary" size="mini" icon="el-icon-edit"
+                    @click="editMed(scope.row)"
+                  />
+                  <el-button
+                    v-if="isEditMode && editingMedId === scope.row.id" v-role="['doctor', 'admin']"
+                    type="warning" size="mini" icon="el-icon-close" @click="cancelEdit()"
+                  />
+                  <el-button
+                    v-role="['doctor', 'admin']" type="danger" size="mini" icon="el-icon-delete"
+                    @click="deleteMed(scope.row.id)"
+                  />
                 </template>
               </el-table-column>
             </el-table>
           </el-row>
           <el-form label-position="top" style="margin-top: 16px;">
             <el-form-item label="Follow Up Date">
-              <date-picker v-model="form.followup" valueType="format"></date-picker>
+              <date-picker v-model="form.followup" value-type="format" />
             </el-form-item>
           </el-form>
         </el-card>
@@ -4130,7 +4302,7 @@
               </el-form-item>
             </el-form>
           </el-row>
-          <br />
+          <br>
           <el-button type="primary" @click="viewDiagnosticsTbl = true">View Diagnostics</el-button>
           <el-button v-role="['doctor', 'admin']" type="warning" plain @click="openDxTemplateDialog">
             Load template
@@ -4159,8 +4331,8 @@
           <el-row :gutter="20">
             <el-table
               ref="dxTable"
-              row-key="id"
               :key="'dx-table-tab-' + activeDiagnosticGroupId"
+              row-key="id"
               :data="activeDiagnosticList"
               style="width: 100%"
               class="compact-table dx-table"
@@ -4183,8 +4355,10 @@
               <el-table-column prop="remarks" label="Remarks" />
               <el-table-column align="center" label="Actions" width="200">
                 <template slot-scope="scope">
-                  <el-button v-role="['doctor', 'admin']" type="danger" size="small" icon="el-icon-delete"
-                    @click="removeProcedure(scope.row.id)">
+                  <el-button
+                    v-role="['doctor', 'admin']" type="danger" size="small" icon="el-icon-delete"
+                    @click="removeProcedure(scope.row.id)"
+                  >
                     Delete
                   </el-button>
                 </template>
@@ -4203,7 +4377,7 @@
             <el-row :gutter="20">
               <el-col :span="24">
                 <el-form-item label="Undersigned Date">
-                  <date-picker v-model="form.medcert_undersigned" valueType="format"></date-picker>
+                  <date-picker v-model="form.medcert_undersigned" value-type="format" />
                 </el-form-item>
               </el-col>
               <el-col :span="24">
@@ -4218,16 +4392,22 @@
                     <el-row :gutter="20" style="margin-bottom: 15px;">
                       <el-col :span="24">
                         <div class="template-buttons">
-                          <el-button v-for="template in medcertRemarksTemplates" :key="template.id" size="small"
+                          <el-button
+                            v-for="template in medcertRemarksTemplates" :key="template.id" size="small"
                             :type="template.type === 'default' ? 'primary' : 'success'" plain
-                            @click="insertMedcertRemarksTemplate(template.content)" class="template-btn">
+                            class="template-btn" @click="insertMedcertRemarksTemplate(template.content)"
+                          >
                             {{ template.name }}
-                            <el-button v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
-                              circle @click.stop="deleteMedcertRemarksTemplate(template.id)" class="delete-template-btn"></el-button>
+                            <el-button
+                              v-if="template.type === 'custom'" size="mini" type="danger" icon="el-icon-delete"
+                              circle class="delete-template-btn" @click.stop="deleteMedcertRemarksTemplate(template.id)"
+                            />
                           </el-button>
                         </div>
-                        <el-button size="small" type="success" @click="showMedcertRemarksCustomTemplateDialog = true"
-                          style="margin-left: 10px;">
+                        <el-button
+                          size="small" type="success" style="margin-left: 10px;"
+                          @click="showMedcertRemarksCustomTemplateDialog = true"
+                        >
                           Custom Template
                         </el-button>
                       </el-col>
@@ -4264,7 +4444,7 @@
               </el-col>
               <el-col :span="24">
                 <el-form-item label="Undersigned Date">
-                  <date-picker v-model="form.referral_undersigned" valueType="format"></date-picker>
+                  <date-picker v-model="form.referral_undersigned" value-type="format" />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -4333,17 +4513,19 @@
         <div class="mb-4">
           <el-upload ref="uploadRef" action="#" :auto-upload="false" multiple :on-change="handleChange" :disabled="isUploading">
             <template #trigger>
-              <el-button ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
-                :on-change="handleChange" :disabled="isUploading">Select attachments</el-button>
+              <el-button
+                ref="uploadRef" size="small" type="info" action="#" :auto-upload="false" multiple
+                :on-change="handleChange" :disabled="isUploading"
+              >Select attachments</el-button>
             </template>
-            <el-button size="small" type="primary" @click="submitUpload" :loading="isUploading" :disabled="isUploading">
+            <el-button size="small" type="primary" :loading="isUploading" :disabled="isUploading" @click="submitUpload">
               {{ isUploading ? 'Uploading...' : 'Submit' }}
             </el-button>
           </el-upload>
-          
+
           <!-- Upload Progress -->
           <div v-if="isUploading" class="mt-3">
-            <el-progress :percentage="uploadProgress" :status="uploadProgress === 100 ? 'success' : ''"></el-progress>
+            <el-progress :percentage="uploadProgress" :status="uploadProgress === 100 ? 'success' : ''" />
             <p class="text-sm text-gray-600 mt-2">{{ uploadStatus }}</p>
           </div>
         </div>
@@ -4371,7 +4553,7 @@
                     :initial-index="item.previewIndex"
                   />
                   <div v-else class="att-tile__file" @click="viewFile(item.raw.newfile, item.raw.extension)">
-                    <i class="el-icon-document" style="font-size: 24px;"></i>
+                    <i class="el-icon-document" style="font-size: 24px;" />
                     <div class="att-tile__fileext">{{ (item.raw.extension || '').toUpperCase() }}</div>
                   </div>
                   <el-button
@@ -4398,11 +4580,15 @@
           <el-dialog :visible.sync="viewFileModel" :fullscreen="false" :close-on-click-modal="false">
             <template #default>
               <div class="iframe-wrapper">
-                <iframe v-if="isPdf" :src="sourceFile" :style="transformStyle" frameborder="0"
-                  class="iframe-full"></iframe>
-                <el-image v-if="!isPdf" style="width: 100px; height: 100px" :src="sourceFile" :zoom-rate="1.2"
+                <iframe
+                  v-if="isPdf" :src="sourceFile" :style="transformStyle" frameborder="0"
+                  class="iframe-full"
+                />
+                <el-image
+                  v-if="!isPdf" style="width: 100px; height: 100px" :src="sourceFile" :zoom-rate="1.2"
                   :max-scale="7" :min-scale="0.2" :preview-src-list="[sourceFile]" show-progress :initial-index="4"
-                  fit="cover" />
+                  fit="cover"
+                />
               </div>
             </template>
           </el-dialog>
@@ -4412,44 +4598,44 @@
   </div>
 </template>
 <script>
-import role from "@/directive/role/index.js";
-import Patients from "@/api/patients";
-import Medicine from "@/api/medicine";
-import { listPrescriptionDiagnosisTemplates, getPrescriptionDiagnosisTemplate } from "@/api/prescriptionDiagnosisTemplate";
-import { listDiagnosticTemplates, getDiagnosticTemplate } from "@/api/diagnosticTemplate";
-import { listFormTemplates, getFormTemplate, getFormTemplateCategories } from "@/api/formTemplate";
-import { replaceFormTemplatePlaceholders, buildFormTemplateContext } from "@/utils/formTemplatePlaceholders";
+import role from '@/directive/role/index.js';
+import Patients from '@/api/patients';
+import Medicine from '@/api/medicine';
+import { listPrescriptionDiagnosisTemplates, getPrescriptionDiagnosisTemplate } from '@/api/prescriptionDiagnosisTemplate';
+import { listDiagnosticTemplates, getDiagnosticTemplate } from '@/api/diagnosticTemplate';
+import { listFormTemplates, getFormTemplate, getFormTemplateCategories } from '@/api/formTemplate';
+import { replaceFormTemplatePlaceholders, buildFormTemplateContext } from '@/utils/formTemplatePlaceholders';
 import {
   appointmentMealTimingStringsFromFrequency,
   isPositiveMealDoseString,
-} from "@/utils/medicationTemplateTiming";
-import { listFavoriteMedicines, createFavoriteMedicine, updateFavoriteMedicine, deleteFavoriteMedicine } from "@/api/favoriteMedicine";
-import Procedure from "@/api/procedure";
-import Services from "@/api/services";
-import Diagnostics from "@/api/diagnostics";
-import { getPeTemplates, createPeTemplate, deletePeTemplate } from "@/api/peTemplates";
+} from '@/utils/medicationTemplateTiming';
+import { listFavoriteMedicines, createFavoriteMedicine, updateFavoriteMedicine, deleteFavoriteMedicine } from '@/api/favoriteMedicine';
+import Procedure from '@/api/procedure';
+import Services from '@/api/services';
+import Diagnostics from '@/api/diagnostics';
+import { getPeTemplates, createPeTemplate, deletePeTemplate } from '@/api/peTemplates';
 import {
   getDiagnosisTemplates,
   createDiagnosisTemplate,
   deleteDiagnosisTemplate as deleteDiagnosisTemplateApi,
-} from "@/api/diagnosisTemplates";
+} from '@/api/diagnosisTemplates';
 import {
   getPlansTemplates,
   createPlansTemplate,
   deletePlansTemplate as deletePlansTemplateApi,
-} from "@/api/plansTemplates";
+} from '@/api/plansTemplates';
 import {
   getMedcertRemarksTemplates,
   createMedcertRemarksTemplate,
   deleteMedcertRemarksTemplate as deleteMedcertRemarksTemplateApi,
-} from "@/api/medcertRemarksTemplates";
-import moment from "moment-timezone";
-import debounce from "lodash/debounce";
-import checkRole from "@/utils/role"; // Role checking
-import DatePicker from "vue2-datepicker";
-import heic2any from "heic2any";
-import QuillEditor from "@/components/QuillEditor";
-import Sortable from "sortablejs";
+} from '@/api/medcertRemarksTemplates';
+import moment from 'moment-timezone';
+import debounce from 'lodash/debounce';
+import checkRole from '@/utils/role'; // Role checking
+import DatePicker from 'vue2-datepicker';
+import heic2any from 'heic2any';
+import QuillEditor from '@/components/QuillEditor';
+import Sortable from 'sortablejs';
 
 const FORM_EDITOR_FONT_SIZES = [
   '8px', '9px', '10px', '11px', '12px', '14px', '16px', '18px', '20px', '24px',
@@ -4471,7 +4657,7 @@ export default {
       viewFileModel: false,
       sourceFile: null,
       pageloading: true,
-      appointment_dt: "",
+      appointment_dt: '',
       vitalsDiaglog: false,
       vitals_records: [],
       vitals_today: [],
@@ -4479,8 +4665,8 @@ export default {
       showTodayVitalsMore: false,
       showVitalsTabMore: false,
       sharePdfDialogVisible: false,
-      sharePdfDoc: "rx",
-      sharePdfLink: "",
+      sharePdfDoc: 'rx',
+      sharePdfLink: '',
       selectedOldRecords: {},
       oldRecordsdialogVisible: false,
       historyDiaglog: false,
@@ -4502,8 +4688,8 @@ export default {
       formTemplateApplyLoading: false,
       formTemplateList: [],
       formTemplateCategoryOptions: [],
-      formTemplateFilterCategory: "",
-      formTemplateSearchKeyword: "",
+      formTemplateFilterCategory: '',
+      formTemplateSearchKeyword: '',
       formTemplateSelectId: null,
       formTemplateRecent: [],
       formEditorFontSizes: FORM_EDITOR_FONT_SIZES,
@@ -4511,7 +4697,7 @@ export default {
       rxPastLoading: false,
       rxPastUseLoading: false,
       rxPastRows: [],
-      rxPastSearch: "",
+      rxPastSearch: '',
       rxFavoriteMedicines: [],
       rxFavoritesDialogVisible: false,
       rxFavoritesApplyLoading: false,
@@ -4530,9 +4716,9 @@ export default {
       rxFavoriteEditSaving: false,
       rxFavoriteEditForm: {
         id: null,
-        drug_name: "",
-        default_qty: "",
-        default_remarks: "",
+        drug_name: '',
+        default_qty: '',
+        default_remarks: '',
       },
       dialogVisible: false,
       isMobile: false,
@@ -4549,7 +4735,7 @@ export default {
       fam: [],
       soc: [],
       loading: true,
-      tab: "first",
+      tab: 'first',
       rx_list: [],
       prescription_groups: [],
       activePrescriptionGroupId: null,
@@ -4576,164 +4762,164 @@ export default {
         lab_others: null,
         smoking_details: '',
         alcohol_details: '',
-        fasting_mode: "",
+        fasting_mode: '',
         sendXrayToEmail: false,
-        email: "",
-        prev_admission: "",
-        prev_surgeries: "",
-        allergies: "",
-        asthma: "",
-        hypertension: "",
-        tb: "",
-        seizure: "",
-        diabetes: "",
-        copd: "",
-        pmh_others: "",
-        clearance_remarks: "",
-        history: "",
-        pmr: "",
-        pe: "",
-        diagnosis: "",
-        nurse_remarks: "",
-        form_content: "",
-        plan: "",
+        email: '',
+        prev_admission: '',
+        prev_surgeries: '',
+        allergies: '',
+        asthma: '',
+        hypertension: '',
+        tb: '',
+        seizure: '',
+        diabetes: '',
+        copd: '',
+        pmh_others: '',
+        clearance_remarks: '',
+        history: '',
+        pmr: '',
+        pe: '',
+        diagnosis: '',
+        nurse_remarks: '',
+        form_content: '',
+        plan: '',
         height: null,
         bmi: null,
         discount: 0,
-        medcert_diagnosis: "",
-        medcert_remarks: "",
+        medcert_diagnosis: '',
+        medcert_remarks: '',
         medcert_undersigned: null,
-        diagnostics_remarks: "",
-        lab_remarks: "",
-        ancillary_remarks: "",
+        diagnostics_remarks: '',
+        lab_remarks: '',
+        ancillary_remarks: '',
         followup: null,
         medcert_opt1: false,
         medcert_opt2: false,
         medcert_opt3: false,
         medcert_opt4: false,
-        medcert_opt1_text1: "",
-        medcert_opt4_text1: "",
-        medcert_opt4_text2: "",
-        medcert_opt4_text3: "",
-        remarks: "",
+        medcert_opt1_text1: '',
+        medcert_opt4_text1: '',
+        medcert_opt4_text2: '',
+        medcert_opt4_text3: '',
+        remarks: '',
         medsArr: [
           {
-            qty: "",
-            bf_b: "",
-            bf_a: "",
-            l_a: "",
-            l_b: "",
-            s_b: "",
-            s_a: "",
-            bt: "",
-            meds: "",
-            id: "",
-            remarks: "",
+            qty: '',
+            bf_b: '',
+            bf_a: '',
+            l_a: '',
+            l_b: '',
+            s_b: '',
+            s_a: '',
+            bt: '',
+            meds: '',
+            id: '',
+            remarks: '',
           },
         ],
         procedures: [
           {
-            procedure: "",
+            procedure: '',
             id: 0,
-            remarks: "",
+            remarks: '',
             type: 0,
           },
         ],
         services: [
           {
-            service: "",
+            service: '',
             id: 0,
             fee: 0,
             discount: 0,
           },
         ],
         id: this.$route.params.id,
-        cc: "",
-        obmens: "",
-        ob_g: "",
-        ob_p: "",
-        ob_tpal: "",
-        ob_remarks: "",
-        mens_m: "",
-        mens_i: "",
-        mens_d: "",
-        mens_a: "",
-        mens_s: "",
-        mens_menu: "",
-        hpi: "",
-        sig_labs: "",
-        pmhx: "",
-        recommendations: "",
-        findings: "",
-        vit_sys: "",
-        vit_dia: "",
+        cc: '',
+        obmens: '',
+        ob_g: '',
+        ob_p: '',
+        ob_tpal: '',
+        ob_remarks: '',
+        mens_m: '',
+        mens_i: '',
+        mens_d: '',
+        mens_a: '',
+        mens_s: '',
+        mens_menu: '',
+        hpi: '',
+        sig_labs: '',
+        pmhx: '',
+        recommendations: '',
+        findings: '',
+        vit_sys: '',
+        vit_dia: '',
         weight: null,
-        vit_temp: "",
-        vit_cr: "",
-        vit_rr: "",
-        pe_head: "",
-        pe_ear: "",
-        pe_eyes: "",
-        pe_nose: "",
-        pe_throat: "",
-        pe_breast: "",
-        pe_chest: "",
-        pe_heart: "",
-        pe_abdomen: "",
-        pe_genito: "",
-        pe_extremities: "",
-        pe_review: "",
-        pe_pq1: "",
-        pe_pq2: "",
-        pe_pq3: "",
-        pe_pq4: "",
-        pe_pq5: "",
-        pe_pq6: "",
-        pe_pq7: "",
-        pe_pq8: "",
-        pe_pq9: "",
-        pe_ext: "",
-        pe_cer: "",
-        pe_uterus: "",
-        pe_adnexa: "",
-        pe_dish: "",
+        vit_temp: '',
+        vit_cr: '',
+        vit_rr: '',
+        pe_head: '',
+        pe_ear: '',
+        pe_eyes: '',
+        pe_nose: '',
+        pe_throat: '',
+        pe_breast: '',
+        pe_chest: '',
+        pe_heart: '',
+        pe_abdomen: '',
+        pe_genito: '',
+        pe_extremities: '',
+        pe_review: '',
+        pe_pq1: '',
+        pe_pq2: '',
+        pe_pq3: '',
+        pe_pq4: '',
+        pe_pq5: '',
+        pe_pq6: '',
+        pe_pq7: '',
+        pe_pq8: '',
+        pe_pq9: '',
+        pe_ext: '',
+        pe_cer: '',
+        pe_uterus: '',
+        pe_adnexa: '',
+        pe_dish: '',
         withs2: false,
-        pregnancy: "",
-        lmp: "",
-        contraceptive_use: "",
-        menopause: "",
-        mother_details: "",
-        father_details: "",
+        pregnancy: '',
+        lmp: '',
+        contraceptive_use: '',
+        menopause: '',
+        mother_details: '',
+        father_details: '',
       },
       medsArr: {
         custom_meds: false,
-        qty: "",
-        bf_b: "",
-        bf_a: "",
-        l_a: "",
-        l_b: "",
-        s_b: "",
-        s_a: "",
-        bt: "",
-        meds: "",
+        qty: '',
+        bf_b: '',
+        bf_a: '',
+        l_a: '',
+        l_b: '',
+        s_b: '',
+        s_a: '',
+        bt: '',
+        meds: '',
         med_id: 0,
         id: this.$route.params.id,
-        remarks: "",
-        custom_generic: "",
-        custom_brand: "",
-        custom_dosage: "",
+        remarks: '',
+        custom_generic: '',
+        custom_brand: '',
+        custom_dosage: '',
       },
       isEditMode: false,
       editingMedId: null,
       procedure: {
-        procedure: "",
+        procedure: '',
         procedure_id: 0,
         id: this.$route.params.id,
-        remarks: "",
+        remarks: '',
         type: 0,
       },
       service: {
-        service: "",
+        service: '',
         // service_selected: [],
         id: this.$route.params.id,
         fee: 0,
@@ -4746,19 +4932,19 @@ export default {
         amount: 0,
       },
       form_att: {
-        patientid: "",
-        file: "",
+        patientid: '',
+        file: '',
       },
       form_cancel: {
         id: this.$route.params.id,
-        cancel_reason: "",
+        cancel_reason: '',
       },
       selectedImage: {},
       attachments: [],
       patientid_id: 0,
       rules: {
         cancel_reason: [
-          { required: true, message: "Please provide reason", trigger: "blur" },
+          { required: true, message: 'Please provide reason', trigger: 'blur' },
         ],
       },
       getAllServicesOffered: [],
@@ -4799,48 +4985,354 @@ export default {
       getAllDiagnosticsOfferedMirco: [],
       getAllDiagnosticsOfferedCrystal: [],
       getAllDiagnosticsOfferedMicroscopy: [],
-      lab_micro_remarks: "",
-      xray_remarks: "",
+      lab_micro_remarks: '',
+      xray_remarks: '',
       synovialFluidExtraOptions: [],
       synovialFluidOptions: [
-        { label: "cell count and differential count", procedureName: "Cell Count and Differential Count" },
-        { label: "gram stain", procedureName: "Gram Stain " },
-        { label: "culture and sensitivity", procedureName: "Culture and Sensitivity " },
-        { label: "crystal analysis", procedureName: "Crystal Analysis" }
+        { label: 'cell count and differential count', procedureName: 'Cell Count and Differential Count' },
+        { label: 'gram stain', procedureName: 'Gram Stain ' },
+        { label: 'culture and sensitivity', procedureName: 'Culture and Sensitivity ' },
+        { label: 'crystal analysis', procedureName: 'Crystal Analysis' },
       ],
 
       // Physical Examination Templates
       showCustomTemplateDialog: false,
       peTemplates: [],
       customTemplateForm: {
-        name: "",
-        content: ""
+        name: '',
+        content: '',
       },
 
       // Diagnosis Templates
       showDiagnosisCustomTemplateDialog: false,
       diagnosisTemplates: [],
       diagnosisCustomTemplateForm: {
-        name: "",
-        content: ""
+        name: '',
+        content: '',
       },
 
       // Plans Templates
       showPlansCustomTemplateDialog: false,
       plansTemplates: [],
       plansCustomTemplateForm: {
-        name: "",
-        content: ""
+        name: '',
+        content: '',
       },
 
       // Med Cert Remarks Templates
       showMedcertRemarksCustomTemplateDialog: false,
       medcertRemarksTemplates: [],
       medcertRemarksCustomTemplateForm: {
-        name: "",
-        content: ""
+        name: '',
+        content: '',
       },
     };
+  },
+  computed: {
+    pinnedToolbarStyle() {
+      if (!this.toolbarPinned) {
+        return {};
+      }
+      return {
+        left: `${this.pinnedToolbarLeft}px`,
+        width: `${this.pinnedToolbarWidth}px`,
+      };
+    },
+    hasPatientProfileLink() {
+      return !!(this.profile && this.profile.id && this.patientid_id);
+    },
+    patientProfilePath() {
+      if (!this.hasPatientProfileLink) {
+        return '';
+      }
+      return `/masterfile/profile/${this.profile.id}/${this.patientid_id}`;
+    },
+    currentVisitSnapshot() {
+      return {
+        form: this.form,
+        rx_list: this.rx_list,
+        prescription_groups: this.prescription_groups,
+        diagnostic_list: this.diagnostic_list,
+        diagnostic_groups: this.diagnostic_groups,
+        services_list: this.services_list,
+      };
+    },
+    compareColumns() {
+      return [
+        {
+          key: 'current',
+          title: 'Current visit',
+          subtitle: this.appointment_dt || '',
+          snapshot: this.currentVisitSnapshot,
+          loading: false,
+        },
+        {
+          key: 'previous',
+          title: 'Previous visit',
+          subtitle: this.compareSelectedVisitLabel,
+          snapshot: this.compareData,
+          loading: this.compareLoading,
+        },
+      ];
+    },
+    compareSelectedVisitLabel() {
+      const match = (this.comparePastVisits || []).find(
+        (v) => String(v.id) === String(this.compareSelectedId)
+      );
+      if (!match) {
+        return '';
+      }
+      return match.cf ? `${match.date} - ${match.cf}` : match.date;
+    },
+    activeRxList() {
+      const gid = this.activePrescriptionGroupId
+        ? Number(this.activePrescriptionGroupId)
+        : null;
+      if (!gid) {
+        return this.rx_list || [];
+      }
+      return (this.rx_list || []).filter(
+        (r) => Number(r.prescription_group_id) === gid
+      );
+    },
+    activePrescriptionGroup() {
+      const gid = this.activePrescriptionGroupId
+        ? Number(this.activePrescriptionGroupId)
+        : null;
+      return (this.prescription_groups || []).find((g) => g.id === gid) || null;
+    },
+    activeDiagnosticList() {
+      const gid = this.activeDiagnosticGroupId
+        ? Number(this.activeDiagnosticGroupId)
+        : null;
+      if (!gid) {
+        return this.diagnostic_list || [];
+      }
+      return (this.diagnostic_list || []).filter(
+        (r) => Number(r.diagnostic_group_id) === gid
+      );
+    },
+    activeDiagnosticGroup() {
+      const gid = this.activeDiagnosticGroupId
+        ? Number(this.activeDiagnosticGroupId)
+        : null;
+      return (this.diagnostic_groups || []).find((g) => g.id === gid) || null;
+    },
+    transformStyle() {
+      return {
+        transform: `rotate(${this.rotation}deg)`,
+        transformOrigin: 'center center',
+        display: 'inline-block',
+      };
+    },
+    isSynovialFluidSelected() {
+      // Check if "synovial fluid" is selected (case-insensitive)
+      return this.diagnosticsRenderedModel.some(item =>
+        item && item.toLowerCase().includes('synovial fluid')
+      );
+    },
+    hasFilteredDiagnostics() {
+      const lists = [
+        this.getAllDiagnosticsOfferedChem,
+        this.getAllDiagnosticsOfferedHema,
+        this.getAllDiagnosticsOfferedMicroscopy,
+        this.getAllDiagnosticsOfferedXray,
+        this.getAllDiagnosticsOfferedUtz,
+        this.getAllDiagnosticsOfferedImmonulogy,
+        this.getAllDiagnosticsOfferedMirco,
+        this.getAllDiagnosticsOfferedCt,
+        this.getAllDiagnosticsOfferedMri,
+        this.getAllDiagnosticsOfferedOth,
+        this.getAllDiagnosticsOfferedCrystal,
+      ];
+      return lists.some((list) => this.filterDiagnosticsList(list).length > 0);
+    },
+    availableTabs() {
+      const tabs = [
+        {
+          name: 'history',
+          label: 'Histories',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasHistoryContent(),
+        },
+        {
+          name: 'family',
+          label: 'Family History',
+          available: false,
+          hasContent: this.hasFamilyContent(),
+        },
+        {
+          name: 'soc',
+          label: 'Social/Environment History',
+          available: false,
+          hasContent: this.hasSocialContent(),
+        },
+        {
+          name: 'first',
+          label: 'Diagnosis',
+          available: true,
+          hasContent: this.hasDiagnosisContent(),
+        },
+        {
+          name: 'second',
+          label: 'Vitals',
+          available: true,
+          hasContent: this.hasVitalsContent(),
+        },
+        {
+          name: 'fourth',
+          label: 'Medicines',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.rx_list && this.rx_list.length > 0,
+        },
+        {
+          name: 'fifth',
+          label: 'Diagnostics',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.diagnostic_list && this.diagnostic_list.length > 0 ||
+            (this.diagnostic_groups || []).some((g) =>
+              (g.lab_remarks || g.findings || g.notes || g.recommendations)
+            ),
+        },
+        {
+          name: 'sixth',
+          label: 'Services & Billing',
+          available: true,
+          hasContent: this.services_list && this.services_list.length > 0,
+        },
+        {
+          name: 'medcert',
+          label: 'Medical Certificate',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasMedCertContent(),
+        },
+        {
+          name: 'referral',
+          label: 'Referral',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasReferralContent(),
+        },
+        {
+          name: 'obgyn',
+          label: 'Obstetric and Gynecologic History',
+          available: this.checkRole(['admin', 'doctor']),
+          hasContent: this.hasObgynContent(),
+        },
+        {
+          name: 'attachments',
+          label: 'Attachments',
+          available: true,
+          hasContent: this.attachments && this.attachments.length > 0,
+        },
+        {
+          name: 'form',
+          label: 'Form',
+          available: true,
+          hasContent: !!this.form.form_content,
+        },
+      ];
+      return tabs.filter(tab => tab.available);
+    },
+    attachmentGroups() {
+      const input = Array.isArray(this.attachments) ? this.attachments : [];
+      const imageExts = new Set(['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic']);
+
+      const parsed = input.map((att) => {
+        const rawDate = att && (att.created_dt || att.created_at || att.date);
+        const m = rawDate ? moment(rawDate) : null;
+        const isValid = !!(m && m.isValid());
+        const key = isValid ? m.format('YYYY-MM') : 'unknown';
+        const label = isValid ? m.format('MMMM YYYY') : 'Unknown date';
+        const ext = (att && att.extension ? String(att.extension) : '').toLowerCase();
+        const isImage = imageExts.has(ext);
+        return { att, key, label, sortTs: isValid ? m.valueOf() : -Infinity, isImage };
+      });
+
+      parsed.sort((a, b) => {
+        if (a.key === 'unknown' && b.key !== 'unknown') {
+          return 1;
+        }
+        if (b.key === 'unknown' && a.key !== 'unknown') {
+          return -1;
+        }
+        return b.sortTs - a.sortTs;
+      });
+
+      const groupsByKey = new Map();
+      for (const row of parsed) {
+        if (!groupsByKey.has(row.key)) {
+          groupsByKey.set(row.key, { key: row.key, label: row.label, _rows: [] });
+        }
+        groupsByKey.get(row.key)._rows.push(row);
+      }
+
+      const groups = Array.from(groupsByKey.values());
+      groups.sort((a, b) => {
+        if (a.key === 'unknown' && b.key !== 'unknown') {
+          return 1;
+        }
+        if (b.key === 'unknown' && a.key !== 'unknown') {
+          return -1;
+        }
+        return a.key < b.key ? 1 : a.key > b.key ? -1 : 0;
+      });
+
+      return groups.map((g) => {
+        const previewList = g._rows.filter(r => r.isImage).map(r => r.att.newfile);
+        let imgIdx = 0;
+        const items = g._rows.map((r) => {
+          const previewIndex = r.isImage ? imgIdx++ : -1;
+          return {
+            raw: r.att,
+            isImage: r.isImage,
+            src: r.att.newfile,
+            previewIndex,
+          };
+        });
+        return { key: g.key, label: g.label, previewList, items };
+      });
+    },
+    rxPastFilteredRows() {
+      const q = (this.rxPastSearch || '').trim().toLowerCase();
+      const rows = Array.isArray(this.rxPastRows) ? this.rxPastRows : [];
+      if (!q) {
+        return rows;
+      }
+      return rows.filter((row) => {
+        const dateStr = this.formatPastRxDate(row.appointment_dt).toLowerCase();
+        const dx = (row.diagnosis || '').toLowerCase();
+        const meds = (row.medications || [])
+          .map((m) => this.medicationLineLabel(m).toLowerCase())
+          .join(' ');
+        return dateStr.includes(q) || dx.includes(q) || meds.includes(q);
+      });
+    },
+    latestTodayVitals() {
+      if (this.vitals_today && this.vitals_today.length > 0) {
+        return this.vitals_today[0];
+      }
+      return {
+        vit_sys: this.form.vit_sys,
+        vit_dia: this.form.vit_dia,
+        weight: this.form.weight,
+        height: this.form.height,
+        bmi: this.form.bmi,
+        vit_temp: this.form.vit_temp,
+        vit_cr: this.form.vit_cr,
+        vit_rr: this.form.vit_rr,
+        o2_stat: this.form.o2_stat,
+        time_display: '',
+      };
+    },
+    otherTodayVitals() {
+      return (this.vitals_today || []).slice(1);
+    },
+    hasMoreTodayVitals() {
+      return this.otherTodayVitals.length > 0;
+    },
+    hasCurrentVisitVitals() {
+      return this.vitalReadingHasValues(this.latestTodayVitals);
+    },
   },
   watch: {
     form: [
@@ -4857,18 +5349,18 @@ export default {
         deep: true,
       },
     ],
-    "form.weight": "calculateBMI",
-    "form.height": "calculateBMI",
-    "form.diagnosis"(val) {
-      this.form.medcert_diagnosis = val || "";
+    'form.weight': 'calculateBMI',
+    'form.height': 'calculateBMI',
+    'form.diagnosis'(val) {
+      this.form.medcert_diagnosis = val || '';
     },
     tab(val) {
-      if (val === "fourth") {
+      if (val === 'fourth') {
         this.initRxMedTableSortable();
       } else {
         this.destroyRxMedSortables();
       }
-      if (val === "fifth") {
+      if (val === 'fifth') {
         this.initDxTableSortable();
       } else {
         this.destroyDxTableSortables();
@@ -4906,11 +5398,11 @@ export default {
   },
   mounted() {
     this.checkIfMobile();
-    window.addEventListener("resize", this.checkIfMobile);
+    window.addEventListener('resize', this.checkIfMobile);
     this.initActionToolbarPin();
   },
   beforeDestroy() {
-    window.removeEventListener("resize", this.checkIfMobile);
+    window.removeEventListener('resize', this.checkIfMobile);
     this.destroyActionToolbarPin();
     this.destroyRxMedSortables();
     this.destroyDxTableSortables();
@@ -4928,340 +5420,44 @@ export default {
     this.loadTemplatesFromDatabase();
     this.loadRxFavoriteMedicines();
   },
-  computed: {
-    pinnedToolbarStyle() {
-      if (!this.toolbarPinned) {
-        return {};
-      }
-      return {
-        left: `${this.pinnedToolbarLeft}px`,
-        width: `${this.pinnedToolbarWidth}px`,
-      };
-    },
-    hasPatientProfileLink() {
-      return !!(this.profile && this.profile.id && this.patientid_id);
-    },
-    patientProfilePath() {
-      if (!this.hasPatientProfileLink) {
-        return '';
-      }
-      return `/masterfile/profile/${this.profile.id}/${this.patientid_id}`;
-    },
-    currentVisitSnapshot() {
-      return {
-        form: this.form,
-        rx_list: this.rx_list,
-        prescription_groups: this.prescription_groups,
-        diagnostic_list: this.diagnostic_list,
-        diagnostic_groups: this.diagnostic_groups,
-        services_list: this.services_list,
-      };
-    },
-    compareColumns() {
-      return [
-        {
-          key: "current",
-          title: "Current visit",
-          subtitle: this.appointment_dt || "",
-          snapshot: this.currentVisitSnapshot,
-          loading: false,
-        },
-        {
-          key: "previous",
-          title: "Previous visit",
-          subtitle: this.compareSelectedVisitLabel,
-          snapshot: this.compareData,
-          loading: this.compareLoading,
-        },
-      ];
-    },
-    compareSelectedVisitLabel() {
-      const match = (this.comparePastVisits || []).find(
-        (v) => String(v.id) === String(this.compareSelectedId),
-      );
-      if (!match) return "";
-      return match.cf ? `${match.date} - ${match.cf}` : match.date;
-    },
-    activeRxList() {
-      const gid = this.activePrescriptionGroupId
-        ? Number(this.activePrescriptionGroupId)
-        : null;
-      if (!gid) {
-        return this.rx_list || [];
-      }
-      return (this.rx_list || []).filter(
-        (r) => Number(r.prescription_group_id) === gid,
-      );
-    },
-    activePrescriptionGroup() {
-      const gid = this.activePrescriptionGroupId
-        ? Number(this.activePrescriptionGroupId)
-        : null;
-      return (this.prescription_groups || []).find((g) => g.id === gid) || null;
-    },
-    activeDiagnosticList() {
-      const gid = this.activeDiagnosticGroupId
-        ? Number(this.activeDiagnosticGroupId)
-        : null;
-      if (!gid) {
-        return this.diagnostic_list || [];
-      }
-      return (this.diagnostic_list || []).filter(
-        (r) => Number(r.diagnostic_group_id) === gid,
-      );
-    },
-    activeDiagnosticGroup() {
-      const gid = this.activeDiagnosticGroupId
-        ? Number(this.activeDiagnosticGroupId)
-        : null;
-      return (this.diagnostic_groups || []).find((g) => g.id === gid) || null;
-    },
-    transformStyle() {
-      return {
-        transform: `rotate(${this.rotation}deg)`,
-        transformOrigin: "center center",
-        display: "inline-block",
-      };
-    },
-    isSynovialFluidSelected() {
-      // Check if "synovial fluid" is selected (case-insensitive)
-      return this.diagnosticsRenderedModel.some(item => 
-        item && item.toLowerCase().includes("synovial fluid")
-      );
-    },
-    hasFilteredDiagnostics() {
-      const lists = [
-        this.getAllDiagnosticsOfferedChem,
-        this.getAllDiagnosticsOfferedHema,
-        this.getAllDiagnosticsOfferedMicroscopy,
-        this.getAllDiagnosticsOfferedXray,
-        this.getAllDiagnosticsOfferedUtz,
-        this.getAllDiagnosticsOfferedImmonulogy,
-        this.getAllDiagnosticsOfferedMirco,
-        this.getAllDiagnosticsOfferedCt,
-        this.getAllDiagnosticsOfferedMri,
-        this.getAllDiagnosticsOfferedOth,
-        this.getAllDiagnosticsOfferedCrystal,
-      ];
-      return lists.some((list) => this.filterDiagnosticsList(list).length > 0);
-    },
-    availableTabs() {
-      const tabs = [
-        {
-          name: 'history',
-          label: 'Histories',
-          available: this.checkRole(['admin', 'doctor']),
-          hasContent: this.hasHistoryContent()
-        },
-        {
-          name: 'family',
-          label: 'Family History',
-          available: false,
-          hasContent: this.hasFamilyContent()
-        },
-        {
-          name: 'soc',
-          label: 'Social/Environment History',
-          available: false,
-          hasContent: this.hasSocialContent()
-        },
-        {
-          name: 'first',
-          label: 'Diagnosis',
-          available: true,
-          hasContent: this.hasDiagnosisContent()
-        },
-        {
-          name: 'second',
-          label: 'Vitals',
-          available: true,
-          hasContent: this.hasVitalsContent()
-        },
-        {
-          name: 'fourth',
-          label: 'Medicines',
-          available: this.checkRole(['admin', 'doctor']),
-          hasContent: this.rx_list && this.rx_list.length > 0
-        },
-        {
-          name: 'fifth',
-          label: 'Diagnostics',
-          available: this.checkRole(['admin', 'doctor']),
-          hasContent: this.diagnostic_list && this.diagnostic_list.length > 0
-            || (this.diagnostic_groups || []).some((g) =>
-              (g.lab_remarks || g.findings || g.notes || g.recommendations),
-            )
-        },
-        {
-          name: 'sixth',
-          label: 'Services & Billing',
-          available: true,
-          hasContent: this.services_list && this.services_list.length > 0
-        },
-        {
-          name: 'medcert',
-          label: 'Medical Certificate',
-          available: this.checkRole(['admin', 'doctor']),
-          hasContent: this.hasMedCertContent()
-        },
-        {
-          name: 'referral',
-          label: 'Referral',
-          available: this.checkRole(['admin', 'doctor']),
-          hasContent: this.hasReferralContent()
-        },
-        {
-          name: 'obgyn',
-          label: 'Obstetric and Gynecologic History',
-          available: this.checkRole(['admin', 'doctor']),
-          hasContent: this.hasObgynContent()
-        },
-        {
-          name: 'attachments',
-          label: 'Attachments',
-          available: true,
-          hasContent: this.attachments && this.attachments.length > 0
-        },
-        {
-          name: 'form',
-          label: 'Form',
-          available: true,
-          hasContent: !!this.form.form_content
-        }
-      ];
-      return tabs.filter(tab => tab.available);
-    },
-    attachmentGroups() {
-      const input = Array.isArray(this.attachments) ? this.attachments : [];
-      const imageExts = new Set(["jpg", "jpeg", "png", "gif", "bmp", "webp", "heic"]);
-
-      const parsed = input.map((att) => {
-        const rawDate = att && (att.created_dt || att.created_at || att.date);
-        const m = rawDate ? moment(rawDate) : null;
-        const isValid = !!(m && m.isValid());
-        const key = isValid ? m.format("YYYY-MM") : "unknown";
-        const label = isValid ? m.format("MMMM YYYY") : "Unknown date";
-        const ext = (att && att.extension ? String(att.extension) : "").toLowerCase();
-        const isImage = imageExts.has(ext);
-        return { att, key, label, sortTs: isValid ? m.valueOf() : -Infinity, isImage };
-      });
-
-      parsed.sort((a, b) => {
-        if (a.key === "unknown" && b.key !== "unknown") return 1;
-        if (b.key === "unknown" && a.key !== "unknown") return -1;
-        return b.sortTs - a.sortTs;
-      });
-
-      const groupsByKey = new Map();
-      for (const row of parsed) {
-        if (!groupsByKey.has(row.key)) {
-          groupsByKey.set(row.key, { key: row.key, label: row.label, _rows: [] });
-        }
-        groupsByKey.get(row.key)._rows.push(row);
-      }
-
-      const groups = Array.from(groupsByKey.values());
-      groups.sort((a, b) => {
-        if (a.key === "unknown" && b.key !== "unknown") return 1;
-        if (b.key === "unknown" && a.key !== "unknown") return -1;
-        return a.key < b.key ? 1 : a.key > b.key ? -1 : 0;
-      });
-
-      return groups.map((g) => {
-        const previewList = g._rows.filter(r => r.isImage).map(r => r.att.newfile);
-        let imgIdx = 0;
-        const items = g._rows.map((r) => {
-          const previewIndex = r.isImage ? imgIdx++ : -1;
-          return {
-            raw: r.att,
-            isImage: r.isImage,
-            src: r.att.newfile,
-            previewIndex
-          };
-        });
-        return { key: g.key, label: g.label, previewList, items };
-      });
-    },
-    rxPastFilteredRows() {
-      const q = (this.rxPastSearch || "").trim().toLowerCase();
-      const rows = Array.isArray(this.rxPastRows) ? this.rxPastRows : [];
-      if (!q) {
-        return rows;
-      }
-      return rows.filter((row) => {
-        const dateStr = this.formatPastRxDate(row.appointment_dt).toLowerCase();
-        const dx = (row.diagnosis || "").toLowerCase();
-        const meds = (row.medications || [])
-          .map((m) => this.medicationLineLabel(m).toLowerCase())
-          .join(" ");
-        return dateStr.includes(q) || dx.includes(q) || meds.includes(q);
-      });
-    },
-    latestTodayVitals() {
-      if (this.vitals_today && this.vitals_today.length > 0) {
-        return this.vitals_today[0];
-      }
-      return {
-        vit_sys: this.form.vit_sys,
-        vit_dia: this.form.vit_dia,
-        weight: this.form.weight,
-        height: this.form.height,
-        bmi: this.form.bmi,
-        vit_temp: this.form.vit_temp,
-        vit_cr: this.form.vit_cr,
-        vit_rr: this.form.vit_rr,
-        o2_stat: this.form.o2_stat,
-        time_display: "",
-      };
-    },
-    otherTodayVitals() {
-      return (this.vitals_today || []).slice(1);
-    },
-    hasMoreTodayVitals() {
-      return this.otherTodayVitals.length > 0;
-    },
-    hasCurrentVisitVitals() {
-      return this.vitalReadingHasValues(this.latestTodayVitals);
-    },
-  },
   methods: {
     checkRole,
 
     // Content checking methods for tab indicators
     hasHistoryContent() {
-      return !!(this.profile.prev_admission || this.profile.prev_surgeries || 
-                this.profile.allergies || this.profile.asthma || 
-                this.profile.hypertension || this.profile.tb || 
-                this.profile.seizure || this.profile.diabetes || 
+      return !!(this.profile.prev_admission || this.profile.prev_surgeries ||
+                this.profile.allergies || this.profile.asthma ||
+                this.profile.hypertension || this.profile.tb ||
+                this.profile.seizure || this.profile.diabetes ||
                 this.profile.copd || this.profile.pmh_others);
     },
     hasFamilyContent() {
-      return !!(this.fam && this.fam.length > 0) || !!this.profile.fam_others || 
+      return !!(this.fam && this.fam.length > 0) || !!this.profile.fam_others ||
              !!this.form.mother_details || !!this.form.father_details;
     },
     hasSocialContent() {
       return !!(this.soc && this.soc.length > 0) || !!this.profile.soc_others || !!this.profile.vaccination_sup;
     },
     hasDiagnosisContent() {
-      return !!(this.form.nurse_remarks || this.form.chiefcomplaints || 
-                this.form.history || this.form.pe || 
+      return !!(this.form.nurse_remarks || this.form.chiefcomplaints ||
+                this.form.history || this.form.pe ||
                 this.form.diagnosis || this.form.remarks);
     },
     hasVitalsContent() {
-      return !!(this.form.vit_sys || this.form.vit_dia || 
-                this.form.weight || this.form.height || 
+      return !!(this.form.vit_sys || this.form.vit_dia ||
+                this.form.weight || this.form.height ||
                 this.form.vit_temp || this.form.vit_cr || this.form.vit_rr);
     },
     hasMedCertContent() {
       return !!(this.form.medcert_diagnosis || this.form.medcert_remarks || this.form.medcert_undersigned);
     },
     hasReferralContent() {
-      return !!(this.form.referral_doctor || this.form.referral_addr1 || 
-                this.form.referral_addr2 || this.form.referral_diagnosis || 
+      return !!(this.form.referral_doctor || this.form.referral_addr1 ||
+                this.form.referral_addr2 || this.form.referral_diagnosis ||
                 this.form.referral_remarks || this.form.referral_undersigned);
     },
     hasObgynContent() {
-      return !!(this.form.pregnancy || this.form.lmp || 
+      return !!(this.form.pregnancy || this.form.lmp ||
                 this.form.contraceptive_use || this.form.menopause);
     },
 
@@ -5296,7 +5492,7 @@ export default {
       try {
         const response = await createPeTemplate({
           name: this.customTemplateForm.name,
-          content: this.customTemplateForm.content
+          content: this.customTemplateForm.content,
         });
 
         if (response.success) {
@@ -5391,7 +5587,7 @@ export default {
       try {
         const response = await createDiagnosisTemplate({
           name: this.diagnosisCustomTemplateForm.name,
-          content: this.diagnosisCustomTemplateForm.content
+          content: this.diagnosisCustomTemplateForm.content,
         });
 
         if (response.success) {
@@ -5435,7 +5631,7 @@ export default {
       try {
         const response = await createPlansTemplate({
           name: this.plansCustomTemplateForm.name,
-          content: this.plansCustomTemplateForm.content
+          content: this.plansCustomTemplateForm.content,
         });
 
         if (response.success) {
@@ -5457,8 +5653,8 @@ export default {
       this.$confirm('Are you sure you want to delete this template?', 'Confirm Delete', {
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
-        type: 'warning'
-      }).then(async () => {
+        type: 'warning',
+      }).then(async() => {
         try {
           const response = await deleteDiagnosisTemplateApi(templateId);
 
@@ -5479,8 +5675,8 @@ export default {
       this.$confirm('Are you sure you want to delete this template?', 'Confirm Delete', {
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
-        type: 'warning'
-      }).then(async () => {
+        type: 'warning',
+      }).then(async() => {
         try {
           const response = await deletePlansTemplateApi(templateId);
 
@@ -5522,7 +5718,7 @@ export default {
       try {
         const response = await createMedcertRemarksTemplate({
           name: this.medcertRemarksCustomTemplateForm.name,
-          content: this.medcertRemarksCustomTemplateForm.content
+          content: this.medcertRemarksCustomTemplateForm.content,
         });
 
         if (response.success) {
@@ -5544,8 +5740,8 @@ export default {
       this.$confirm('Are you sure you want to delete this template?', 'Confirm Delete', {
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
-        type: 'warning'
-      }).then(async () => {
+        type: 'warning',
+      }).then(async() => {
         try {
           const response = await deleteMedcertRemarksTemplateApi(templateId);
 
@@ -5566,8 +5762,8 @@ export default {
       this.$confirm('Are you sure you want to delete this template?', 'Confirm Delete', {
         confirmButtonText: 'Delete',
         cancelButtonText: 'Cancel',
-        type: 'warning'
-      }).then(async () => {
+        type: 'warning',
+      }).then(async() => {
         try {
           const response = await deletePeTemplate(templateId);
 
@@ -5587,78 +5783,78 @@ export default {
       });
     },
     handleCommand(command) {
-      if (command === "update_diagnosis") {
+      if (command === 'update_diagnosis') {
         this.popconfirmUpddateDiagnosis = true;
         this.$nextTick(() => {
           this.$refs.updateDiagnosisBtn.$el.click();
         });
       }
-      if (command === "share_pdf") {
+      if (command === 'share_pdf') {
         this.openSharePdfDialog();
       }
-      if (command === "print_rx_current") {
+      if (command === 'print_rx_current') {
         this.printCurrentRxGroup();
       }
-      if (command === "print_rx_all") {
+      if (command === 'print_rx_all') {
         this.printAllRxGroups();
       }
-      if (command === "email_rx") {
+      if (command === 'email_rx') {
         this.emailPrescription();
       }
-      if (command === "print_dx_current") {
+      if (command === 'print_dx_current') {
         this.printCurrentDxGroup();
       }
-      if (command === "print_dx_all") {
+      if (command === 'print_dx_all') {
         this.printAllDxGroups();
       }
-      if (command === "print_labs") {
+      if (command === 'print_labs') {
         this.printCurrentDxGroup();
       }
-      if (command === "print_ancillary") {
+      if (command === 'print_ancillary') {
         this.printrequest(2);
       }
-      if (command === "print_medcert") {
+      if (command === 'print_medcert') {
         this.printmedcert();
       }
-      if (command === "print_fees") {
+      if (command === 'print_fees') {
         this.printfees();
       }
-      if (command === "print_riskstrat") {
+      if (command === 'print_riskstrat') {
         this.printriskstrat();
       }
-      if (command === "print_fit") {
+      if (command === 'print_fit') {
         this.printfittowork();
       }
-      if (command === "print_clearance") {
+      if (command === 'print_clearance') {
         this.printclearance();
       }
-      if (command === "print_referral") {
+      if (command === 'print_referral') {
         this.printreferral();
       }
-      if (command === "print_form") {
+      if (command === 'print_form') {
         this.printform();
       }
-      if (command === "cancel_apt") {
+      if (command === 'cancel_apt') {
         this.cancelAppointment();
       }
-      if (command === "view_chart") {
+      if (command === 'view_chart') {
         this.printChart();
       }
-      if (command === "load_form_template") {
+      if (command === 'load_form_template') {
         this.openFormTemplateDialog();
       }
-      if (command === "done_consult") {
+      if (command === 'done_consult') {
         this.doneConsult();
       }
     },
     openSharePdfDialog() {
       this.sharePdfDialogVisible = true;
-      this.sharePdfDoc = this.sharePdfDoc || "rx";
+      this.sharePdfDoc = this.sharePdfDoc || 'rx';
       this.updateSharePdfLink();
     },
     buildPublicPdfUrl(doc) {
       const id = this.form && this.form.id ? this.form.id : this.$route.params.id;
-      const origin = window.location.origin || "";
+      const origin = window.location.origin || '';
       const map = {
         rx: `/api/printpdf2/${id}`,
         diagnostics: `/api/printrequest/${id}/1`,
@@ -5671,74 +5867,74 @@ export default {
     },
     async updateSharePdfLink() {
       const id = this.form && this.form.id ? this.form.id : this.$route.params.id;
-      const doc = this.sharePdfDoc || "rx";
-      const type = doc === "diagnostics" ? 1 : undefined;
+      const doc = this.sharePdfDoc || 'rx';
+      const type = doc === 'diagnostics' ? 1 : undefined;
 
       try {
         const res = await Patients.getPublicPdfLink(id, doc, type);
-        this.sharePdfLink = res && res.url ? res.url : "";
+        this.sharePdfLink = res && res.url ? res.url : '';
         if (!this.sharePdfLink) {
-          throw new Error("No URL returned");
+          throw new Error('No URL returned');
         }
       } catch (e) {
         // Do not fall back to internal /api/print* links because those require login.
-        this.sharePdfLink = "";
-        this.$message.error("Could not generate a no-login share link. Please refresh and try again.");
+        this.sharePdfLink = '';
+        this.$message.error('Could not generate a no-login share link. Please refresh and try again.');
       }
     },
     async copySharePdfLink() {
       try {
-        const text = this.sharePdfLink || "";
+        const text = this.sharePdfLink || '';
         if (navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText(text);
-          this.$message.success("Link copied.");
+          this.$message.success('Link copied.');
           return;
         }
         // Fallback for older browsers
-        const el = document.createElement("textarea");
+        const el = document.createElement('textarea');
         el.value = text;
-        el.setAttribute("readonly", "");
-        el.style.position = "absolute";
-        el.style.left = "-9999px";
+        el.setAttribute('readonly', '');
+        el.style.position = 'absolute';
+        el.style.left = '-9999px';
         document.body.appendChild(el);
         el.select();
-        document.execCommand("copy");
+        document.execCommand('copy');
         document.body.removeChild(el);
-        this.$message.success("Link copied.");
+        this.$message.success('Link copied.');
       } catch (e) {
-        this.$message.error("Could not copy link.");
+        this.$message.error('Could not copy link.');
       }
     },
     sharePdfToWhatsApp() {
-      const url = this.sharePdfLink || "";
+      const url = this.sharePdfLink || '';
       if (!url) {
-        this.$message.error("No public share link yet. Please wait for the link to load, then try again.");
+        this.$message.error('No public share link yet. Please wait for the link to load, then try again.');
         return;
       }
       const msg = `PDF: ${url}`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     },
     sharePdfToViber() {
-      const url = this.sharePdfLink || "";
+      const url = this.sharePdfLink || '';
       if (!url) {
-        this.$message.error("No public share link yet. Please wait for the link to load, then try again.");
+        this.$message.error('No public share link yet. Please wait for the link to load, then try again.');
         return;
       }
       const msg = `PDF: ${url}`;
       // Works best on mobile/desktop Viber installed; otherwise no-op.
-      window.open(`viber://forward?text=${encodeURIComponent(msg)}`, "_blank");
+      window.open(`viber://forward?text=${encodeURIComponent(msg)}`, '_blank');
     },
     sharePdfToMessenger() {
-      const url = this.sharePdfLink || "";
+      const url = this.sharePdfLink || '';
       if (!url) {
-        this.$message.error("No public share link yet. Please wait for the link to load, then try again.");
+        this.$message.error('No public share link yet. Please wait for the link to load, then try again.');
         return;
       }
       const fbAppId =
-        (typeof process !== "undefined" &&
+        (typeof process !== 'undefined' &&
           process.env &&
           (process.env.MIX_FACEBOOK_APP_ID || process.env.MIX_FB_APP_ID)) ||
-        "";
+        '';
 
       // Best UX on web: Messenger "Send Dialog" (requires a Facebook App ID).
       if (fbAppId) {
@@ -5748,17 +5944,17 @@ export default {
           `app_id=${encodeURIComponent(fbAppId)}` +
           `&link=${encodeURIComponent(url)}` +
           `&redirect_uri=${encodeURIComponent(redirectUri)}`;
-        window.open(sendDialogUrl, "fb_send", "width=700,height=650,noopener,noreferrer");
+        window.open(sendDialogUrl, 'fb_send', 'width=700,height=650,noopener,noreferrer');
         return;
       }
 
       // Fallback: try deep-linking the Messenger app (mobile). If blocked, user can still Copy+Paste.
       try {
-        window.open(`fb-messenger://share?link=${encodeURIComponent(url)}`, "_blank");
+        window.open(`fb-messenger://share?link=${encodeURIComponent(url)}`, '_blank');
       } catch (e) {
         // ignore
       }
-      this.$message.info("Messenger popup needs a Facebook App ID. Use Copy link and paste in Messenger.");
+      this.$message.info('Messenger popup needs a Facebook App ID. Use Copy link and paste in Messenger.');
     },
     autoResize() {
       this.$nextTick(() => {
@@ -5775,11 +5971,11 @@ export default {
           textarea.style.height = 'auto';
           textarea.style.height = textarea.scrollHeight + 'px';
         });
-      })
+      });
     },
     _hasUnsavedChanges() {
-      return this._lastFormChangeAt
-        && (!this._lastSaveCompletedAt || this._lastFormChangeAt > this._lastSaveCompletedAt);
+      return this._lastFormChangeAt &&
+        (!this._lastSaveCompletedAt || this._lastFormChangeAt > this._lastSaveCompletedAt);
     },
     async _waitForSaveComplete() {
       while (this._saveInFlight) {
@@ -5800,11 +5996,11 @@ export default {
       await this._waitForSaveComplete();
       this._saveInFlight = true;
       this.form.followup = moment
-        .tz(this.form.followup, "Asia/Manila")
-        .format("YYYY-MM-DD"); // moment(this.form.followup).tz('Asia/Manila').format('YYYY-MM-DD');
+        .tz(this.form.followup, 'Asia/Manila')
+        .format('YYYY-MM-DD'); // moment(this.form.followup).tz('Asia/Manila').format('YYYY-MM-DD');
       this.form.medcert_undersigned = moment
-        .tz(this.form.medcert_undersigned, "Asia/Manila")
-        .format("YYYY-MM-DD"); // moment(this.form.medcert_undersigned).tz('Asia/Manila').format('YYYY-MM-DD');
+        .tz(this.form.medcert_undersigned, 'Asia/Manila')
+        .format('YYYY-MM-DD'); // moment(this.form.medcert_undersigned).tz('Asia/Manila').format('YYYY-MM-DD');
       this.form.prev_admission = this.profile.prev_admission;
       // this.form.email = this.profile.email;
       this.form.prev_surgeries = this.profile.prev_surgeries;
@@ -5817,23 +6013,23 @@ export default {
       this.form.copd = this.profile.copd;
       this.form.pmh_others = this.profile.pmh_others;
 
-      let famVal = "";
+      let famVal = '';
       this.fam.forEach((element, index) => {
         if (index === this.fam.length - 1) {
           famVal += element;
         } else {
-          famVal += element + ",";
+          famVal += element + ',';
         }
       });
       this.form.fam = famVal;
       this.form.fam_others = this.profile.fam_others;
 
-      let socVal = "";
+      let socVal = '';
       this.soc.forEach((element, index) => {
         if (index === this.fam.length - 1) {
           socVal += element;
         } else {
-          socVal += element + ",";
+          socVal += element + ',';
         }
       });
       this.form.soc = socVal;
@@ -5848,19 +6044,19 @@ export default {
         this._lastSaveCompletedAt = Date.now();
         if (source === 'manual') {
           this.$message({
-            message: "Diagnosis has been created successfully.",
-            type: "success",
+            message: 'Diagnosis has been created successfully.',
+            type: 'success',
             duration: 5 * 1000,
           });
         } else if (source === 'autosave') {
           this.$message({
-            message: "Diagnosis has been updated successfully.",
-            type: "success",
+            message: 'Diagnosis has been updated successfully.',
+            type: 'success',
             duration: 5 * 1000,
           });
         }
       } catch (err) {
-        console.error("Error adding suggestions:", err);
+        console.error('Error adding suggestions:', err);
       } finally {
         this._saveInFlight = false;
       }
@@ -5878,8 +6074,8 @@ export default {
 
       this.syncActionToolbarMetrics();
       this._onToolbarResize = () => this.syncActionToolbarMetrics();
-      window.addEventListener("resize", this._onToolbarResize);
-      window.addEventListener("scroll", this._onToolbarResize, { passive: true });
+      window.addEventListener('resize', this._onToolbarResize);
+      window.addEventListener('scroll', this._onToolbarResize, { passive: true });
 
       if (window.IntersectionObserver) {
         this._toolbarObserver = new IntersectionObserver(
@@ -5898,8 +6094,8 @@ export default {
         this._toolbarObserver = null;
       }
       if (this._onToolbarResize) {
-        window.removeEventListener("resize", this._onToolbarResize);
-        window.removeEventListener("scroll", this._onToolbarResize);
+        window.removeEventListener('resize', this._onToolbarResize);
+        window.removeEventListener('scroll', this._onToolbarResize);
         this._onToolbarResize = null;
       }
     },
@@ -5913,7 +6109,7 @@ export default {
 
       const height = toolbar.offsetHeight;
       const marginBottom = 20;
-      wrap.style.minHeight = this.toolbarPinned ? `${height + marginBottom}px` : "";
+      wrap.style.minHeight = this.toolbarPinned ? `${height + marginBottom}px` : '';
 
       if (this.toolbarPinned) {
         const rect = container.getBoundingClientRect();
@@ -5923,12 +6119,12 @@ export default {
     },
     onCancel() {
       this.$message({
-        message: "cancel!",
-        type: "warning",
+        message: 'cancel!',
+        type: 'warning',
       });
     },
     currentDt() {
-      return moment(this.appointment_dt).format("MMMM DD, YYYY");
+      return moment(this.appointment_dt).format('MMMM DD, YYYY');
     },
     goToPatientProfile() {
       if (!this.hasPatientProfileLink) {
@@ -5940,10 +6136,10 @@ export default {
       if (val === null || val === undefined) {
         return false;
       }
-      if (typeof val === "string") {
-        return val.trim() !== "";
+      if (typeof val === 'string') {
+        return val.trim() !== '';
       }
-      return String(val).trim() !== "";
+      return String(val).trim() !== '';
     },
     normalizePrevConsultRecord(prev) {
       if (!prev || (Array.isArray(prev) && prev.length === 0)) {
@@ -5960,12 +6156,12 @@ export default {
         return;
       }
       const keys = [
-        "nurse_remarks",
-        "chiefcomplaints",
-        "history",
-        "pe",
-        "diagnosis",
-        "remarks",
+        'nurse_remarks',
+        'chiefcomplaints',
+        'history',
+        'pe',
+        'diagnosis',
+        'remarks',
       ];
       keys.forEach((key) => {
         if (!this.consultFieldHasValue(prev[key])) {
@@ -5973,7 +6169,7 @@ export default {
         }
         const value = prev[key];
         this.form[key] =
-          typeof value === "string" ? value : String(value);
+          typeof value === 'string' ? value : String(value);
       });
     },
     appointments() {
@@ -6008,22 +6204,22 @@ export default {
           this.get_attachments(response.px_profile.patientid);
 
           if (response.px_profile.fam) {
-            const fam = response.px_profile.fam.split(",");
+            const fam = response.px_profile.fam.split(',');
             fam.forEach((element) => {
               this.fam.push(element);
             });
           }
 
           if (response.px_profile.soc) {
-            const soc = response.px_profile.soc.split(",");
+            const soc = response.px_profile.soc.split(',');
             soc.forEach((element) => {
               this.soc.push(element);
             });
           }
 
-          this.form.medcert_diagnosis = this.form.diagnosis || "";
+          this.form.medcert_diagnosis = this.form.diagnosis || '';
           if (!this.form.referral_diagnosis) {
-            this.form.referral_diagnosis = this.form.diagnosis || "";
+            this.form.referral_diagnosis = this.form.diagnosis || '';
           }
 
           this.form.pregnancy = response.px_profile.pregnancy;
@@ -6032,7 +6228,6 @@ export default {
           this.form.menopause = response.px_profile.menopause;
           this.form.mother_details = response.px_profile.mother_details;
           this.form.father_details = response.px_profile.father_details;
-          
         })
         .catch((error) => {
           console.log(error);
@@ -6055,14 +6250,14 @@ export default {
     },
     rxMedicineStringOrEmpty(val) {
       if (val === null || val === undefined) {
-        return "";
+        return '';
       }
       const s = String(val).trim();
-      return s !== "" ? s : "";
+      return s !== '' ? s : '';
     },
     mealTimingFieldsFromMedicineRecord(item) {
       if (!item) {
-        return { bf_b: "", bf_a: "", l_b: "", l_a: "", s_b: "", s_a: "", bt: "" };
+        return { bf_b: '', bf_a: '', l_b: '', l_a: '', s_b: '', s_a: '', bt: '' };
       }
       return {
         bf_b: this.rxMedicineStringOrEmpty(item.default_bf_b),
@@ -6077,12 +6272,12 @@ export default {
     buildRxSuggestionList(searchItems, favItems) {
       const out = [];
       if (favItems.length) {
-        out.push({ medicine: "—", isSectionHeader: true, sectionLabel: "Favorites" });
+        out.push({ medicine: '—', isSectionHeader: true, sectionLabel: 'Favorites' });
         favItems.forEach((x) => out.push(x));
       }
       if (searchItems.length) {
         if (favItems.length) {
-          out.push({ medicine: "—", isSectionHeader: true, sectionLabel: "Search results" });
+          out.push({ medicine: '—', isSectionHeader: true, sectionLabel: 'Search results' });
         }
         searchItems.forEach((x) => out.push(x));
       }
@@ -6115,21 +6310,21 @@ export default {
         if (item.favoriteId) {
           await deleteFavoriteMedicine(item.favoriteId);
           await this.loadRxFavoriteMedicines();
-          this.$message.success("Removed from favorites");
+          this.$message.success('Removed from favorites');
           return;
         }
         await createFavoriteMedicine(this.buildFavoritePayloadFromRxSuggestion(item));
         await this.loadRxFavoriteMedicines();
-        this.$message.success("Saved to favorites");
+        this.$message.success('Saved to favorites');
       } catch (e) {
-        this.$message.error("Could not update favorites");
+        this.$message.error('Could not update favorites');
       }
     },
     rxTimingDoseFilled(val) {
       return isPositiveMealDoseString(val);
     },
     emptyRxMealTiming() {
-      return { bf_b: "", bf_a: "", l_b: "", l_a: "", s_b: "", s_a: "", bt: "" };
+      return { bf_b: '', bf_a: '', l_b: '', l_a: '', s_b: '', s_a: '', bt: '' };
     },
     rxMealTimingFromMedsArr() {
       return {
@@ -6148,7 +6343,7 @@ export default {
       }
       const pick = (primary, legacy) => {
         const a = this.rxMedicineStringOrEmpty(primary);
-        if (a !== "") {
+        if (a !== '') {
           return a;
         }
         return this.rxMedicineStringOrEmpty(legacy);
@@ -6165,30 +6360,30 @@ export default {
     },
     applyMealTimingToMedsArr(meal) {
       const m = meal || this.emptyRxMealTiming();
-      this.medsArr.bf_b = m.bf_b || "";
-      this.medsArr.bf_a = m.bf_a || "";
-      this.medsArr.l_b = m.l_b || "";
-      this.medsArr.l_a = m.l_a || "";
-      this.medsArr.s_b = m.s_b || "";
-      this.medsArr.s_a = m.s_a || "";
-      this.medsArr.bt = m.bt || "";
+      this.medsArr.bf_b = m.bf_b || '';
+      this.medsArr.bf_a = m.bf_a || '';
+      this.medsArr.l_b = m.l_b || '';
+      this.medsArr.l_a = m.l_a || '';
+      this.medsArr.s_b = m.s_b || '';
+      this.medsArr.s_a = m.s_a || '';
+      this.medsArr.bt = m.bt || '';
     },
     itemHasMealTiming(row) {
       const meal = row && (row.bf_b !== undefined || row.bb !== undefined)
         ? this.rxMealTimingFromListRow(row)
         : this.rxMealTimingFromMedsArr();
-      return ["bf_b", "bf_a", "l_b", "l_a", "s_b", "s_a", "bt"].some((k) =>
-        this.rxTimingDoseFilled(meal[k]),
+      return ['bf_b', 'bf_a', 'l_b', 'l_a', 's_b', 's_a', 'bt'].some((k) =>
+        this.rxTimingDoseFilled(meal[k])
       );
     },
     mealTimingFieldsFromFavoriteRecord(r) {
-      const fromFreq = appointmentMealTimingStringsFromFrequency(r.default_frequency || "");
+      const fromFreq = appointmentMealTimingStringsFromFrequency(r.default_frequency || '');
       const pick = (col, freqVal) => {
-        const c = col != null ? String(col).trim() : "";
-        if (c !== "") {
+        const c = col != null ? String(col).trim() : '';
+        if (c !== '') {
           return c;
         }
-        return freqVal != null && String(freqVal).trim() !== "" ? String(freqVal).trim() : "";
+        return freqVal != null && String(freqVal).trim() !== '' ? String(freqVal).trim() : '';
       };
       return {
         bf_b: pick(r.default_bf_b, fromFreq.bf_b),
@@ -6212,15 +6407,15 @@ export default {
       let qty = masterQty;
       if (favoriteRecord) {
         const favQty = this.rxMedicineStringOrEmpty(favoriteRecord.default_qty);
-        if (favQty !== "") {
+        if (favQty !== '') {
           qty = favQty;
         }
         const favDosage = this.rxMedicineStringOrEmpty(favoriteRecord.default_dosage);
-        if (favDosage !== "") {
+        if (favDosage !== '') {
           this.medsArr.custom_dosage = favDosage;
         }
       }
-      this.medsArr.qty = qty !== "" ? qty : "1";
+      this.medsArr.qty = qty !== '' ? qty : '1';
 
       const masterMeal = this.mealTimingFieldsFromMedicineRecord(item);
       let meal = { ...masterMeal };
@@ -6241,7 +6436,7 @@ export default {
       const masterRemarks = this.rxMedicineStringOrEmpty(item.default_remarks);
       const favRemarks = favoriteRecord
         ? this.rxMedicineStringOrEmpty(favoriteRecord.default_remarks)
-        : "";
+        : '';
       this.medsArr.remarks = favRemarks || masterRemarks;
     },
     async applyFavoriteRecordToMedsArr(r) {
@@ -6264,7 +6459,7 @@ export default {
         return;
       }
 
-      this.medsArr.meds = "";
+      this.medsArr.meds = '';
       this.medsArr.med_id = hasMaster ? r.medicine_id : 0;
       const gen = this.rxMedicineStringOrEmpty(r.custom_generic_name);
       const brand = this.rxMedicineStringOrEmpty(r.drug_name);
@@ -6273,21 +6468,21 @@ export default {
       this.medsArr.custom_dosage = this.rxMedicineStringOrEmpty(r.default_dosage);
 
       const favQty = this.rxMedicineStringOrEmpty(r.default_qty);
-      this.medsArr.qty = favQty !== "" ? favQty : "1";
+      this.medsArr.qty = favQty !== '' ? favQty : '1';
 
       this.applyMealTimingToMedsArr(this.mealTimingFieldsFromFavoriteRecord(r));
       this.medsArr.remarks = this.rxMedicineStringOrEmpty(r.default_remarks);
     },
     buildRxPayloadFromFavorite(r) {
       const hasMaster = r.medicine_id != null && r.medicine_id !== 0;
-      const dq = r.default_qty != null ? String(r.default_qty).trim() : "";
-      const qty = dq !== "" ? dq : "1";
+      const dq = r.default_qty != null ? String(r.default_qty).trim() : '';
+      const qty = dq !== '' ? dq : '1';
       const groupId = this.getActivePrescriptionGroupId();
       const meal = this.mealTimingFieldsFromFavoriteRecord(r);
       if (hasMaster) {
-        const brand = (r.drug_name || "").trim();
-        const generic = (r.custom_generic_name || "").trim();
-        const dosage = (r.default_dosage || "").trim();
+        const brand = (r.drug_name || '').trim();
+        const generic = (r.custom_generic_name || '').trim();
+        const dosage = (r.default_dosage || '').trim();
         return {
           id: this.$route.params.id,
           prescription_group_id: groupId,
@@ -6299,23 +6494,23 @@ export default {
           custom_dosage: dosage,
           qty,
           ...meal,
-          remarks: r.default_remarks || "",
+          remarks: r.default_remarks || '',
         };
       }
-      const gen = (r.custom_generic_name || "").trim();
-      const brand = (r.drug_name || "").trim();
+      const gen = (r.custom_generic_name || '').trim();
+      const brand = (r.drug_name || '').trim();
       return {
         id: this.$route.params.id,
         prescription_group_id: groupId,
         custom_meds: true,
         med_id: 0,
-        meds: "",
+        meds: '',
         custom_generic: gen || brand,
         custom_brand: brand || gen,
-        custom_dosage: (r.default_dosage || "").trim(),
+        custom_dosage: (r.default_dosage || '').trim(),
         qty,
         ...meal,
-        remarks: r.default_remarks || "",
+        remarks: r.default_remarks || '',
       };
     },
     openRxFavoritesDialog() {
@@ -6334,13 +6529,13 @@ export default {
     rxFavoriteSchedulePreview(row) {
       const parts = [];
       if (row.default_bf_b || row.default_bf_a) {
-        parts.push(`BF ${row.default_bf_b || "—"}/${row.default_bf_a || "—"}`);
+        parts.push(`BF ${row.default_bf_b || '—'}/${row.default_bf_a || '—'}`);
       }
       if (row.default_l_b || row.default_l_a) {
-        parts.push(`L ${row.default_l_b || "—"}/${row.default_l_a || "—"}`);
+        parts.push(`L ${row.default_l_b || '—'}/${row.default_l_a || '—'}`);
       }
       if (row.default_s_b || row.default_s_a) {
-        parts.push(`D ${row.default_s_b || "—"}/${row.default_s_a || "—"}`);
+        parts.push(`D ${row.default_s_b || '—'}/${row.default_s_a || '—'}`);
       }
       if (row.default_bt) {
         parts.push(`HS ${row.default_bt}`);
@@ -6348,12 +6543,12 @@ export default {
       if (row.default_remarks) {
         parts.push(row.default_remarks);
       }
-      return parts.length ? parts.join(" · ") : "—";
+      return parts.length ? parts.join(' · ') : '—';
     },
     async applyRxFavoritesSelection() {
       const rows = this.rxFavoritesDialogSelection;
       if (!rows || !rows.length) {
-        this.$message.warning("Select at least one favorite.");
+        this.$message.warning('Select at least one favorite.');
         return;
       }
       this.rxFavoritesApplyLoading = true;
@@ -6362,10 +6557,10 @@ export default {
           await Medicine.add_rx(this.buildRxPayloadFromFavorite(fav));
         }
         await this.getmeds();
-        this.$message.success("Medicines added from favorites.");
+        this.$message.success('Medicines added from favorites.');
         this.rxFavoritesDialogVisible = false;
       } catch (e) {
-        this.$message.error("Could not add medicines from favorites.");
+        this.$message.error('Could not add medicines from favorites.');
       } finally {
         this.rxFavoritesApplyLoading = false;
       }
@@ -6376,9 +6571,9 @@ export default {
       }
       this.rxFavoriteEditForm = {
         id: row.id,
-        drug_name: row.drug_name || "",
-        default_qty: row.default_qty != null ? String(row.default_qty) : "",
-        default_remarks: row.default_remarks || "",
+        drug_name: row.drug_name || '',
+        default_qty: row.default_qty != null ? String(row.default_qty) : '',
+        default_remarks: row.default_remarks || '',
       };
       this.rxFavoriteEditDialogVisible = true;
     },
@@ -6389,14 +6584,14 @@ export default {
       this.rxFavoriteEditSaving = true;
       try {
         await updateFavoriteMedicine(this.rxFavoriteEditForm.id, {
-          default_qty: (this.rxFavoriteEditForm.default_qty || "").trim() || null,
-          default_remarks: (this.rxFavoriteEditForm.default_remarks || "").trim() || null,
+          default_qty: (this.rxFavoriteEditForm.default_qty || '').trim() || null,
+          default_remarks: (this.rxFavoriteEditForm.default_remarks || '').trim() || null,
         });
         await this.loadRxFavoriteMedicines();
-        this.$message.success("Favorite updated.");
+        this.$message.success('Favorite updated.');
         this.rxFavoriteEditDialogVisible = false;
       } catch (e) {
-        this.$message.error("Could not update favorite.");
+        this.$message.error('Could not update favorite.');
       } finally {
         this.rxFavoriteEditSaving = false;
       }
@@ -6406,10 +6601,10 @@ export default {
         return;
       }
       try {
-        await this.$confirm("Remove this medicine from favorites?", "Remove favorite", {
-          confirmButtonText: "Remove",
-          cancelButtonText: "Cancel",
-          type: "warning",
+        await this.$confirm('Remove this medicine from favorites?', 'Remove favorite', {
+          confirmButtonText: 'Remove',
+          cancelButtonText: 'Cancel',
+          type: 'warning',
         });
       } catch (_) {
         return;
@@ -6417,28 +6612,28 @@ export default {
       try {
         await deleteFavoriteMedicine(row.id);
         await this.loadRxFavoriteMedicines();
-        this.$message.success("Removed from favorites.");
+        this.$message.success('Removed from favorites.');
       } catch (e) {
-        this.$message.error("Could not remove favorite.");
+        this.$message.error('Could not remove favorite.');
       }
     },
     async querySearch(queryString, cb) {
-      const q = (queryString || "").trim().toLowerCase();
+      const q = (queryString || '').trim().toLowerCase();
       const favList = this.rxFavoriteMedicines || [];
 
       const favMatches = favList.filter((f) => {
         if (!q) {
           return true;
         }
-        return (f.drug_name || "").toLowerCase().includes(q)
-          || (f.custom_generic_name || "").toLowerCase().includes(q);
+        return (f.drug_name || '').toLowerCase().includes(q) ||
+          (f.custom_generic_name || '').toLowerCase().includes(q);
       });
 
       const favSuggestions = favMatches.map((f) => ({
         medicine: f.drug_name,
         id: f.medicine_id || 0,
-        generic_name: (f.custom_generic_name || f.drug_name || "").trim(),
-        unit: f.default_dosage || "",
+        generic_name: (f.custom_generic_name || f.drug_name || '').trim(),
+        unit: f.default_dosage || '',
         isFavoriteRow: true,
         favoriteId: f.id,
         favoriteRecord: f,
@@ -6449,7 +6644,7 @@ export default {
         favMatches.filter((f) => f.medicine_id).map((f) => f.medicine_id)
       );
 
-      if (q === "") {
+      if (q === '') {
         cb(this.buildRxSuggestionList([], favSuggestions));
         return;
       }
@@ -6469,7 +6664,7 @@ export default {
         });
         cb(this.buildRxSuggestionList(withFav, favSuggestions));
       } catch (error) {
-        console.error("Error fetching suggestions:", error);
+        console.error('Error fetching suggestions:', error);
         cb(this.buildRxSuggestionList([], favSuggestions));
       } finally {
         this.loading = false;
@@ -6494,7 +6689,7 @@ export default {
     },
     removeItem(id) { },
     async queryProcedure(queryString, cb) {
-      if (queryString === "") {
+      if (queryString === '') {
         cb([]);
         return;
       }
@@ -6504,7 +6699,7 @@ export default {
         const suggestions = response.suggestions;
         cb(suggestions);
       } catch (error) {
-        console.error("Error fetching suggestions:", error);
+        console.error('Error fetching suggestions:', error);
         cb([]);
       } finally {
         this.loading = false;
@@ -6526,7 +6721,7 @@ export default {
       }
       const tables = Array.isArray(ref) ? ref : [ref];
       tables.forEach((t) => {
-        if (t && typeof t.clearSelection === "function") {
+        if (t && typeof t.clearSelection === 'function') {
           t.clearSelection();
         }
       });
@@ -6534,20 +6729,20 @@ export default {
     deleteSelectedDiagnostics() {
       const rows = this.dxListSelection || [];
       if (!rows.length) {
-        this.$message.warning("Select at least one diagnostic to delete.");
+        this.$message.warning('Select at least one diagnostic to delete.');
         return;
       }
       const count = rows.length;
       this.$confirm(
-        `Delete ${count} selected diagnostic${count === 1 ? "" : "s"}?`,
-        "Warning",
+        `Delete ${count} selected diagnostic${count === 1 ? '' : 's'}?`,
+        'Warning',
         {
-          confirmButtonText: "OK",
-          cancelButtonText: "Cancel",
-          type: "warning",
-        },
+          confirmButtonText: 'OK',
+          cancelButtonText: 'Cancel',
+          type: 'warning',
+        }
       )
-        .then(async () => {
+        .then(async() => {
           this.dxListDeleteLoading = true;
           try {
             for (const row of rows) {
@@ -6556,27 +6751,27 @@ export default {
             this.clearDxTableSelection();
             await this.getdiagnostics();
             this.$message.success(
-              `Deleted ${count} diagnostic${count === 1 ? "" : "s"}.`,
+              `Deleted ${count} diagnostic${count === 1 ? '' : 's'}.`
             );
           } catch (err) {
-            console.error("Error deleting diagnostics:", err);
-            this.$message.error("Could not delete all selected diagnostics.");
+            console.error('Error deleting diagnostics:', err);
+            this.$message.error('Could not delete all selected diagnostics.');
           } finally {
             this.dxListDeleteLoading = false;
           }
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "Delete canceled",
+            type: 'info',
+            message: 'Delete canceled',
           });
         });
     },
     removeProcedure(index) {
-      this.$confirm("Are you sure you want to delete this item?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
-        type: "warning",
+      this.$confirm('Are you sure you want to delete this item?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
       })
         .then(() => {
           Procedure.remove_diagnostic(index)
@@ -6587,18 +6782,18 @@ export default {
               this.getdiagnostics();
             })
             .catch((err) => {
-              console.error("Error adding suggestions:", err);
+              console.error('Error adding suggestions:', err);
             });
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "Delete canceled",
+            type: 'info',
+            message: 'Delete canceled',
           });
         });
     },
     async queryService(queryString, cb) {
-      if (queryString === "") {
+      if (queryString === '') {
         // If query string is empty, reset suggestions
         cb([]);
         return;
@@ -6612,7 +6807,7 @@ export default {
         // Call back function
         cb(suggestions);
       } catch (error) {
-        console.error("Error fetching suggestions:", error);
+        console.error('Error fetching suggestions:', error);
         cb([]);
       } finally {
         this.loading = false;
@@ -6624,10 +6819,10 @@ export default {
       this.service.service_id = ev.id;
     },
     removeService(row) {
-      this.$confirm("Are you sure you want to delete this item?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
-        type: "warning",
+      this.$confirm('Are you sure you want to delete this item?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
       })
         .then(() => {
           Patients.remove_service(row)
@@ -6635,13 +6830,13 @@ export default {
               this.getservices();
             })
             .catch((err) => {
-              console.error("Error adding suggestions:", err);
+              console.error('Error adding suggestions:', err);
             });
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "Delete canceled",
+            type: 'info',
+            message: 'Delete canceled',
           });
         });
     },
@@ -6651,7 +6846,7 @@ export default {
           this.getAllServicesOffered = response;
         })
         .catch((err) => {
-          console.error("Error adding suggestions:", err);
+          console.error('Error adding suggestions:', err);
         });
     },
     getAllDiagnostics() {
@@ -6716,7 +6911,7 @@ export default {
           );
         })
         .catch((err) => {
-          console.error("Error adding suggestions:", err);
+          console.error('Error adding suggestions:', err);
         });
     },
     addServices() {
@@ -6724,7 +6919,7 @@ export default {
         Patients.add_service(this.servicesRendered)
           .then((response) => {
             this.getservices();
-            this.service.service = "";
+            this.service.service = '';
             this.service.fee = 0;
             this.service.discount = 0;
             this.servicesRendered.rendered = [];
@@ -6732,10 +6927,10 @@ export default {
             this.viewServicesTbl = false;
           })
           .catch((err) => {
-            console.error("Error adding suggestions:", err);
+            console.error('Error adding suggestions:', err);
           });
       } else {
-        this.$message.warning("Select at least one service to add.");
+        this.$message.warning('Select at least one service to add.');
       }
     },
     addNewServices(e) {
@@ -6790,7 +6985,7 @@ export default {
       }
       const tables = Array.isArray(ref) ? ref : [ref];
       tables.forEach((t) => {
-        if (t && typeof t.clearSelection === "function") {
+        if (t && typeof t.clearSelection === 'function') {
           t.clearSelection();
         }
       });
@@ -6798,21 +6993,21 @@ export default {
     deleteSelectedMeds() {
       const rows = this.rxListSelection || [];
       if (!rows.length) {
-        this.$message.warning("Select at least one medicine to delete.");
+        this.$message.warning('Select at least one medicine to delete.');
         return;
       }
       const count = rows.length;
       const deletingEditTarget = this.isEditMode && rows.some((r) => r.id === this.editingMedId);
       this.$confirm(
-        `Delete ${count} selected medicine${count === 1 ? "" : "s"}?`,
-        "Warning",
+        `Delete ${count} selected medicine${count === 1 ? '' : 's'}?`,
+        'Warning',
         {
-          confirmButtonText: "OK",
-          cancelButtonText: "Cancel",
-          type: "warning",
-        },
+          confirmButtonText: 'OK',
+          cancelButtonText: 'Cancel',
+          type: 'warning',
+        }
       )
-        .then(async () => {
+        .then(async() => {
           this.rxListDeleteLoading = true;
           try {
             for (const row of rows) {
@@ -6824,27 +7019,27 @@ export default {
             }
             await this.getmeds();
             this.$message.success(
-              `Deleted ${count} medicine${count === 1 ? "" : "s"}.`,
+              `Deleted ${count} medicine${count === 1 ? '' : 's'}.`
             );
           } catch (err) {
-            console.error("Error deleting medicines:", err);
-            this.$message.error("Could not delete all selected medicines.");
+            console.error('Error deleting medicines:', err);
+            this.$message.error('Could not delete all selected medicines.');
           } finally {
             this.rxListDeleteLoading = false;
           }
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "Delete canceled",
+            type: 'info',
+            message: 'Delete canceled',
           });
         });
     },
     deleteMed(row) {
-      this.$confirm("Are you sure you want to delete this item?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
-        type: "warning",
+      this.$confirm('Are you sure you want to delete this item?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
       })
         .then(() => {
           Medicine.remove_rx(row)
@@ -6858,13 +7053,13 @@ export default {
               this.getmeds();
             })
             .catch((err) => {
-              console.error("Error adding suggestions:", err);
+              console.error('Error adding suggestions:', err);
             });
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "Delete canceled",
+            type: 'info',
+            message: 'Delete canceled',
           });
         });
     },
@@ -6875,19 +7070,19 @@ export default {
       this.clearMedsForm();
     },
     clearMedsForm() {
-      this.medsArr.qty = "";
-      this.medsArr.bf_b = "";
-      this.medsArr.bf_a = "";
-      this.medsArr.l_a = "";
-      this.medsArr.l_b = "";
-      this.medsArr.s_b = "";
-      this.medsArr.s_a = "";
-      this.medsArr.bt = "";
-      this.medsArr.meds = "";
-      this.medsArr.remarks = "";
-      this.medsArr.custom_generic = "";
-      this.medsArr.custom_brand = "";
-      this.medsArr.custom_dosage = "";
+      this.medsArr.qty = '';
+      this.medsArr.bf_b = '';
+      this.medsArr.bf_a = '';
+      this.medsArr.l_a = '';
+      this.medsArr.l_b = '';
+      this.medsArr.s_b = '';
+      this.medsArr.s_a = '';
+      this.medsArr.bt = '';
+      this.medsArr.meds = '';
+      this.medsArr.remarks = '';
+      this.medsArr.custom_generic = '';
+      this.medsArr.custom_brand = '';
+      this.medsArr.custom_dosage = '';
       this.medsArr.custom_meds = false;
       this.medsArr.med_id = 0;
       this.isEditMode = false;
@@ -6900,9 +7095,9 @@ export default {
       const generic = this.rxMedicineStringOrEmpty(this.medsArr.custom_generic);
       const brand = this.rxMedicineStringOrEmpty(this.medsArr.custom_brand);
       const qty = this.rxMedicineStringOrEmpty(this.medsArr.qty);
-      if (generic !== "" && qty !== "") {
+      if (generic !== '' && qty !== '') {
         if (!this.itemHasMealTiming(this.medsArr)) {
-          this.$message.warning("Enter at least one meal timing dose.");
+          this.$message.warning('Enter at least one meal timing dose.');
           return;
         }
         const payload = {
@@ -6924,13 +7119,13 @@ export default {
               this.rxOrderDialogVisible = false;
               this.clearMedsForm();
               this.$message({
-                type: "success",
-                message: "Medicine updated successfully.",
+                type: 'success',
+                message: 'Medicine updated successfully.',
               });
             })
             .catch((err) => {
-              console.error("Error updating medicine:", err);
-              this.$message.error("Failed to update medicine.");
+              console.error('Error updating medicine:', err);
+              this.$message.error('Failed to update medicine.');
             });
         } else {
           // Add new medicine
@@ -6940,22 +7135,24 @@ export default {
               this.rxOrderDialogVisible = false;
               this.clearMedsForm();
               this.$message({
-                type: "success",
-                message: "Medicine added successfully.",
+                type: 'success',
+                message: 'Medicine added successfully.',
               });
             })
             .catch((err) => {
-              console.error("Error adding medicine:", err);
-              this.$message.error("Failed to add medicine.");
+              console.error('Error adding medicine:', err);
+              this.$message.error('Failed to add medicine.');
             });
         }
       } else {
-        alert("Generic name and quantity are required.");
+        alert('Generic name and quantity are required.');
       }
     },
     filterDiagnosticsList(list) {
       const q = (this.diagnosticsFilterQuery || '').trim().toLowerCase();
-      if (!q) return list || [];
+      if (!q) {
+        return list || [];
+      }
       return (list || []).filter((item) =>
         (item.lab_test || '').toLowerCase().includes(q)
       );
@@ -6969,8 +7166,8 @@ export default {
         })
           .then((response) => {
             this.getdiagnostics();
-            this.procedure.procedure = "";
-            this.procedure.remarks = "";
+            this.procedure.procedure = '';
+            this.procedure.remarks = '';
             this.procedure.type = 0;
             this.diagnosticsRendered.rendered = [];
             this.diagnosticsRenderedModel = [];
@@ -6980,14 +7177,14 @@ export default {
             this.viewDiagnosticsTbl = false;
           })
           .catch((err) => {
-            console.error("Error adding suggestions:", err);
+            console.error('Error adding suggestions:', err);
           });
       } else {
-        alert("Diagnostic are required.");
+        alert('Diagnostic are required.');
       }
     },
     addNewProcedure2(e) {
-      console.log(e)
+      console.log(e);
       if (this.diagnosticsRenderedModel.length > 0) {
         this.diagnosticsRendered.rendered.push({
           id: this.$route.params.id,
@@ -7008,10 +7205,10 @@ export default {
             id: this.$route.params.id,
             procedure_id: e.lab_test_id,
             procedure: e.lab_test,
-            remarks: "",
+            remarks: '',
             type: e.lab_category_id,
             lab_micro_remarks: this.lab_micro_remarks,
-            xray_remarks: ""
+            xray_remarks: '',
           });
         }
       } else {
@@ -7027,7 +7224,7 @@ export default {
     handleSynovialFluidExtraOption(option) {
       const procedureName = option.procedureName;
       const isSelected = this.synovialFluidExtraOptions.includes(option.label);
-      
+
       if (isSelected) {
         // Add to diagnosticsRenderedModel if not already present
         if (!this.diagnosticsRenderedModel.includes(procedureName)) {
@@ -7039,10 +7236,10 @@ export default {
             id: this.$route.params.id,
             procedure_id: 0, // Using 0 for custom procedures
             procedure: procedureName,
-            remarks: "extra",
+            remarks: 'extra',
             type: 19, // Using crystal analysis category ID
             lab_micro_remarks: this.lab_micro_remarks,
-            xray_remarks: ""
+            xray_remarks: '',
           });
         }
       } else {
@@ -7057,7 +7254,9 @@ export default {
       }
     },
     processLabOthersInput(v) {
-      if (!v) return;
+      if (!v) {
+        return;
+      }
       const items = String(v)
         .split(',')
         .map((s) => s.trim())
@@ -7067,7 +7266,9 @@ export default {
         const exists = this.diagnosticsRendered.rendered.some(
           (p) => p.procedure_id === 0 && p.procedure === item
         );
-        if (exists) return;
+        if (exists) {
+          return;
+        }
 
         this.diagnosticsRendered.rendered.push({
           id: this.$route.params.id,
@@ -7091,7 +7292,7 @@ export default {
           id: this.$route.params.id,
           procedure_id: 0,
           procedure: v,
-          remarks: "",
+          remarks: '',
           type: 2,
         });
       }
@@ -7102,7 +7303,7 @@ export default {
     },
     initRxMedTableSortable() {
       this.destroyRxMedSortables();
-      if (this.tab !== "fourth" || !this.activeRxList.length) {
+      if (this.tab !== 'fourth' || !this.activeRxList.length) {
         return;
       }
       this.$nextTick(() => {
@@ -7112,14 +7313,14 @@ export default {
         }
         const tables = Array.isArray(ref) ? ref : [ref];
         tables.forEach((table) => {
-          const tbody = table.$el.querySelector(".el-table__body-wrapper tbody");
+          const tbody = table.$el.querySelector('.el-table__body-wrapper tbody');
           if (!tbody) {
             return;
           }
           const sortable = Sortable.create(tbody, {
-            handle: ".rx-drag-handle",
+            handle: '.rx-drag-handle',
             animation: 150,
-            ghostClass: "rx-med-row-ghost",
+            ghostClass: 'rx-med-row-ghost',
             onEnd: (evt) => {
               const { oldIndex, newIndex } = evt;
               if (oldIndex === newIndex || oldIndex == null || newIndex == null) {
@@ -7153,7 +7354,9 @@ export default {
     },
     async saveRxMedOrder() {
       const appointmentId = this.$route.params.id;
-      if (!appointmentId || !this.activeRxList.length) return;
+      if (!appointmentId || !this.activeRxList.length) {
+        return;
+      }
       this.rxListReorderLoading = true;
       try {
         await Medicine.reorderAppointmentMeds({
@@ -7164,8 +7367,8 @@ export default {
           order: this.activeRxList.map((r) => r.id),
         });
       } catch (err) {
-        console.error("Error saving medicine order:", err);
-        this.$message.error("Could not save medicine order.");
+        console.error('Error saving medicine order:', err);
+        this.$message.error('Could not save medicine order.');
         await this.getmeds();
       } finally {
         this.rxListReorderLoading = false;
@@ -7195,7 +7398,7 @@ export default {
           this.initRxMedTableSortable();
         })
         .catch((err) => {
-          console.error("Error adding suggestions:", err);
+          console.error('Error adding suggestions:', err);
         });
     },
     ensureActivePrescriptionGroup() {
@@ -7219,7 +7422,9 @@ export default {
     },
     async addPrescriptionGroup() {
       const appointmentId = this.$route.params.id;
-      if (!appointmentId) return;
+      if (!appointmentId) {
+        return;
+      }
       this.rxGroupActionLoading = true;
       try {
         const group = await Medicine.createPrescriptionGroup({
@@ -7229,32 +7434,36 @@ export default {
         if (group && group.id) {
           this.activePrescriptionGroupId = String(group.id);
         }
-        this.$message.success("Prescription group added.");
+        this.$message.success('Prescription group added.');
       } catch (e) {
-        this.$message.error("Could not add prescription group.");
+        this.$message.error('Could not add prescription group.');
       } finally {
         this.rxGroupActionLoading = false;
       }
     },
     renamePrescriptionGroup(group) {
-      if (!group || !group.id) return;
-      this.$prompt("Prescription group name", "Rename", {
-        confirmButtonText: "Save",
-        cancelButtonText: "Cancel",
-        inputValue: group.title || "",
+      if (!group || !group.id) {
+        return;
+      }
+      this.$prompt('Prescription group name', 'Rename', {
+        confirmButtonText: 'Save',
+        cancelButtonText: 'Cancel',
+        inputValue: group.title || '',
         inputPattern: /\S+/,
-        inputErrorMessage: "Name is required",
+        inputErrorMessage: 'Name is required',
       })
-        .then(async ({ value }) => {
-          const title = String(value || "").trim();
-          if (!title) return;
+        .then(async({ value }) => {
+          const title = String(value || '').trim();
+          if (!title) {
+            return;
+          }
           this.rxGroupActionLoading = true;
           try {
             await Medicine.updatePrescriptionGroup(group.id, { title });
             group.title = title;
-            this.$message.success("Prescription group renamed.");
+            this.$message.success('Prescription group renamed.');
           } catch (e) {
-            this.$message.error("Could not rename prescription group.");
+            this.$message.error('Could not rename prescription group.');
           } finally {
             this.rxGroupActionLoading = false;
           }
@@ -7263,14 +7472,16 @@ export default {
     },
     async deleteActivePrescriptionGroup() {
       const gid = this.getActivePrescriptionGroupId();
-      if (!gid) return;
+      if (!gid) {
+        return;
+      }
       const group = this.activePrescriptionGroup;
-      const title = group ? group.title : "this group";
+      const title = group ? group.title : 'this group';
       try {
         await this.$confirm(
           `Delete "${title}" and all medicines in this group?`,
-          "Delete prescription group",
-          { type: "warning", confirmButtonText: "Delete", cancelButtonText: "Cancel" },
+          'Delete prescription group',
+          { type: 'warning', confirmButtonText: 'Delete', cancelButtonText: 'Cancel' }
         );
       } catch (e) {
         return;
@@ -7286,15 +7497,15 @@ export default {
         this.clearRxMedTableSelection();
         await Medicine.deletePrescriptionGroup(gid);
         await this.getmeds();
-        this.$message.success("Prescription group deleted.");
+        this.$message.success('Prescription group deleted.');
       } catch (e) {
-        this.$message.error("Could not delete prescription group.");
+        this.$message.error('Could not delete prescription group.');
       } finally {
         this.rxGroupActionLoading = false;
       }
     },
     handlePrintRxCommand(command) {
-      if (command === "all") {
+      if (command === 'all') {
         this.printAllRxGroups();
         return;
       }
@@ -7303,13 +7514,13 @@ export default {
     printCurrentRxGroup() {
       const gid = this.getActivePrescriptionGroupId();
       if (!gid) {
-        this.$message.warning("Select a prescription group first.");
+        this.$message.warning('Select a prescription group first.');
         return;
       }
       this.printpdf2(gid);
     },
     printAllRxGroups() {
-      this.printpdf2("all");
+      this.printpdf2('all');
     },
     destroyDxTableSortables() {
       (this.dxTableSortables || []).forEach((s) => s.destroy());
@@ -7317,7 +7528,7 @@ export default {
     },
     initDxTableSortable() {
       this.destroyDxTableSortables();
-      if (this.tab !== "fifth" || !this.activeDiagnosticList.length) {
+      if (this.tab !== 'fifth' || !this.activeDiagnosticList.length) {
         return;
       }
       this.$nextTick(() => {
@@ -7327,14 +7538,14 @@ export default {
         }
         const tables = Array.isArray(ref) ? ref : [ref];
         tables.forEach((table) => {
-          const tbody = table.$el.querySelector(".el-table__body-wrapper tbody");
+          const tbody = table.$el.querySelector('.el-table__body-wrapper tbody');
           if (!tbody) {
             return;
           }
           const sortable = Sortable.create(tbody, {
-            handle: ".rx-drag-handle",
+            handle: '.rx-drag-handle',
             animation: 150,
-            ghostClass: "rx-med-row-ghost",
+            ghostClass: 'rx-med-row-ghost',
             onEnd: (evt) => {
               const { oldIndex, newIndex } = evt;
               if (oldIndex === newIndex || oldIndex == null || newIndex == null) {
@@ -7368,7 +7579,9 @@ export default {
     },
     async saveDxOrder() {
       const appointmentId = this.$route.params.id;
-      if (!appointmentId || !this.activeDiagnosticList.length) return;
+      if (!appointmentId || !this.activeDiagnosticList.length) {
+        return;
+      }
       this.dxListReorderLoading = true;
       try {
         await Procedure.reorderAppointmentDiagnostics({
@@ -7379,8 +7592,8 @@ export default {
           order: this.activeDiagnosticList.map((r) => r.id),
         });
       } catch (err) {
-        console.error("Error saving diagnostic order:", err);
-        this.$message.error("Could not save diagnostic order.");
+        console.error('Error saving diagnostic order:', err);
+        this.$message.error('Could not save diagnostic order.');
         await this.getdiagnostics();
       } finally {
         this.dxListReorderLoading = false;
@@ -7393,11 +7606,11 @@ export default {
           const payload = response || {};
           this.diagnostic_groups = (payload.groups || []).map((g) => ({
             ...g,
-            lab_remarks: g.lab_remarks || "",
+            lab_remarks: g.lab_remarks || '',
             request_date: g.request_date || null,
-            findings: g.findings || "",
-            notes: g.notes || "",
-            recommendations: g.recommendations || "",
+            findings: g.findings || '',
+            notes: g.notes || '',
+            recommendations: g.recommendations || '',
           }));
           this.diagnostic_list = payload.diagnostics || payload.data || [];
           this.ensureActiveDiagnosticGroup();
@@ -7405,7 +7618,7 @@ export default {
           this.initDxTableSortable();
         })
         .catch((err) => {
-          console.error("Error adding suggestions:", err);
+          console.error('Error adding suggestions:', err);
         });
     },
     ensureActiveDiagnosticGroup() {
@@ -7430,23 +7643,25 @@ export default {
     syncFormLabRemarksFromActiveGroup() {
       const group = this.activeDiagnosticGroup;
       if (group) {
-        this.form.lab_remarks = group.lab_remarks || "";
+        this.form.lab_remarks = group.lab_remarks || '';
       }
     },
     async saveActiveDiagnosticGroupMeta() {
       const group = this.activeDiagnosticGroup;
-      if (!group || !group.id) return;
+      if (!group || !group.id) {
+        return;
+      }
       try {
         await Procedure.updateDiagnosticGroup(group.id, {
-          lab_remarks: group.lab_remarks || "",
+          lab_remarks: group.lab_remarks || '',
           request_date: group.request_date || null,
-          findings: group.findings || "",
-          notes: group.notes || "",
-          recommendations: group.recommendations || "",
+          findings: group.findings || '',
+          notes: group.notes || '',
+          recommendations: group.recommendations || '',
         });
         this.syncFormLabRemarksFromActiveGroup();
       } catch (e) {
-        this.$message.error("Could not save diagnostic group details.");
+        this.$message.error('Could not save diagnostic group details.');
       }
     },
     onDiagnosticGroupTabClick() {
@@ -7455,7 +7670,9 @@ export default {
     },
     async addDiagnosticGroup() {
       const appointmentId = this.$route.params.id;
-      if (!appointmentId) return;
+      if (!appointmentId) {
+        return;
+      }
       this.dxGroupActionLoading = true;
       try {
         await this.saveActiveDiagnosticGroupMeta();
@@ -7466,32 +7683,36 @@ export default {
         if (group && group.id) {
           this.activeDiagnosticGroupId = String(group.id);
         }
-        this.$message.success("Diagnostic group added.");
+        this.$message.success('Diagnostic group added.');
       } catch (e) {
-        this.$message.error("Could not add diagnostic group.");
+        this.$message.error('Could not add diagnostic group.');
       } finally {
         this.dxGroupActionLoading = false;
       }
     },
     renameDiagnosticGroup(group) {
-      if (!group || !group.id) return;
-      this.$prompt("Diagnostic group name", "Rename", {
-        confirmButtonText: "Save",
-        cancelButtonText: "Cancel",
-        inputValue: group.title || "",
+      if (!group || !group.id) {
+        return;
+      }
+      this.$prompt('Diagnostic group name', 'Rename', {
+        confirmButtonText: 'Save',
+        cancelButtonText: 'Cancel',
+        inputValue: group.title || '',
         inputPattern: /\S+/,
-        inputErrorMessage: "Name is required",
+        inputErrorMessage: 'Name is required',
       })
-        .then(async ({ value }) => {
-          const title = String(value || "").trim();
-          if (!title) return;
+        .then(async({ value }) => {
+          const title = String(value || '').trim();
+          if (!title) {
+            return;
+          }
           this.dxGroupActionLoading = true;
           try {
             await Procedure.updateDiagnosticGroup(group.id, { title });
             group.title = title;
-            this.$message.success("Diagnostic group renamed.");
+            this.$message.success('Diagnostic group renamed.');
           } catch (e) {
-            this.$message.error("Could not rename diagnostic group.");
+            this.$message.error('Could not rename diagnostic group.');
           } finally {
             this.dxGroupActionLoading = false;
           }
@@ -7500,14 +7721,16 @@ export default {
     },
     async deleteActiveDiagnosticGroup() {
       const gid = this.getActiveDiagnosticGroupId();
-      if (!gid) return;
+      if (!gid) {
+        return;
+      }
       const group = this.activeDiagnosticGroup;
-      const title = group ? group.title : "this group";
+      const title = group ? group.title : 'this group';
       try {
         await this.$confirm(
           `Delete "${title}" and all diagnostics in this group?`,
-          "Delete diagnostic group",
-          { type: "warning", confirmButtonText: "Delete", cancelButtonText: "Cancel" },
+          'Delete diagnostic group',
+          { type: 'warning', confirmButtonText: 'Delete', cancelButtonText: 'Cancel' }
         );
       } catch (e) {
         return;
@@ -7517,15 +7740,15 @@ export default {
         this.clearDxListSelection();
         await Procedure.deleteDiagnosticGroup(gid);
         await this.getdiagnostics();
-        this.$message.success("Diagnostic group deleted.");
+        this.$message.success('Diagnostic group deleted.');
       } catch (e) {
-        this.$message.error("Could not delete diagnostic group.");
+        this.$message.error('Could not delete diagnostic group.');
       } finally {
         this.dxGroupActionLoading = false;
       }
     },
     handlePrintDxCommand(command) {
-      if (command === "all") {
+      if (command === 'all') {
         this.printAllDxGroups();
         return;
       }
@@ -7534,13 +7757,13 @@ export default {
     printCurrentDxGroup() {
       const gid = this.getActiveDiagnosticGroupId();
       if (!gid) {
-        this.$message.warning("Select a diagnostic group first.");
+        this.$message.warning('Select a diagnostic group first.');
         return;
       }
       this.printrequest(1, gid);
     },
     printAllDxGroups() {
-      this.printrequest(1, "all");
+      this.printrequest(1, 'all');
     },
     getservices() {
       this.services_list = [];
@@ -7549,12 +7772,12 @@ export default {
           this.services_list = response.data;
         })
         .catch((err) => {
-          console.error("Error adding suggestions:", err);
+          console.error('Error adding suggestions:', err);
         });
     },
     openCompareDrawer() {
       if (!this.patientid_id) {
-        this.$message.warning("Patient information is still loading.");
+        this.$message.warning('Patient information is still loading.');
         return;
       }
       this.compareDrawerVisible = true;
@@ -7566,19 +7789,21 @@ export default {
         .then((response) => {
           const rows = (response && response.data) || [];
           this.comparePastVisits = rows.filter(
-            (v) => String(v.id) !== String(this.form.id),
+            (v) => String(v.id) !== String(this.form.id)
           );
         })
         .catch((err) => {
-          console.error("Error loading past consultations:", err);
-          this.$message.error("Could not load previous visits.");
+          console.error('Error loading past consultations:', err);
+          this.$message.error('Could not load previous visits.');
         })
         .finally(() => {
           this.compareListLoading = false;
         });
     },
     loadCompareVisit(id) {
-      if (!id) return;
+      if (!id) {
+        return;
+      }
       this.compareLoading = true;
       this.resetCompareData();
       Promise.all([
@@ -7600,8 +7825,8 @@ export default {
           this.compareData.services_list = (services && services.data) || [];
         })
         .catch((err) => {
-          console.error("Error loading visit for comparison:", err);
-          this.$message.error("Could not load the selected visit.");
+          console.error('Error loading visit for comparison:', err);
+          this.$message.error('Could not load the selected visit.');
         })
         .finally(() => {
           this.compareLoading = false;
@@ -7622,15 +7847,15 @@ export default {
       this.compareSelectedId = null;
       this.resetCompareData();
     },
-    printpdf(groupId = "all") {
+    printpdf(groupId = 'all') {
       const query =
-        groupId && groupId !== "all" ? `?group_id=${groupId}` : "";
-      window.open("/api/printpdf/" + this.form.id + query);
+        groupId && groupId !== 'all' ? `?group_id=${groupId}` : '';
+      window.open('/api/printpdf/' + this.form.id + query);
     },
-    printpdf2(groupId = "all") {
+    printpdf2(groupId = 'all') {
       const query =
-        groupId && groupId !== "all" ? `?group_id=${groupId}` : "";
-      window.open("/api/printpdf2/" + this.form.id + query);
+        groupId && groupId !== 'all' ? `?group_id=${groupId}` : '';
+      window.open('/api/printpdf2/' + this.form.id + query);
     },
     /* emailpdf() {
       window.open("/api/email-prescription/" + this.form.id);
@@ -7648,67 +7873,67 @@ export default {
           console.error("Error adding suggestions:", err);
         });
     }, */
-    printrequest(type, groupId = "all") {
+    printrequest(type, groupId = 'all') {
       const query =
-        groupId && groupId !== "all" ? `?group_id=${groupId}` : "";
-      window.open("/api/printrequest/" + this.form.id + "/" + type + query);
+        groupId && groupId !== 'all' ? `?group_id=${groupId}` : '';
+      window.open('/api/printrequest/' + this.form.id + '/' + type + query);
     },
     async printmedcert(type) {
       await this.ensureSavedBeforePrint();
-      window.open("/api/printmedcert/" + this.form.id);
+      window.open('/api/printmedcert/' + this.form.id);
     },
     printfees() {
-      window.open("/api/printfees/" + this.form.id);
+      window.open('/api/printfees/' + this.form.id);
     },
     printriskstrat(type) {
-      window.open("/api/printriskstrat/" + this.form.id);
+      window.open('/api/printriskstrat/' + this.form.id);
     },
     printfittowork(type) {
-      window.open("/api/printfittowork/" + this.form.id);
+      window.open('/api/printfittowork/' + this.form.id);
     },
     printclearance(type) {
-      window.open("/api/printclearance/" + this.form.id);
+      window.open('/api/printclearance/' + this.form.id);
     },
     printreferral(type) {
-      window.open("/api/printreferral/" + this.form.id);
+      window.open('/api/printreferral/' + this.form.id);
     },
     async printform(type) {
       await this.ensureSavedBeforePrint();
-      window.open("/api/printform/" + this.form.id);
+      window.open('/api/printform/' + this.form.id);
     },
     doneConsult() {
-      this.$confirm("Are you done with this consultation?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
-        type: "warning",
+      this.$confirm('Are you done with this consultation?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
       })
         .then(() => {
           Patients.doneConsult(this.$route.params.id)
             .then((response) => {
               this.$message({
-                type: "success",
-                message: "Done consultation",
+                type: 'success',
+                message: 'Done consultation',
               });
             })
             .catch((err) => {
-              console.error("Error adding suggestions:", err);
+              console.error('Error adding suggestions:', err);
             });
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "Canceled action.",
+            type: 'info',
+            message: 'Canceled action.',
           });
         });
     },
     vitalsHistoryRowClass({ row }) {
-      return row.is_current ? "vitals-history-row--current" : "";
+      return row.is_current ? 'vitals-history-row--current' : '';
     },
     parseVitalNumber(value) {
-      if (value === null || value === undefined || value === "") {
+      if (value === null || value === undefined || value === '') {
         return null;
       }
-      const n = parseFloat(String(value).replace(/[^\d.-]/g, ""));
+      const n = parseFloat(String(value).replace(/[^\d.-]/g, ''));
       return Number.isFinite(n) ? n : null;
     },
     vitalReadingHasValues(reading) {
@@ -7755,30 +7980,30 @@ export default {
     isPeVitalAbnormal(type, reading = null) {
       const f = reading || this.form;
       switch (type) {
-        case "bp": {
+        case 'bp': {
           const sys = this.parseVitalNumber(f.vit_sys);
           const dia = this.parseVitalNumber(f.vit_dia);
           const sysAbnormal = sys !== null && (sys < 90 || sys > 140);
           const diaAbnormal = dia !== null && (dia < 60 || dia > 90);
           return sysAbnormal || diaAbnormal;
         }
-        case "temp": {
+        case 'temp': {
           const temp = this.parseVitalNumber(f.vit_temp);
           return temp !== null && (temp < 36 || temp > 37.5);
         }
-        case "hr": {
+        case 'hr': {
           const hr = this.parseVitalNumber(f.vit_cr);
           return hr !== null && (hr < 60 || hr > 100);
         }
-        case "rr": {
+        case 'rr': {
           const rr = this.parseVitalNumber(f.vit_rr);
           return rr !== null && (rr < 12 || rr > 20);
         }
-        case "o2": {
+        case 'o2': {
           const o2 = this.parseVitalNumber(f.o2_stat);
           return o2 !== null && o2 < 95;
         }
-        case "bmi": {
+        case 'bmi': {
           const bmi = this.parseVitalNumber(f.bmi);
           return bmi !== null && (bmi < 18.5 || bmi >= 25);
         }
@@ -7787,11 +8012,11 @@ export default {
       }
     },
     buildCurrentVitalsRow() {
-      const sys = (this.form.vit_sys || "").toString().trim();
-      const dia = (this.form.vit_dia || "").toString().trim();
-      let bp = "";
+      const sys = (this.form.vit_sys || '').toString().trim();
+      const dia = (this.form.vit_dia || '').toString().trim();
+      let bp = '';
       if (sys || dia) {
-        bp = `${sys || "—"}/${dia || "—"}`;
+        bp = `${sys || '—'}/${dia || '—'}`;
       }
       return {
         id: Number(this.form.id || this.$route.params.id),
@@ -7816,13 +8041,13 @@ export default {
         return;
       }
       const dayKey = this.appointment_dt
-        ? moment(this.appointment_dt).format("YYYY-MM-DD")
-        : moment().format("YYYY-MM-DD");
+        ? moment(this.appointment_dt).format('YYYY-MM-DD')
+        : moment().format('YYYY-MM-DD');
       const entry = {
         id: `local-${Date.now()}`,
         appointment_id: Number(this.form.id || this.$route.params.id),
         recorded_at: new Date().toISOString(),
-        time_display: moment().format("h:mm A"),
+        time_display: moment().format('h:mm A'),
         date: row.date,
         date_sort: row.date_sort,
         day_key: dayKey,
@@ -7841,10 +8066,10 @@ export default {
       this.syncVitalsAfterBpUpdate(entry);
     },
     upDateBP() {
-      this.$confirm("Are you done with this update?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
-        type: "warning",
+      this.$confirm('Are you done with this update?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
       })
         .then(() => {
           const bp = {
@@ -7867,18 +8092,18 @@ export default {
                 this.syncVitalsHistoryAfterUpdate();
               }
               this.$message({
-                type: "success",
-                message: "Done updating",
+                type: 'success',
+                message: 'Done updating',
               });
             })
             .catch((err) => {
-              console.error("Error adding suggestions:", err);
+              console.error('Error adding suggestions:', err);
             });
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "Canceled action.",
+            type: 'info',
+            message: 'Canceled action.',
           });
         });
     },
@@ -7889,13 +8114,13 @@ export default {
           this.attachments = response.data;
         })
         .catch((err) => {
-          console.error("Error adding suggestions:", err);
+          console.error('Error adding suggestions:', err);
         });
     },
     handleChange(file, fileList) {
       this.form_att.files = fileList.map((fileItem) => fileItem.raw);
     },
-    
+
     // Image compression utility
     compressImage(file, quality = 0.8, maxWidth = 1920, maxHeight = 1080) {
       return new Promise((resolve) => {
@@ -7938,16 +8163,16 @@ export default {
       this.uploadProgress = 0;
       this.isUploading = true;
       this.uploadStatus = 'Preparing files...';
-      
+
       const formData = new FormData();
-      formData.append("patientid", this.form_att.patientid);
+      formData.append('patientid', this.form_att.patientid);
 
       // Check network connection
       const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
       const isSlowConnection = connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
-      
+
       if (isSlowConnection) {
-        this.$message.warning("Slow network detected. Upload may take longer...");
+        this.$message.warning('Slow network detected. Upload may take longer...');
       }
 
       const totalFiles = this.form_att.files.length;
@@ -7955,8 +8180,8 @@ export default {
 
       for (let i = 0; i < this.form_att.files.length; i++) {
         const file = this.form_att.files[i];
-        const extension = file.name.split(".").pop().toLowerCase();
-        
+        const extension = file.name.split('.').pop().toLowerCase();
+
         // Update progress
         this.uploadStatus = `Processing file ${i + 1} of ${totalFiles}: ${file.name}`;
         this.uploadProgress = (processedFiles / totalFiles) * 30; // 30% for processing
@@ -7971,28 +8196,28 @@ export default {
         let processedFile = file;
 
         // Handle HEIC/HEIF conversion
-        if (extension === "heic" || extension === "heif") {
+        if (extension === 'heic' || extension === 'heif') {
           try {
             this.uploadStatus = `Converting HEIC file: ${file.name}`;
             const bmpBlob = await heic2any({
               blob: file,
-              toType: "image/bmp",
+              toType: 'image/bmp',
               quality: 0.9,
             });
 
             processedFile = new File(
               [bmpBlob],
-              file.name.replace(/\.(heic|heif)$/i, ".jpg"),
-              { type: "image/bmp" }
+              file.name.replace(/\.(heic|heif)$/i, '.jpg'),
+              { type: 'image/bmp' }
             );
           } catch (error) {
-            console.error("HEIC conversion failed:", error);
-            this.$message.error("HEIC conversion failed.");
+            console.error('HEIC conversion failed:', error);
+            this.$message.error('HEIC conversion failed.');
             this.isUploading = false;
             return;
           }
         }
-        
+
         // Compress images (JPEG, PNG, BMP, WebP)
         const imageTypes = ['jpg', 'jpeg', 'png', 'bmp', 'webp'];
         if (imageTypes.includes(extension.toLowerCase())) {
@@ -8001,7 +8226,7 @@ export default {
             processedFile = await this.compressImage(processedFile, 0.8, 1920, 1080);
             console.log(`Compressed ${file.name}: ${file.size} -> ${processedFile.size} bytes`);
           } catch (error) {
-            console.error("Image compression failed:", error);
+            console.error('Image compression failed:', error);
             // Continue with original file if compression fails
           }
         }
@@ -8014,36 +8239,36 @@ export default {
       // Retry mechanism for mobile data
       const maxRetries = 3;
       let retryCount = 0;
-      
+
       while (retryCount < maxRetries) {
         try {
           this.uploadStatus = 'Uploading files...';
           this.uploadProgress = 30; // Start upload at 30%
-          
+
           const response = await Patients.addAttachments(formData);
-          
+
           // Upload successful
           this.uploadProgress = 100;
           this.uploadStatus = 'Upload completed!';
-          
-          this.form_att.file = "";
+
+          this.form_att.file = '';
           this.get_attachments(this.form_att.patientid);
-          this.$message.success("File uploaded successfully!");
+          this.$message.success('File uploaded successfully!');
           this.$refs.uploadRef.clearFiles();
-          
+
           // Reset upload state
           this.isUploading = false;
           this.uploadProgress = 0;
           this.uploadStatus = '';
-          
+
           return; // Success, exit the retry loop
         } catch (err) {
           retryCount++;
           console.error(`Upload attempt ${retryCount} failed:`, err);
-          
+
           // Check if it's a network-related error
           const isNetworkError = !err.response || err.code === 'ECONNABORTED' || err.code === 'NETWORK_ERROR';
-          
+
           if (isNetworkError && retryCount < maxRetries) {
             this.uploadStatus = `Upload failed (attempt ${retryCount}/${maxRetries}). Retrying...`;
             this.$message.warning(`Upload failed (attempt ${retryCount}/${maxRetries}). Retrying...`);
@@ -8051,59 +8276,59 @@ export default {
             await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
             continue;
           }
-          
+
           // Final error handling
-          let errorMessage = "Upload failed.";
-          
+          let errorMessage = 'Upload failed.';
+
           if (isNetworkError) {
-            errorMessage = "Network error. Please check your connection and try again.";
+            errorMessage = 'Network error. Please check your connection and try again.';
           } else if (err.response && err.response.data) {
             if (err.response.data.message) {
-              errorMessage += " " + err.response.data.message;
+              errorMessage += ' ' + err.response.data.message;
             } else if (err.response.data.error) {
-              errorMessage += " " + err.response.data.error;
+              errorMessage += ' ' + err.response.data.error;
             } else if (typeof err.response.data === 'string') {
-              errorMessage += " " + err.response.data;
+              errorMessage += ' ' + err.response.data;
             }
           } else if (err.message) {
-            errorMessage += " " + err.message;
+            errorMessage += ' ' + err.message;
           } else if (typeof err === 'string') {
-            errorMessage += " " + err;
+            errorMessage += ' ' + err;
           }
-          
+
           this.$message.error(errorMessage);
           break;
         }
       }
-      
+
       // Reset upload state on failure
       this.isUploading = false;
       this.uploadProgress = 0;
       this.uploadStatus = '';
     },
     deleteAtt(id) {
-      this.$confirm("Are you done with this file?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
-        type: "warning",
+      this.$confirm('Are you done with this file?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
       })
         .then(() => {
           Patients.deleteAttachments(id)
             .then((response) => {
               this.$message({
-                type: "success",
-                message: "Deleted File",
+                type: 'success',
+                message: 'Deleted File',
               });
               this.get_attachments(this.form_att.patientid);
             })
             .catch((err) => {
-              console.error("Error adding suggestions:", err);
+              console.error('Error adding suggestions:', err);
             });
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "Canceled action.",
+            type: 'info',
+            message: 'Canceled action.',
           });
         });
     },
@@ -8121,21 +8346,21 @@ export default {
       this.dialogFormVisible = true;
     },
     confirmCancel() {
-      this.$refs["appForm"].validate((valid) => {
+      this.$refs['appForm'].validate((valid) => {
         if (valid) {
           this.isProcessing = true;
           Patients.cancel_appointment(this.form)
             .then((response) => {
               this.dialogFormVisible = false;
               this.$message({
-                message: "Appointment Cancelled",
-                type: "success",
+                message: 'Appointment Cancelled',
+                type: 'success',
                 duration: 5 * 1000,
               });
-              this.$router.push({ path: "/appointments/appointments" });
+              this.$router.push({ path: '/appointments/appointments' });
             })
             .catch((err) => {
-              console.error("Error adding suggestions:", err);
+              console.error('Error adding suggestions:', err);
             })
             .finally(() => {
               // This will always run, regardless of the request outcome
@@ -8143,13 +8368,13 @@ export default {
             });
           // }, 5000);
         } else {
-          console.log("error submit!!");
+          console.log('error submit!!');
           return false;
         }
       });
     },
     printChart() {
-      window.open("/api/printchart/" + this.patientid_id);
+      window.open('/api/printchart/' + this.patientid_id);
     },
     handleRowClick(row, column, event) {
       this.selectedOldRecords = row;
@@ -8165,13 +8390,13 @@ export default {
       }
     },
     checkExtn(a) {
-      return a.split(".");
+      return a.split('.');
     },
     dateFormat(dt) {
-      return moment(dt).format("MMMM D, YYYY");
+      return moment(dt).format('MMMM D, YYYY');
     },
     viewFile(s, e) {
-      this.isPdf = e == "pdf" ? true : false;
+      this.isPdf = e == 'pdf';
       this.viewFileModel = true;
       this.sourceFile = s;
     },
@@ -8183,20 +8408,20 @@ export default {
     openDxTemplateDialog() {
       this.dxTemplateDialogVisible = true;
       this.dxTemplateSelectId = null;
-      this.fetchDxTemplatesForDialog("");
+      this.fetchDxTemplatesForDialog('');
     },
     openFormTemplateDialog() {
       this.formTemplateDialogVisible = true;
       this.formTemplateSelectId = null;
-      this.formTemplateSearchKeyword = "";
-      this.formTemplateFilterCategory = "";
+      this.formTemplateSearchKeyword = '';
+      this.formTemplateFilterCategory = '';
       this.loadFormTemplateRecentFromStorage();
       this.fetchFormTemplateCategoriesForDialog();
       this.fetchFormTemplatesForDialog();
     },
     loadFormTemplateRecentFromStorage() {
       try {
-        const raw = localStorage.getItem("formTemplateRecent");
+        const raw = localStorage.getItem('formTemplateRecent');
         const parsed = raw ? JSON.parse(raw) : [];
         this.formTemplateRecent = Array.isArray(parsed) ? parsed.filter((x) => x && x.id) : [];
       } catch (e) {
@@ -8205,28 +8430,28 @@ export default {
     },
     rememberFormTemplateRecent(id, name) {
       const sid = Number(id);
-      const nm = (name || "Template").trim();
+      const nm = (name || 'Template').trim();
       const next = [{ id: sid, name: nm }];
       for (const r of this.formTemplateRecent) {
         if (next.length >= 8) {
           break;
         }
         if (r && Number(r.id) !== sid) {
-          next.push({ id: Number(r.id), name: r.name || "Template" });
+          next.push({ id: Number(r.id), name: r.name || 'Template' });
         }
       }
       this.formTemplateRecent = next.slice(0, 8);
       try {
-        localStorage.setItem("formTemplateRecent", JSON.stringify(this.formTemplateRecent));
+        localStorage.setItem('formTemplateRecent', JSON.stringify(this.formTemplateRecent));
       } catch (e) {
         /* ignore quota */
       }
     },
     formTemplateOptionLabel(t) {
       if (!t) {
-        return "";
+        return '';
       }
-      const cat = (t.category || "").trim();
+      const cat = (t.category || '').trim();
       return cat ? `${t.name} — ${cat}` : t.name;
     },
     quickSelectFormTemplate(id) {
@@ -8251,12 +8476,12 @@ export default {
         const res = await listFormTemplates({
           page: 1,
           limit: 400,
-          keyword: (this.formTemplateSearchKeyword || "").trim(),
-          category: (this.formTemplateFilterCategory || "").trim(),
+          keyword: (this.formTemplateSearchKeyword || '').trim(),
+          category: (this.formTemplateFilterCategory || '').trim(),
         });
         this.formTemplateList = res.data || [];
       } catch (e) {
-        this.$message.error("Could not load form templates.");
+        this.$message.error('Could not load form templates.');
         this.formTemplateList = [];
       } finally {
         this.formTemplateLoading = false;
@@ -8270,9 +8495,9 @@ export default {
       try {
         const res = await getFormTemplate(this.formTemplateSelectId);
         const row = res.data || {};
-        let html = row.content_html || "";
+        let html = row.content_html || '';
         html = replaceFormTemplatePlaceholders(html, buildFormTemplateContext(this));
-        const existing = (this.form.form_content || "").trim();
+        const existing = (this.form.form_content || '').trim();
         if (existing) {
           this.form.form_content = `${existing}<p><br></p>${html}`;
         } else {
@@ -8280,11 +8505,11 @@ export default {
         }
         await this.$nextTick();
         this.rememberFormTemplateRecent(row.id, row.name);
-        this.tab = "form";
-        this.$message.success("Template loaded into the form editor.");
+        this.tab = 'form';
+        this.$message.success('Template loaded into the form editor.');
         this.formTemplateDialogVisible = false;
       } catch (e) {
-        this.$message.error("Could not load template.");
+        this.$message.error('Could not load template.');
       } finally {
         this.formTemplateApplyLoading = false;
       }
@@ -8295,17 +8520,17 @@ export default {
         const res = await listPrescriptionDiagnosisTemplates({
           page: 1,
           limit: 200,
-          keyword: "",
+          keyword: '',
         });
         this.rxTemplateList = res.data || [];
       } catch (e) {
-        this.$message.error("Could not load prescription templates.");
+        this.$message.error('Could not load prescription templates.');
       } finally {
         this.rxTemplateLoading = false;
       }
     },
     async fetchDxTemplatesForDialog(keyword) {
-      const kw = (keyword || "").trim();
+      const kw = (keyword || '').trim();
       this.dxTemplateLoading = true;
       try {
         const res = await listDiagnosticTemplates({
@@ -8315,27 +8540,27 @@ export default {
         });
         this.dxTemplateList = res.data || [];
       } catch (e) {
-        this.$message.error("Could not load diagnostic templates.");
+        this.$message.error('Could not load diagnostic templates.');
       } finally {
         this.dxTemplateLoading = false;
       }
     },
     qtyFromTemplateDuration(duration) {
       if (!duration) {
-        return "1";
+        return '1';
       }
       const m = String(duration).match(/\d+/);
-      return m ? m[0] : "1";
+      return m ? m[0] : '1';
     },
     buildRxPayloadFromTemplateItem(item) {
       const parts = [];
       if (item.instructions) {
         parts.push(`${item.instructions}`);
       }
-      const remarks = parts.join(" | ");
+      const remarks = parts.join(' | ');
       const hasMaster = item.medicine_id != null && item.medicine_id !== 0;
-      const brand = (item.brand_name || "").trim();
-      const generic = (item.generic_name || "").trim();
+      const brand = (item.brand_name || '').trim();
+      const generic = (item.generic_name || '').trim();
       const groupId = this.getActivePrescriptionGroupId();
       const meal = appointmentMealTimingStringsFromFrequency(item.frequency);
 
@@ -8346,8 +8571,8 @@ export default {
           custom_meds: false,
           custom_generic: generic,
           custom_brand: brand,
-          custom_dosage: "",
-          qty: (item.quantity || "").trim() || this.qtyFromTemplateDuration(item.duration),
+          custom_dosage: (item.dosage || '').trim(),
+          qty: (item.quantity || '').trim() || this.qtyFromTemplateDuration(item.duration),
           ...meal,
           meds: brand,
           remarks,
@@ -8361,10 +8586,10 @@ export default {
         custom_meds: true,
         custom_generic: generic || brand,
         custom_brand: brand || generic,
-        custom_dosage: "",
-        qty: (item.quantity || "").trim() || this.qtyFromTemplateDuration(item.duration),
+        custom_dosage: (item.dosage || '').trim(),
+        qty: (item.quantity || '').trim() || this.qtyFromTemplateDuration(item.duration),
         ...meal,
-        meds: "",
+        meds: '',
         remarks,
         med_id: 0,
       };
@@ -8378,17 +8603,17 @@ export default {
         const res = await getPrescriptionDiagnosisTemplate(this.rxTemplateSelectId);
         const items = (res.data && res.data.items) || [];
         if (!items.length) {
-          this.$message.warning("This template has no medications.");
+          this.$message.warning('This template has no medications.');
           return;
         }
         for (const item of items) {
           await Medicine.add_rx(this.buildRxPayloadFromTemplateItem(item));
         }
         this.getmeds();
-        this.$message.success("Template applied to prescription.");
+        this.$message.success('Template applied to prescription.');
         this.rxTemplateDialogVisible = false;
       } catch (e) {
-        this.$message.error("Could not apply template.");
+        this.$message.error('Could not apply template.');
       } finally {
         this.rxTemplateApplyLoading = false;
       }
@@ -8413,12 +8638,16 @@ export default {
       ];
       const all = [];
       lists.forEach((x) => {
-        if (Array.isArray(x)) all.push(...x);
+        if (Array.isArray(x)) {
+          all.push(...x);
+        }
       });
       const byName = new Map();
       all.forEach((t) => {
-        const name = (t && t.lab_test) ? String(t.lab_test).trim() : "";
-        if (!name) return;
+        const name = (t && t.lab_test) ? String(t.lab_test).trim() : '';
+        if (!name) {
+          return;
+        }
         if (!byName.has(name.toLowerCase())) {
           byName.set(name.toLowerCase(), t);
         }
@@ -8435,23 +8664,25 @@ export default {
         const items = (res.data && res.data.items) || [];
         const activeItems = items.filter((x) => x && x.active !== false);
         if (!activeItems.length) {
-          this.$message.warning("This template has no active diagnostic items.");
+          this.$message.warning('This template has no active diagnostic items.');
           return;
         }
 
         const lookup = this.buildDiagnosticsLookup();
         const existingIds = new Set(
-          (this.activeDiagnosticList || []).map((r) => String(r.ancillary_id)),
+          (this.activeDiagnosticList || []).map((r) => String(r.ancillary_id))
         );
         const existingCustom = new Set(
-          (this.activeDiagnosticList || []).map((r) => (r.diagnostic || "").trim().toLowerCase()),
+          (this.activeDiagnosticList || []).map((r) => (r.diagnostic || '').trim().toLowerCase())
         );
 
         const toAdd = [];
         let added = 0;
         for (const item of activeItems) {
-          const name = (item.diagnostic_name || "").trim();
-          if (!name) continue;
+          const name = (item.diagnostic_name || '').trim();
+          if (!name) {
+            continue;
+          }
           const match = lookup.get(name.toLowerCase());
 
           if (match && match.lab_test_id != null) {
@@ -8466,10 +8697,10 @@ export default {
               id: this.$route.params.id,
               procedure_id: match.lab_test_id,
               procedure: match.lab_test,
-              remarks: (item.notes || "") || "",
+              remarks: (item.notes || '') || '',
               type: match.lab_category_id,
               lab_micro_remarks: this.lab_micro_remarks,
-              xray_remarks: "",
+              xray_remarks: '',
             };
             this.diagnosticsRendered.rendered.push(row);
             toAdd.push(row);
@@ -8489,10 +8720,10 @@ export default {
             id: this.$route.params.id,
             procedure_id: 0,
             procedure: name,
-            remarks: (item.notes || "") || "",
+            remarks: (item.notes || '') || '',
             type: 1,
             lab_micro_remarks: this.lab_micro_remarks,
-            xray_remarks: "",
+            xray_remarks: '',
           };
           this.diagnosticsRendered.rendered.push(row);
           toAdd.push(row);
@@ -8501,7 +8732,7 @@ export default {
         }
 
         if (!added) {
-          this.$message.info("All template items are already loaded.");
+          this.$message.info('All template items are already loaded.');
           return;
         }
 
@@ -8520,7 +8751,7 @@ export default {
         this.$message.success(`Added ${added} diagnostic item(s) from template.`);
         this.dxTemplateDialogVisible = false;
       } catch (e) {
-        this.$message.error("Could not apply diagnostic template.");
+        this.$message.error('Could not apply diagnostic template.');
       } finally {
         this.dxTemplateApplyLoading = false;
       }
@@ -8530,36 +8761,36 @@ export default {
     },
     formatPastRxDate(dt) {
       if (!dt) {
-        return "—";
+        return '—';
       }
       const m = moment(dt);
-      return m.isValid() ? m.format("MMM D, YYYY") : String(dt);
+      return m.isValid() ? m.format('MMM D, YYYY') : String(dt);
     },
     medicationLineLabel(m) {
-      const g = (m.generic_name || "").trim();
-      const b = (m.medicine || "").trim();
+      const g = (m.generic_name || '').trim();
+      const b = (m.medicine || '').trim();
       if (g && b) {
         return `${g} ${b}`;
       }
-      return g || b || "—";
+      return g || b || '—';
     },
     pastRxPreview(medications) {
       const list = Array.isArray(medications) ? medications : [];
       if (!list.length) {
-        return "—";
+        return '—';
       }
       const parts = list.slice(0, 3).map((m) => this.medicationLineLabel(m));
-      const extra = list.length > 3 ? ` (+${list.length - 3} more)` : "";
-      return parts.join(", ") + extra;
+      const extra = list.length > 3 ? ` (+${list.length - 3} more)` : '';
+      return parts.join(', ') + extra;
     },
     async openRxPastPrescriptionDialog() {
       const pid = this.form_att.patientid || this.patientid_id;
       if (!pid) {
-        this.$message.warning("Patient information is still loading. Try again in a moment.");
+        this.$message.warning('Patient information is still loading. Try again in a moment.');
         return;
       }
       this.rxPastDialogVisible = true;
-      this.rxPastSearch = "";
+      this.rxPastSearch = '';
       this.rxPastLoading = true;
       try {
         const res = await Patients.getPatientPastPrescriptions(pid, this.$route.params.id);
@@ -8582,18 +8813,18 @@ export default {
     },
     buildRxPayloadFromPastRx(rx) {
       const custom = !rx.medicine_id || rx.medicine_id === 0;
-      const generic = String(rx.generic_name || "").trim();
-      const brand = String(rx.medicine || "").trim();
+      const generic = String(rx.generic_name || '').trim();
+      const brand = String(rx.medicine || '').trim();
       return {
         id: this.$route.params.id,
         prescription_group_id: this.getActivePrescriptionGroupId(),
         custom_meds: custom,
         med_id: custom ? 0 : rx.medicine_id,
-        meds: custom ? "" : brand,
+        meds: custom ? '' : brand,
         custom_generic: generic,
         custom_brand: brand,
-        custom_dosage: "",
-        qty: rx.qty != null ? String(rx.qty) : "",
+        custom_dosage: '',
+        qty: rx.qty != null ? String(rx.qty) : '',
         bf_b: this.rxMedicineStringOrEmpty(rx.bf_b),
         bf_a: this.rxMedicineStringOrEmpty(rx.bf_a),
         l_b: this.rxMedicineStringOrEmpty(rx.l_b),
@@ -8601,7 +8832,7 @@ export default {
         s_b: this.rxMedicineStringOrEmpty(rx.s_b),
         s_a: this.rxMedicineStringOrEmpty(rx.s_a),
         bt: this.rxMedicineStringOrEmpty(rx.bt),
-        remarks: rx.remarks || "",
+        remarks: rx.remarks || '',
       };
     },
     async clearAllCurrentRx() {
@@ -8612,52 +8843,52 @@ export default {
     },
     async usePastPrescription(row) {
       if (!row.medications || !row.medications.length) {
-        this.$message.warning("This visit has no medications to copy.");
+        this.$message.warning('This visit has no medications to copy.');
         return;
       }
       const hasExisting = this.rx_list && this.rx_list.length > 0;
-      let mode = "merge";
+      let mode = 'merge';
       if (hasExisting) {
         try {
           await this.$confirm(
-            "You already have medications on this appointment. Replace all clears the current list and copies only the selected past prescription. Merge adds these medications alongside current ones.",
-            "Apply past prescription",
+            'You already have medications on this appointment. Replace all clears the current list and copies only the selected past prescription. Merge adds these medications alongside current ones.',
+            'Apply past prescription',
             {
-              confirmButtonText: "Replace all",
-              cancelButtonText: "Merge with current",
-              type: "warning",
-            },
+              confirmButtonText: 'Replace all',
+              cancelButtonText: 'Merge with current',
+              type: 'warning',
+            }
           );
-          mode = "replace";
+          mode = 'replace';
         } catch (action) {
-          if (action !== "cancel") {
+          if (action !== 'cancel') {
             return;
           }
-          mode = "merge";
+          mode = 'merge';
         }
       }
       this.rxPastUseLoading = true;
       try {
-        if (mode === "replace") {
+        if (mode === 'replace') {
           await this.clearAllCurrentRx();
         }
         for (const rx of row.medications) {
           await Medicine.add_rx(this.buildRxPayloadFromPastRx(rx));
         }
         await this.getmeds();
-        this.$message.success("Past prescription applied.");
+        this.$message.success('Past prescription applied.');
         this.rxPastDialogVisible = false;
       } catch (e) {
-        this.$message.error("Could not apply prescription.");
+        this.$message.error('Could not apply prescription.');
       } finally {
         this.rxPastUseLoading = false;
       }
     },
     importMedicine() {
-      this.$confirm("Are you sure you want to import last prescriptions?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
-        type: "warning",
+      this.$confirm('Are you sure you want to import last prescriptions?', 'Warning', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
       })
         .then(() => {
           Patients.ImportMedicine(this.form_att.patientid, this.$route.params.id)
@@ -8665,13 +8896,13 @@ export default {
               this.getmeds();
             })
             .catch((err) => {
-              console.error("Error adding suggestions:", err);
+              console.error('Error adding suggestions:', err);
             });
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: "Delete canceled",
+            type: 'info',
+            message: 'Delete canceled',
           });
         });
     },
@@ -9778,64 +10009,64 @@ button {
   .app-container {
     padding: 10px;
   }
-  
+
   .action-toolbar {
     padding: 10px 12px;
   }
-  
+
   .action-buttons {
     flex-direction: row;
     flex-wrap: nowrap;
     overflow-x: auto;
     align-items: center;
   }
-  
+
   .action-btn {
     width: auto;
     flex-shrink: 0;
     margin-bottom: 0;
   }
-  
+
   .profile-content {
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .profile-photo-container {
     width: 100px;
     height: 100px;
     margin: 0 auto;
   }
-  
+
   .profile-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .vitals-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .mobile-section .el-col {
     margin-bottom: 10px;
   }
-  
+
   .mobile-section .el-form-item__label {
     font-weight: 600;
     margin-bottom: 5px;
   }
-  
+
   .template-buttons {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .template-btn {
     width: 100%;
     margin-bottom: 8px;
     margin-right: 0;
   }
-  
+
   .modern-tabs .el-tabs__header {
     background: linear-gradient(135deg, #409EFF 0%, #67c23a 100%);
   }

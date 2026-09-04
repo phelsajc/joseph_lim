@@ -92,6 +92,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="qty" label="Qty" width="72" align="center" />
+          <el-table-column prop="dosage" label="Dosage" width="100" align="center" show-overflow-tooltip />
           <el-table-column label="Breakfast" width="120">
             <el-table-column label="B" width="60" align="center">
               <template slot-scope="scope">
@@ -168,22 +169,19 @@
     >
       <el-form :inline="true" label-position="top" class="demo-form-inline" style="width: 100%;">
         <el-row :gutter="24">
-          <el-col :xs="24" :sm="24" :md="24">
-            <el-checkbox v-model="medsArr.custom_meds" label="Not carried" size="large" />
-          </el-col>
           <el-col :xs="24" :sm="6" :md="4" :lg="3">
             <el-form-item label="Quantity">
               <el-input v-model="medsArr.qty" autosize clearable />
             </el-form-item>
           </el-col>
-          <el-col v-if="!medsArr.custom_meds" :xs="24" :sm="18" :md="20" :lg="21">
-            <el-form-item label="Search Medicine" class="search-medicine-item">
+          <el-col :xs="24" :sm="18" :md="8" :lg="7">
+            <el-form-item label="Generic Name" class="search-medicine-item">
               <el-autocomplete
-                v-model="medsArr.meds"
-                value-key="medicine"
+                v-model="medsArr.custom_generic"
+                value-key="generic_name"
                 :fetch-suggestions="querySearch"
                 popper-class="my-autocomplete rx-fav-meds-dropdown"
-                placeholder="Please input"
+                placeholder="Search by generic name"
                 class="search-medicine-autocomplete"
                 style="width: 100%"
                 @select="handleSelect"
@@ -196,8 +194,10 @@
                     :class="{ 'rx-ac-suggestion-row--fav': item.isFavoriteRow }"
                   >
                     <div class="rx-ac-suggestion-main">
-                      <span class="rx-ac-name">{{ item.medicine }}</span>
-                      <span v-if="item.generic_name" class="rx-ac-meta">{{ item.generic_name }}</span>
+                      <span class="rx-ac-name">{{ item.generic_name || item.medicine }}</span>
+                      <span v-if="item.medicine || item.unit" class="rx-ac-meta">
+                        {{ [item.medicine, item.unit].filter(Boolean).join(' · ') }}
+                      </span>
                     </div>
                     <i
                       class="rx-ac-star"
@@ -209,14 +209,14 @@
               </el-autocomplete>
             </el-form-item>
           </el-col>
-          <el-col v-if="medsArr.custom_meds" :xs="24" :sm="12" :md="12" :lg="4">
-            <el-form-item label="Generic Name">
-              <el-input v-model="medsArr.custom_generic" autosize clearable />
+          <el-col :xs="24" :sm="18" :md="8" :lg="7">
+            <el-form-item label="Brand Name" class="search-medicine-item">
+              <el-input v-model="medsArr.custom_brand" autosize clearable placeholder="Brand name" style="width: 100%" />
             </el-form-item>
           </el-col>
-          <el-col v-if="medsArr.custom_meds" :xs="24" :sm="12" :md="12" :lg="4">
-            <el-form-item label="Brand Name">
-              <el-input v-model="medsArr.custom_brand" autosize clearable />
+          <el-col :xs="24" :sm="6" :md="4" :lg="4">
+            <el-form-item label="Dosage">
+              <el-input v-model="medsArr.custom_dosage" autosize clearable placeholder="e.g. 20mg" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -335,9 +335,11 @@
         @selection-change="handleTplFavoritesSelectionChange"
       >
         <el-table-column type="selection" width="48" align="center" />
-        <el-table-column prop="drug_name" label="Medicine" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="default_qty" label="Qty" width="80" show-overflow-tooltip />
-        <el-table-column label="Timing" min-width="140" show-overflow-tooltip>
+        <el-table-column prop="drug_name" label="Medicine" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="default_qty" label="Qty" width="64" align="center" show-overflow-tooltip />
+        <el-table-column prop="default_dosage" label="Dosage" width="90" show-overflow-tooltip />
+        <el-table-column prop="default_remarks" label="Remarks" min-width="120" show-overflow-tooltip />
+        <el-table-column label="Timing" min-width="120" show-overflow-tooltip>
           <template slot-scope="{ row }">
             {{ timingFavoriteColumn(row.default_frequency) }}
           </template>
@@ -391,6 +393,7 @@ function emptyMedsArr() {
     remarks: '',
     custom_generic: '',
     custom_brand: '',
+    custom_dosage: '',
   };
 }
 
@@ -402,6 +405,7 @@ function emptyItem() {
     generic_name: '',
     medicine_id: null,
     qty: '',
+    dosage: '',
     bf_b: '',
     bf_a: '',
     l_b: '',
@@ -527,9 +531,12 @@ export default {
       const hasId = item.id && item.id !== 0;
       return {
         medicine_id: hasId ? item.id : null,
-        drug_name: item.medicine,
-        custom_generic_name: this.medsArr.custom_meds ? this.medsArr.custom_generic : null,
-        default_qty: this.medsArr.qty || null,
+        drug_name: hasId
+          ? item.medicine
+          : (this.rxMedicineStringOrEmpty(this.medsArr.custom_brand) || item.medicine),
+        custom_generic_name: this.rxMedicineStringOrEmpty(this.medsArr.custom_generic || item.generic_name) || null,
+        default_qty: this.rxMedicineStringOrEmpty(this.medsArr.qty) || null,
+        default_dosage: this.rxMedicineStringOrEmpty(this.medsArr.custom_dosage || item.unit) || null,
         default_bf_b: this.medsArr.bf_b || null,
         default_bf_a: this.medsArr.bf_a || null,
         default_l_b: this.medsArr.l_b || null,
@@ -537,16 +544,17 @@ export default {
         default_s_b: this.medsArr.s_b || null,
         default_s_a: this.medsArr.s_a || null,
         default_bt: this.medsArr.bt || null,
-        default_remarks: this.medsArr.remarks || null,
+        default_remarks: this.rxMedicineStringOrEmpty(this.medsArr.remarks) || null,
       };
     },
     applyMedicineDefaultsToMedsArr(item, favoriteRecord = null) {
       this.medsArr.custom_meds = false;
-      this.medsArr.meds = item.medicine;
       this.medsArr.med_id = item.id;
-      this.medsArr.custom_generic = '';
-      this.medsArr.custom_brand = '';
-      this.medsArr.master_generic = this.rxMedicineStringOrEmpty(item.generic_name);
+      this.medsArr.custom_generic = this.rxMedicineStringOrEmpty(item.generic_name);
+      this.medsArr.custom_brand = this.rxMedicineStringOrEmpty(item.medicine);
+      this.medsArr.custom_dosage = this.rxMedicineStringOrEmpty(item.unit);
+      this.medsArr.meds = this.medsArr.custom_brand;
+      this.medsArr.master_generic = this.medsArr.custom_generic;
 
       const masterQty = this.rxMedicineStringOrEmpty(item.default_qty);
       let qty = masterQty;
@@ -555,8 +563,12 @@ export default {
         if (favQty !== '') {
           qty = favQty;
         }
+        const favDosage = this.rxMedicineStringOrEmpty(favoriteRecord.default_dosage);
+        if (favDosage !== '') {
+          this.medsArr.custom_dosage = favDosage;
+        }
       }
-      this.medsArr.qty = qty;
+      this.medsArr.qty = qty !== '' ? qty : '1';
 
       const masterMeal = this.mealTimingFieldsFromMedicineRecord(item);
       let meal = { ...masterMeal };
@@ -591,7 +603,8 @@ export default {
       let masterItem = null;
       if (hasMaster) {
         try {
-          const response = await Medicine.findmedicine(r.drug_name || '');
+          const searchTerm = this.rxMedicineStringOrEmpty(r.custom_generic_name || r.drug_name);
+          const response = await Medicine.findmedicine(searchTerm);
           masterItem =
             (response.suggestions || []).find((s) => s.id === r.medicine_id) || null;
         } catch (e) {
@@ -599,52 +612,52 @@ export default {
         }
       }
 
-      this.medsArr.custom_meds = !hasMaster;
-      if (hasMaster) {
-        this.medsArr.meds = r.drug_name;
-        this.medsArr.med_id = r.medicine_id;
-        this.medsArr.custom_generic = '';
-        this.medsArr.custom_brand = '';
-        this.medsArr.master_generic = this.rxMedicineStringOrEmpty(r.custom_generic_name);
-      } else {
-        this.medsArr.meds = '';
-        this.medsArr.med_id = 0;
-        const gen = (r.custom_generic_name || '').trim();
-        const brand = (r.drug_name || '').trim();
-        this.medsArr.custom_generic = gen || brand;
-        this.medsArr.custom_brand = brand || gen;
-        this.medsArr.master_generic = '';
+      if (hasMaster && masterItem) {
+        this.applyMedicineDefaultsToMedsArr(masterItem, r);
+        return;
       }
 
+      this.medsArr.custom_meds = !hasMaster;
+      this.medsArr.meds = '';
+      this.medsArr.med_id = hasMaster ? r.medicine_id : 0;
+      const gen = this.rxMedicineStringOrEmpty(r.custom_generic_name);
+      const brand = this.rxMedicineStringOrEmpty(r.drug_name);
+      this.medsArr.custom_generic = gen || brand;
+      this.medsArr.custom_brand = brand || gen;
+      this.medsArr.custom_dosage = this.rxMedicineStringOrEmpty(r.default_dosage);
+      this.medsArr.master_generic = this.medsArr.custom_generic;
+
       const favQty = this.rxMedicineStringOrEmpty(r.default_qty);
-      const masterQty = masterItem ? this.rxMedicineStringOrEmpty(masterItem.default_qty) : '';
-      this.medsArr.qty = favQty !== '' ? favQty : (masterQty !== '' ? masterQty : '1');
+      this.medsArr.qty = favQty !== '' ? favQty : '1';
 
-      const masterMeal = this.mealTimingFieldsFromMedicineRecord(masterItem);
       const favMeal = this.mealTimingFieldsFromFavoriteRecord(r);
-      this.medsArr.bf_b = favMeal.bf_b || masterMeal.bf_b;
-      this.medsArr.bf_a = favMeal.bf_a || masterMeal.bf_a;
-      this.medsArr.l_b = favMeal.l_b || masterMeal.l_b;
-      this.medsArr.l_a = favMeal.l_a || masterMeal.l_a;
-      this.medsArr.s_b = favMeal.s_b || masterMeal.s_b;
-      this.medsArr.s_a = favMeal.s_a || masterMeal.s_a;
-      this.medsArr.bt = favMeal.bt || masterMeal.bt;
+      this.medsArr.bf_b = favMeal.bf_b;
+      this.medsArr.bf_a = favMeal.bf_a;
+      this.medsArr.l_b = favMeal.l_b;
+      this.medsArr.l_a = favMeal.l_a;
+      this.medsArr.s_b = favMeal.s_b;
+      this.medsArr.s_a = favMeal.s_a;
+      this.medsArr.bt = favMeal.bt;
 
-      const favRemarks = this.rxMedicineStringOrEmpty(r.default_remarks);
-      const masterRemarks = masterItem
-        ? this.rxMedicineStringOrEmpty(masterItem.default_remarks)
-        : '';
-      this.medsArr.remarks = favRemarks || masterRemarks;
+      this.medsArr.remarks = this.rxMedicineStringOrEmpty(r.default_remarks);
     },
     async querySearch(queryString, cb) {
       const q = (queryString || '').trim().toLowerCase();
       const favList = this.favoriteMedicinesCache || [];
-      const favMatches = favList.filter((f) => (!q ? true : (f.drug_name || '').toLowerCase().includes(q)));
+      const favMatches = favList.filter((f) => {
+        if (!q) {
+          return true;
+        }
+        return (f.drug_name || '').toLowerCase().includes(q) ||
+          (f.custom_generic_name || '').toLowerCase().includes(q);
+      });
       const favSuggestions = favMatches.map((f) => ({
         medicine: f.drug_name,
         id: f.medicine_id || 0,
-        generic_name: '',
-        unit: '',
+        generic_name: (f.custom_generic_name || f.drug_name || '').trim(),
+        unit: f.default_dosage || '',
+        default_qty: f.default_qty,
+        default_remarks: f.default_remarks,
         isFavoriteRow: true,
         favoriteId: f.id,
         favoriteRecord: f,
@@ -678,7 +691,7 @@ export default {
     },
     async handleSelect(ev) {
       if (!ev || ev.isSectionHeader) {
-        this.medsArr.meds = '';
+        this.medsArr.custom_generic = '';
         return;
       }
       if (ev.isFavoriteRow && ev.favoriteRecord) {
@@ -717,18 +730,17 @@ export default {
       return this.medUidCounter;
     },
     itemFromMedsArr(medsArr, existingUid = null) {
-      const custom = !!medsArr.custom_meds;
+      const medicineId = medsArr.med_id && medsArr.med_id !== 0 ? medsArr.med_id : null;
+      const brand = (medsArr.custom_brand || '').trim() || (medsArr.meds || '').trim();
+      const generic = (medsArr.custom_generic || '').trim();
       return {
         _uid: existingUid != null ? existingUid : this.nextMedUid(),
-        custom_meds: custom,
-        brand_name: custom
-          ? (medsArr.custom_brand || '').trim()
-          : (medsArr.meds || '').trim(),
-        generic_name: custom
-          ? (medsArr.custom_generic || '').trim()
-          : (medsArr.master_generic || '').trim(),
-        medicine_id: custom ? null : (medsArr.med_id && medsArr.med_id !== 0 ? medsArr.med_id : null),
+        custom_meds: !medicineId,
+        brand_name: brand,
+        generic_name: generic,
+        medicine_id: medicineId,
         qty: (medsArr.qty || '').trim(),
+        dosage: (medsArr.custom_dosage || '').trim(),
         bf_b: (medsArr.bf_b || '').trim(),
         bf_a: (medsArr.bf_a || '').trim(),
         l_b: (medsArr.l_b || '').trim(),
@@ -740,9 +752,10 @@ export default {
       };
     },
     loadItemIntoMedsArr(item) {
-      const custom = !!item.custom_meds;
-      this.medsArr.custom_meds = custom;
+      const hasMaster = item.medicine_id != null && item.medicine_id !== 0;
+      this.medsArr.custom_meds = !hasMaster;
       this.medsArr.qty = item.qty || '';
+      this.medsArr.custom_dosage = item.dosage || '';
       this.medsArr.bf_b = item.bf_b || '';
       this.medsArr.bf_a = item.bf_a || '';
       this.medsArr.l_b = item.l_b || '';
@@ -751,19 +764,11 @@ export default {
       this.medsArr.s_a = item.s_a || '';
       this.medsArr.bt = item.bt || '';
       this.medsArr.remarks = item.instructions || '';
-      if (custom) {
-        this.medsArr.meds = '';
-        this.medsArr.med_id = 0;
-        this.medsArr.custom_generic = item.generic_name || '';
-        this.medsArr.custom_brand = item.brand_name || '';
-        this.medsArr.master_generic = '';
-      } else {
-        this.medsArr.meds = item.brand_name || '';
-        this.medsArr.med_id = item.medicine_id || 0;
-        this.medsArr.custom_generic = '';
-        this.medsArr.custom_brand = '';
-        this.medsArr.master_generic = item.generic_name || '';
-      }
+      this.medsArr.custom_generic = item.generic_name || '';
+      this.medsArr.custom_brand = item.brand_name || '';
+      this.medsArr.master_generic = item.generic_name || '';
+      this.medsArr.meds = item.brand_name || '';
+      this.medsArr.med_id = hasMaster ? item.medicine_id : 0;
     },
     itemFromApiRow(r) {
       const hasMaster = r.medicine_id != null && r.medicine_id !== 0;
@@ -775,6 +780,7 @@ export default {
       item.generic_name = r.generic_name || '';
       item.medicine_id = hasMaster ? r.medicine_id : null;
       item.qty = r.quantity || '';
+      item.dosage = r.dosage || '';
       item.instructions = r.instructions || '';
       Object.assign(item, meal);
       return item;
@@ -786,6 +792,7 @@ export default {
       item._uid = this.nextMedUid();
       item.custom_meds = !hasMaster;
       item.qty = this.rxMedicineStringOrEmpty(f.default_qty) || '1';
+      item.dosage = this.rxMedicineStringOrEmpty(f.default_dosage);
       item.instructions = f.default_remarks || '';
       Object.assign(item, meal);
       if (hasMaster) {
@@ -849,20 +856,23 @@ export default {
       this.editingMedIndex = null;
     },
     addOrUpdateMed() {
-      const masterOk = !this.medsArr.custom_meds
-        && (this.medsArr.meds || '').trim() !== ''
-        && (this.medsArr.qty || '').trim() !== '';
-      const customOk = this.medsArr.custom_meds
-        && (this.medsArr.custom_generic || '').trim() !== ''
-        && (this.medsArr.custom_brand || '').trim() !== '';
-      if (!masterOk && !customOk) {
-        this.$message.warning('Medicine details are required.');
+      const generic = this.rxMedicineStringOrEmpty(this.medsArr.custom_generic);
+      const brand = this.rxMedicineStringOrEmpty(this.medsArr.custom_brand);
+      const qty = this.rxMedicineStringOrEmpty(this.medsArr.qty);
+      if (generic === '' || qty === '') {
+        this.$message.warning('Generic name and quantity are required.');
         return;
       }
+      this.medsArr.custom_generic = generic;
+      this.medsArr.custom_brand = brand;
+      this.medsArr.qty = qty;
       const existingUid = this.isMedEditMode && this.editingMedIndex != null
         ? (this.form.items[this.editingMedIndex] && this.form.items[this.editingMedIndex]._uid)
         : null;
       const item = this.itemFromMedsArr(this.medsArr, existingUid);
+      if (!item.brand_name) {
+        item.brand_name = generic;
+      }
       if (!this.itemHasMealTiming(item)) {
         this.$message.warning('Enter at least one meal timing dose.');
         return;
@@ -936,7 +946,7 @@ export default {
       /* value already bound */
     },
     submit() {
-      this.$refs.formRef.validate(async (valid) => {
+      this.$refs.formRef.validate(async(valid) => {
         if (!valid) {
           return;
         }
@@ -951,6 +961,7 @@ export default {
             generic_name: (r.generic_name || '').trim() || null,
             medicine_id: r.custom_meds ? null : (r.medicine_id != null ? r.medicine_id : null),
             quantity: (r.qty || '').trim() || null,
+            dosage: (r.dosage || '').trim() || null,
             frequency: serializeTimingFromAppointmentMealStrings({
               bf_b: r.bf_b,
               bf_a: r.bf_a,
