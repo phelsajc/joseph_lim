@@ -4654,6 +4654,7 @@ export default {
       _lastFormChangeAt: null,
       _lastSaveCompletedAt: null,
       _saveInFlight: false,
+      _hydratingForm: true,
       viewFileModel: false,
       sourceFile: null,
       pageloading: true,
@@ -5338,12 +5339,18 @@ export default {
     form: [
       {
         handler() {
+          if (this._hydratingForm) {
+            return;
+          }
           this._lastFormChangeAt = Date.now();
         },
         deep: true,
       },
       {
         handler() {
+          if (this._hydratingForm) {
+            return;
+          }
           this._debouncedAutoSave();
         },
         deep: true,
@@ -5352,6 +5359,9 @@ export default {
     'form.weight': 'calculateBMI',
     'form.height': 'calculateBMI',
     'form.diagnosis'(val) {
+      if (this._hydratingForm) {
+        return;
+      }
       this.form.medcert_diagnosis = val || '';
     },
     tab(val) {
@@ -5408,6 +5418,7 @@ export default {
     this.destroyDxTableSortables();
   },
   created() {
+    this._hydratingForm = true;
     this._debouncedAutoSave = debounce(() => {
       this.onSubmit('autosave');
     }, 1000);
@@ -5993,6 +6004,9 @@ export default {
       await this._waitForSaveComplete();
     },
     async onSubmit(source = 'manual') {
+      if (this._hydratingForm && source === 'autosave') {
+        return;
+      }
       await this._waitForSaveComplete();
       this._saveInFlight = true;
       this.form.followup = moment
@@ -6153,7 +6167,7 @@ export default {
     applyLastConsultationChartFields(prevData) {
       const prev = this.normalizePrevConsultRecord(prevData);
       if (!prev) {
-        return;
+        return false;
       }
       const keys = [
         'nurse_remarks',
@@ -6163,16 +6177,26 @@ export default {
         'diagnosis',
         'remarks',
       ];
+      let copied = false;
       keys.forEach((key) => {
+        if (this.consultFieldHasValue(this.form[key])) {
+          return;
+        }
         if (!this.consultFieldHasValue(prev[key])) {
           return;
         }
         const value = prev[key];
         this.form[key] =
           typeof value === 'string' ? value : String(value);
+        copied = true;
       });
+      return copied;
     },
     appointments() {
+      this._hydratingForm = true;
+      if (this._debouncedAutoSave && this._debouncedAutoSave.cancel) {
+        this._debouncedAutoSave.cancel();
+      }
       Patients.getAppointment(this.form.id)
         .then((response) => {
           this.autoResize();
@@ -6198,7 +6222,7 @@ export default {
               : response.px_profile.profile; */
           this.profile.photo = response.px_profile.profile_name;
           this.form = response.data;
-          this.applyLastConsultationChartFields(response.prev_data);
+          const carriedOver = this.applyLastConsultationChartFields(response.prev_data);
           this.form_att.patientid = response.px_profile.patientid;
           this.patientid_id = response.px_profile.patientid;
           this.get_attachments(response.px_profile.patientid);
@@ -6228,8 +6252,22 @@ export default {
           this.form.menopause = response.px_profile.menopause;
           this.form.mother_details = response.px_profile.mother_details;
           this.form.father_details = response.px_profile.father_details;
+
+          this.$nextTick(async () => {
+            if (this._debouncedAutoSave && this._debouncedAutoSave.cancel) {
+              this._debouncedAutoSave.cancel();
+            }
+            if (carriedOver) {
+              await this.onSubmit('hydrate');
+            }
+            this._hydratingForm = false;
+            if (this._debouncedAutoSave && this._debouncedAutoSave.cancel) {
+              this._debouncedAutoSave.cancel();
+            }
+          });
         })
         .catch((error) => {
+          this._hydratingForm = false;
           console.log(error);
         });
     },
