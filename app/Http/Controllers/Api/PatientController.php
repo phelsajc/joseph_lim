@@ -891,13 +891,15 @@ class PatientController extends BaseController
 
     public function printchart($id)
     {
+        $patient = Patients::where(['patientid' => $id])->first();
+        if (!$patient) {
+            return response()->json(['message' => 'Patient not found.'], 404);
+        }
+
         $data = array();
-        $data['patient_detail'] = Patients::where(['patientid' => $id])->first();
-        /* $data['query_prescriptions'] = Rx::where(['appointment_id'=>$id])->get();
-        $data['query_diagnostics'] = Ancillary::where(['appointment_id'=>$id])->get(); */
+        $data['patient_detail'] = $patient;
         $data['profile'] = Profile::where(['id' => 1])->first();
-        //$data['getHistory'] = Appointments::where(['patientid' => $data['patient_detail']->patientid, 'isdone' => 1])->orderby('id', 'desc')->get();
-        $data['getHistory'] = Appointments::where(['patientid' => $data['patient_detail']->patientid, 'is_cancel' => 0])->orderby('id', 'desc')->get();
+        $data['getHistory'] = Appointments::where(['patientid' => $patient->patientid, 'is_cancel' => 0])->orderby('id', 'desc')->get();
         $myPdf = new ChartRecordPdf($data);
         $myPdf->Output('I', time() . "-.pdf", true);
         exit;

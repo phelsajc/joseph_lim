@@ -8,529 +8,378 @@ use App\Model\Ancillary;
 
 class ChartRecordPdf extends Fpdf
 {
-  private $data;
-  private $widths;
-  private $aligns;
+    private $data;
+    private $widths;
+    private $aligns;
 
-  public function __construct($data)
-  {
-    $this->data = $data;
-    //parent::__construct('L', 'mm', array(216, 277));
-    parent::__construct('L', 'mm', 'Legal');
-    $this->SetTitle('CLINICAL CHART', true);
-    $this->SetAuthor('TJGazel', true);
-    $this->AddPage('P');
-    $this->SetWidths(array(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15));
-    $this->Body();
-  }
-  public function Header()
-  {
-    $this->SetFont('Arial', 'B', 12);
-  
-    $this->Cell(15, 28, "", 0, 0, 'C');
-    $this->Cell(165, 28, strtoupper("CHART"), 0, 0, 'C');
+    /** Left margin and content width (Legal portrait ≈ 216 mm). */
+    private const MARGIN_X = 11;
+    private const CONTENT_W = 193;
 
-  }
-  // Simple table
-  function HeaderTable($data)
-  {
-    $this->SetFont('Arial', 'B', 12);
-    $this->Ln(21);
-    $this->SetFont('Arial', 'B', 10);
-    $this->AliasNbPages();
-    $this->Rect(11, 40, 115, 14);
-    $this->SetXY(8, 40);
-    $this->Cell(21, 5, 'Name', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 9);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-    $this->SetFont('Arial', '', 10);
-
-    $pname = explode(' ', $this->data['patient_detail']->patientname);
-    $this->SetXY(32, 40);
-    $this->Cell(11, 5, 'Last', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 9);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-    $this->SetXY(8, 45);
-    //$this->Cell(30, 7, strtoupper($pname[0]), 0, 0, 'C');
-    $this->Cell(50, 7, strtoupper($this->data['patient_detail']->lastname), 0, 0, 'C');
-    $this->SetFont('Arial', '', 10);
-
-    $this->SetXY(57, 40);
-    $this->Cell(40, 5, 'First', 0, 0, 'C');
-    $this->SetFont('Arial', '', 9);
-    $this->ln(5);
-    $this->SetFont('Arial', '', 9);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-    $this->SetXY(46, 45);
-    //$this->Cell(15, 7, strtoupper($pname[1]), 0, 0, 'C');
-    $this->Cell(60, 7, strtoupper($this->data['patient_detail']->firstname), 0, 0, 'C');
-    $this->SetFont('Arial', '', 10);
-
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(80, 40);
-    $this->Cell(50, 5, 'Middle', 0, 0, 'C');
-    $this->SetFont('Arial', '', 9);
-    $this->ln(5);
-    $this->SetFont('Arial', '', 9);
-    $this->SetXY(70, 45);
-    $this->Cell(70, 7, strtoupper(mb_substr($this->data['patient_detail']->middlename, 0, 1)), 0, 0, 'C');
-    $this->Cell(70, 7, '', 0, 0, 'C');
-
-    $this->Rect(126.1, 40, 10, 14);
-
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(121.1, 40);
-    $this->Cell(20, 5, 'Age', 0, 0, 'C');
-    $this->SetFont('Arial', '', 9);
-    $this->ln(5);
-    $this->SetXY(89, 45);
-    $this->Cell(85, 7, date_diff(date_create($this->data['patient_detail']->birthdate), date_create('now'))->y, 0, 0, 'C');
-
-    $this->ln(5);
-    $this->SetFont('Arial', '', 9);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-
-    $this->Rect(136, 40, 10, 14);
-
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(131.1, 40);
-    $this->Cell(20, 5, 'Sex', 0, 0, 'C');
-    $this->SetFont('Arial', '', 9);
-    $this->ln(5);
-    $this->SetXY(99, 45);
-    $this->Cell(85, 7, $this->data['patient_detail']->sex == 1 ? 'M' : 'F', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 9);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-
-
-    $this->Rect(146.1, 40, 20, 14);
-
-    $this->SetFont('Arial', '', 9);
-    $this->SetXY(147.1, 40);
-    $this->Cell(20, 5, 'Civil Status', 0, 0, 'C');
-    $this->SetFont('Arial', '', 9);
-    $this->ln(5);
-    $this->SetXY(114, 45);
-    $this->Cell(85, 7, strtoupper($this->data['patient_detail']->civil_status), 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 9);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-
-    $this->Rect(166.1, 40, 38, 14);
-
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(175.1, 40);
-    $this->Cell(20, 5, 'Birth Date', 0, 0, 'C');
-    $this->SetFont('Arial', '', 9);
-    $this->ln(5);
-    $this->SetXY(165, 45);
-    $this->Cell(35, 7, date_format(date_create(strtoupper($this->data['patient_detail']->birthdate)), 'F d, Y'), 0, 0, 'C');
-
-    $this->MultiCell(40, 4, $data->doctor, '', 'C', 0);
-    $this->SetFont('Arial', 'B', 10);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-
-
-    $this->Rect(11, 54, 193.1, 14);
-    $this->SetFont('Arial', 'B', 10);
-    $this->SetXY(17, 54);
-    $this->Cell(21, 5, 'Patient Address', 0, 0, 'C');
-    $this->ln(5);
-
-    $this->SetFont('Arial', '', 9);
-    $this->SetXY(13, 59);
-    $this->MultiCell(100, 4, strtoupper($this->data['patient_detail']->address), '', 'L', 0);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-
-    /*DATE AND TIME*/
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, 70, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(18, 70);
-    $this->Cell(26, 5, 'Date time & Vital Signs', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 9);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-
-    $this->Rect(11, 70, 193, 12);
-    $this->SetFont('Arial', '', 9);
-
-    $this->SetXY(12, 78);
-    $diagnose_dt = date_create($data->appointment_dt);
-    $this->MultiCell(193, 2, " Date:" . date_format($diagnose_dt, "M d, Y") . "         Weight: " . $data->weight. "        Height: " . $data->height . "       Temperature: " . $data->vit_temp .  "        BMI: " . $data->bmi.  "        BP: " . $data->bmi . " \n", '', 'L', 0);
-    $this->Cell(0.1, 5, '', 0, 0, 'C');
-    //CHIEF COMPLAINTS
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, 84, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(11, 84);
-    $this->Cell(33, 5, 'CHIEF COMPLAINTS', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(11, 91);
-
-    // Calculate the height of the MultiCell content
-    $ccHeight = $this->getMultiCellHeight($this, 193, 3, "");
-    $this->MultiCell(193, 3, $data->chiefcomplaints, '', 'L', 0);
-
-    //HISTORY
-    $currentY = $this->GetY();
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, $currentY+5, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(11, $currentY+5);
-    $this->Cell(15, 5, 'HISTORY', 0, 0, 'C');
-    $this->Ln(5);
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(11, $currentY + 15); // Adjust based on the new Y position
-    // Get the height of OB & Menstrual content and output it
-    $this->MultiCell(193, 4, $data->history, '', 'L', 0);
-
-    //P.E
-    $currentY = $this->GetY();
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, $currentY+5, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(11, $currentY+5);
-    //$this->Cell(-2, 5, 'HPI', 0, 0, 'C');
-    $this->Cell(7, 5, 'P.E', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(11, $currentY + 15);
-    $hpiHeight = $this->getMultiCellHeight($this, 193, 3, "");
-    $this->MultiCell(193, 3, $data->pe, '', 'L', 0);
-
-    //diagnosis
-    $currentY = $this->GetY();
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, $currentY+5, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(11, $currentY+5);
-    $this->Cell(17, 5, 'Diagnosis', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(11, $currentY+ 15);
-    $this->getMultiCellHeight($this, 193, 3, "");
-    $this->MultiCell(190, 3, $data->diagnosis, '', 'L', 0);
-
-    //PE
-    $currentY = $this->GetY();
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, $currentY+5, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(11, $currentY+5);
-    $this->Cell(16, 5, 'Remarks', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(11, $currentY+15);
-    $this->getMultiCellHeight($this, 193, 3, "");
-    $this->MultiCell(190, 3, $data->remarks, '', 'L', 0);
-
-    //PMHX
-    /* $currentY = $this->GetY();
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, $currentY, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(11, $currentY);
-    $this->Cell(10, 5, 'pmHx', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 7);
-    $this->SetXY(11, $currentY+7);
-    $this->getMultiCellHeight($this, 193, 3, "");
-    $this->MultiCell(190, 3, $data->pmhx, '', 'L', 0); */
-
-    //Recommendations
-    /* $currentY = $this->GetY();
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, $currentY, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(11, $currentY);
-    $this->Cell(30, 5, 'Recommendations', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 7);
-    $this->SetXY(11, $currentY+7);
-    $diagnose_dt = date_create($data->pmhx);
-    $this->getMultiCellHeight($this, 193, 3, "");
-    $this->MultiCell(190, 3, $data->recommendations, '', 'L', 0); */
-
-    //Rx
-    $getPrescriptions = Rx::where(['appointment_id' => $data->id])->orderby('rx_id','asc')->get();
-    $prescriptions = '';
-    $ar = array();
-    foreach ($getPrescriptions as $key => $value) {
-      if($value->medicine_id==0){
-        $prescriptions .= ($key + 1) . '.) ' . strtoupper($value->generic_name).' ('. strtoupper($value->medicine) . ")\r\n";
-      }else{
-        $prescriptions .= ($key + 1) . '.) ' . strtoupper($value->medicine) . "\r\n";
-      }
-      $ar[] = ($key + 1) . '.) ' . strtoupper($value->medicine) .  ",";
+    public function __construct($data)
+    {
+        $this->data = $data;
+        parent::__construct('P', 'mm', 'Legal');
+        $this->SetTitle('CLINICAL CHART', true);
+        $this->SetAuthor('TJGazel', true);
+        $this->SetAutoPageBreak(true, 18);
+        $this->AliasNbPages();
+        $this->AddPage('P');
+        $this->Body();
     }
 
-    $currentY = $this->GetY();
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, $currentY+5, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(11, $currentY+5);
-    $this->Cell(20, 5, 'Medications', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(11, $currentY+15);
-    $this->getMultiCellHeight($this, 193, 3, "");
-    $this->MultiCell(190, 3, $prescriptions, '', 'L', 0);
-
-    //Diagnostics
-    $getAncillary = Ancillary::where(['appointment_id' => $data->id])->get();
-    $ancillary = '';
-    $ar = array();
-    foreach ($getAncillary as $key => $value) {
-      $ancillary .= ($key + 1) . '.) ' . strtoupper($value->ancillary) . " "."\r\n";
-      $ar[] = ($key + 1) . '.) ' . strtoupper($value->ancillary) . ",";
+    public function Header()
+    {
+        $this->SetFont('Arial', 'B', 12);
+        $this->Cell(0, 8, 'CHART', 0, 1, 'C');
+        $this->Ln(2);
     }
 
-    $currentY = $this->GetY();
-    $this->SetFillColor(211, 211, 211);
-    $this->Rect(11, $currentY+5, 193, 6, 'F');
-    $this->SetFont('Arial', 'B', 9);
-    $this->SetXY(11, $currentY+5);
-    $this->Cell(20, 5, 'Diagnostics', 0, 0, 'C');
-    $this->ln(5);
-    $this->SetFont('Arial', '', 10);
-    $this->SetXY(11, $currentY+15);
-    $this->getMultiCellHeight($this, 193, 3, "");
-    $this->MultiCell(190, 3, $ancillary, '', 'L', 0);
-  }
-
-  public function Body()
-  {
-    $width_cell = array(125, 15, 30, 25, 15, 80, 35, 65, 15, 30, 25, 55, 55, 30, 30, 30, 60, 35, 15, 25);
-    $this->SetWidths(array(125, 15, 30, 25, 15, 80, 35, 65, 15, 30, 25, 55, 55, 30, 30, 30, 60, 35, 15, 25));
-    for ($i = 0; $i < sizeof($this->data['getHistory']); $i++) {
-
-      $this->HeaderTable($this->data['getHistory'][$i]);
-      $this->AddPage('P');
-      $this->FooterTable();
+    public function Footer()
+    {
+        $this->SetY(-12);
+        $this->SetFont('Arial', 'I', 8);
+        $this->Cell(0, 8, 'Page ' . $this->PageNo() . ' of {nb}', 0, 0, 'C');
     }
-  }
 
-  public function Footer()
-  {
-  }
+    public function Body()
+    {
+        $history = $this->data['getHistory'] ?? [];
+        $count = is_countable($history) ? count($history) : 0;
 
-  public function FooterTable()
-  {
-    $this->SetY(-10);
-    $this->SetFont('Arial', 'B', 50);
-    $this->SetFont('Arial', '', 5);
-    $this->SetAutoPageBreak(true, 25);
-  }
-
-  function SetWidths($w)
-  {
-    $this->widths = $w;
-  }
-
-  function SetAligns($a)
-  {
-    $this->aligns = $a;
-  }
-
-  function Row($data)
-  {
-    //Calculate the height of the row
-    $nb = 0;
-    for ($i = 0; $i < count($data); $i++)
-      $nb = max($nb, $this->NbLines($this->widths[$i], $data[$i]));
-    $h = 5 * $nb;
-    //Issue a page break first if needed
-    $this->CheckPageBreak($h);
-    //Draw the cells of the row
-    for ($i = 0; $i < count($data); $i++) {
-      $w = $this->widths[$i];
-      $a = isset($this->aligns[$i]) ? $this->aligns[$i] : 'C';
-      //Save the current position
-      $x = $this->GetX();
-      $y = $this->GetY();
-      //Draw the border
-      $this->Rect($x, $y, $w, $h);
-      //Print the text
-      $this->MultiCell($w, 5, $data[$i], 0, $a);
-      //Put the position to the right of the cell
-      $this->SetXY($x + $w, $y);
-    }
-    //Go to the next line
-    $this->Ln($h);
-  }
-
-  function CheckPageBreak($h)
-  {
-    //If the height h would cause an overflow, add a new page immediately
-    if ($this->GetY() + $h > $this->PageBreakTrigger)
-      $this->AddPage($this->CurOrientation);
-  }
-
-  function NbLines($w, $txt)
-  {
-    //Computes the number of lines a MultiCell of width w will take
-    $cw = &$this->CurrentFont['cw'];
-    if ($w == 0)
-      $w = $this->w - $this->rMargin - $this->x;
-    $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
-    $s = str_replace("\r", '', $txt);
-    $nb = strlen($s);
-    if ($nb > 0 and $s[$nb - 1] == "\n")
-      $nb--;
-    $sep = -1;
-    $i = 0;
-    $j = 0;
-    $l = 0;
-    $nl = 1;
-    while ($i < $nb) {
-      $c = $s[$i];
-      if ($c == "\n") {
-        $i++;
-        $sep = -1;
-        $j = $i;
-        $l = 0;
-        $nl++;
-        continue;
-      }
-      if ($c == ' ')
-        $sep = $i;
-      $l += $cw[$c];
-      if ($l > $wmax) {
-        if ($sep == -1) {
-          if ($i == $j)
-            $i++;
-        } else
-          $i = $sep + 1;
-        $sep = -1;
-        $j = $i;
-        $l = 0;
-        $nl++;
-      } else
-        $i++;
-    }
-    return $nl;
-  }
-  function FancyRow($data, $border = array(), $align = array(), $style = array(), $maxline = array())
-  {
-    //Calculate the height of the row
-    $nb = 0;
-    for ($i = 0; $i < count($data); $i++) {
-      $nb = max($nb, $this->NbLines($this->widths[$i], $data[$i]));
-    }
-    if (count($maxline)) {
-      $_maxline = max($maxline);
-      if ($nb > $_maxline) {
-        $nb = $_maxline;
-      }
-    }
-    $h = 5 * $nb;
-    //Issue a page break first if needed
-    $this->CheckPageBreak($h);
-    //Draw the cells of the row
-    for ($i = 0; $i < count($data); $i++) {
-      $w = $this->widths[$i];
-      // alignment
-      $a = isset($align[$i]) ? $align[$i] : 'L';
-      // maxline
-      $m = isset($maxline[$i]) ? $maxline[$i] : false;
-      //Save the current position
-      $x = $this->GetX();
-      $y = $this->GetY();
-      //Draw the border
-      if ($border[$i] == 1) {
-        $this->Rect($x, $y, $w, $h);
-      } else {
-        $_border = strtoupper($border[$i]);
-        if (strstr($_border, 'L') !== false) {
-          $this->Line($x, $y, $x, $y + $h);
+        if ($count === 0) {
+            $this->demographicsHeader();
+            $this->addressRow();
+            $this->section('Note', 'No consultation records.');
+            return;
         }
-        if (strstr($_border, 'R') !== false) {
-          $this->Line($x + $w, $y, $x + $w, $y + $h);
-        }
-        if (strstr($_border, 'T') !== false) {
-          $this->Line($x, $y, $x + $w, $y);
-        }
-        if (strstr($_border, 'B') !== false) {
-          $this->Line($x, $y + $h, $x + $w, $y + $h);
-        }
-      }
-      // Setting Style
-      if (isset($style[$i])) {
-        $this->SetFont('', $style[$i]);
-      }
-      $this->MultiCell($w, 5, $data[$i], 0, $a, 0, $m);
-      //Put the position to the right of the cell
-      $this->SetXY($x + $w, $y);
-    }
-    //Go to the next line
-    $this->Ln($h);
-  }
 
-  function WordWrap(&$text, $maxwidth)
-  {
-    $text = trim($text);
-    if ($text === '')
-      return 0;
-    $space = $this->GetStringWidth(' ');
-    $lines = explode("\n", $text);
-    $text = '';
-    $count = 0;
-
-    foreach ($lines as $line) {
-      $words = preg_split('/ +/', $line);
-      $width = 0;
-
-      foreach ($words as $word) {
-        $wordwidth = $this->GetStringWidth($word);
-        if ($wordwidth > $maxwidth) {
-          // Word is too long, we cut it
-          for ($i = 0; $i < strlen($word); $i++) {
-            $wordwidth = $this->GetStringWidth(substr($word, $i, 1));
-            if ($width + $wordwidth <= $maxwidth) {
-              $width += $wordwidth;
-              $text .= substr($word, $i, 1);
-            } else {
-              $width = $wordwidth;
-              $text = rtrim($text) . "\n" . substr($word, $i, 1);
-              $count++;
+        for ($i = 0; $i < $count; $i++) {
+            if ($i > 0) {
+                $this->AddPage('P');
             }
-          }
-        } elseif ($width + $wordwidth <= $maxwidth) {
-          $width += $wordwidth + $space;
-          $text .= $word . ' ';
-        } else {
-          $width = $wordwidth + $space;
-          $text = rtrim($text) . "\n" . $word . ' ';
-          $count++;
+            $this->visitPage($history[$i]);
         }
-      }
-      $text = rtrim($text) . "\n";
-      $count++;
     }
-    $text = rtrim($text);
-    return $count;
-  }
 
-  function getMultiCellHeight($pdf, $w, $h, $text)
-  {
-    // Save the current position
-    $startY = $pdf->GetY();
+    private function visitPage($appointment): void
+    {
+        $this->demographicsHeader();
+        $this->addressRow();
+        $this->doctorLine($appointment);
+        $this->vitalsBand($appointment);
 
-    // Output the multicell in test mode (no page break or output)
-    $pdf->MultiCell($w, $h, $text, 0, 'L', false);
+        $this->section('CHIEF COMPLAINTS', $this->plainText($appointment->chiefcomplaints ?? ''));
+        $this->section('HISTORY', $this->plainText($appointment->history ?? ''));
+        $this->section('P.E', $this->plainText($appointment->pe ?? ''));
+        $this->section('Diagnosis', $this->plainText($appointment->diagnosis ?? ''));
+        $this->section('Remarks', $this->plainText($appointment->remarks ?? ''));
+        $this->section('Medications', $this->buildPrescriptionsText((int) $appointment->id));
+        $this->section('Diagnostics', $this->buildDiagnosticsText((int) $appointment->id));
+    }
 
-    // Calculate the height by subtracting start Y from the current Y
-    $endY = $pdf->GetY();
-    $height = $endY - $startY;
+    private function demographicsHeader(): void
+    {
+        $patient = $this->data['patient_detail'];
+        $age = '';
+        if (!empty($patient->birthdate)) {
+            $age = (string) date_diff(date_create($patient->birthdate), date_create('now'))->y;
+        }
+        $birth = '';
+        if (!empty($patient->birthdate)) {
+            $birth = date_format(date_create($patient->birthdate), 'M d, Y');
+        }
+        $middle = trim((string) ($patient->middlename ?? ''));
+        $middleInitial = $middle !== '' ? strtoupper(mb_substr($middle, 0, 1)) : '';
 
-    // Return to the original Y position
-    $pdf->SetY($startY);
+        $cols = [
+            ['label' => 'Last', 'value' => strtoupper((string) ($patient->lastname ?? '')), 'w' => 45],
+            ['label' => 'First', 'value' => strtoupper((string) ($patient->firstname ?? '')), 'w' => 45],
+            ['label' => 'Middle', 'value' => $middleInitial, 'w' => 25],
+            ['label' => 'Age', 'value' => $age, 'w' => 12],
+            ['label' => 'Sex', 'value' => ((int) ($patient->sex ?? 0) === 1) ? 'M' : 'F', 'w' => 12],
+            ['label' => 'Civil Status', 'value' => strtoupper((string) ($patient->civil_status ?? '')), 'w' => 24],
+            ['label' => 'Birth Date', 'value' => $birth, 'w' => 30],
+        ];
 
-    return $height;
-  }
+        $y = $this->GetY();
+        $h = 14;
+        $x = self::MARGIN_X;
+
+        foreach ($cols as $col) {
+            $this->Rect($x, $y, $col['w'], $h);
+            $this->SetXY($x, $y + 0.5);
+            $this->SetFont('Arial', '', 8);
+            $this->Cell($col['w'], 5, $col['label'], 0, 0, 'C');
+            $this->SetXY($x, $y + 5.5);
+            $this->SetFont('Arial', '', 9);
+            $this->Cell($col['w'], 7, $this->pdfText($col['value']), 0, 0, 'C');
+            $x += $col['w'];
+        }
+
+        $this->SetY($y + $h);
+    }
+
+    private function addressRow(): void
+    {
+        $address = strtoupper((string) ($this->data['patient_detail']->address ?? ''));
+        $y = $this->GetY();
+        $labelH = 5;
+        $this->SetFont('Arial', 'B', 9);
+        $this->SetXY(self::MARGIN_X + 2, $y + 1);
+        $this->Cell(self::CONTENT_W - 4, $labelH, 'Patient Address', 0, 1, 'L');
+
+        $this->SetFont('Arial', '', 9);
+        $this->SetXY(self::MARGIN_X + 2, $y + $labelH + 1);
+        $startContentY = $this->GetY();
+        $this->MultiCell(self::CONTENT_W - 4, 4, $this->pdfText($address !== '' ? $address : '—'), 0, 'L');
+        $endY = max($this->GetY(), $startContentY + 4);
+        $boxH = max(12, $endY - $y + 2);
+        $this->Rect(self::MARGIN_X, $y, self::CONTENT_W, $boxH);
+        $this->SetY($y + $boxH);
+    }
+
+    private function doctorLine($appointment): void
+    {
+        $doctor = trim((string) ($appointment->doctor ?? ''));
+        if ($doctor === '' && !empty($this->data['profile']->name)) {
+            $doctor = (string) $this->data['profile']->name;
+        }
+        if ($doctor === '') {
+            return;
+        }
+
+        $this->Ln(2);
+        $this->SetFont('Arial', 'B', 9);
+        $this->SetX(self::MARGIN_X);
+        $this->Cell(20, 5, 'Doctor:', 0, 0, 'L');
+        $this->SetFont('Arial', '', 9);
+        $this->Cell(0, 5, $this->pdfText($doctor), 0, 1, 'L');
+    }
+
+    private function vitalsBand($appointment): void
+    {
+        $this->Ln(2);
+        $this->CheckPageBreak(16);
+
+        $this->SetFillColor(211, 211, 211);
+        $this->SetFont('Arial', 'B', 9);
+        $this->SetX(self::MARGIN_X);
+        $this->Cell(self::CONTENT_W, 6, 'Date, Time & Vital Signs', 0, 1, 'L', true);
+
+        $date = '—';
+        if (!empty($appointment->appointment_dt)) {
+            $date = date_format(date_create($appointment->appointment_dt), 'M d, Y');
+        }
+
+        $sys = trim((string) ($appointment->vit_sys ?? ''));
+        $dia = trim((string) ($appointment->vit_dia ?? ''));
+        if ($sys !== '' || $dia !== '') {
+            $bp = ($sys !== '' ? $sys : '—') . '/' . ($dia !== '' ? $dia : '—');
+        } else {
+            $bp = '—';
+        }
+
+        $parts = [
+            'Date: ' . $date,
+            'Weight: ' . $this->displayValue($appointment->weight ?? null),
+            'Height: ' . $this->displayValue($appointment->height ?? null),
+            'Temperature: ' . $this->displayValue($appointment->vit_temp ?? null),
+            'BMI: ' . $this->displayValue($appointment->bmi ?? null),
+            'BP: ' . $bp,
+        ];
+
+        $hr = trim((string) ($appointment->vit_cr ?? ''));
+        if ($hr !== '') {
+            $parts[] = 'HR: ' . $hr;
+        }
+
+        $this->SetFont('Arial', '', 9);
+        $this->SetX(self::MARGIN_X);
+        $y = $this->GetY();
+        $this->MultiCell(self::CONTENT_W, 4.5, $this->pdfText(implode('    ', $parts)), 0, 'L');
+        $endY = $this->GetY();
+        $this->Rect(self::MARGIN_X, $y - 6, self::CONTENT_W, ($endY - $y) + 6);
+        $this->SetY($endY);
+    }
+
+    private function section(string $title, string $text): void
+    {
+        $this->Ln(3);
+        $this->CheckPageBreak(18);
+
+        $this->SetFillColor(211, 211, 211);
+        $this->SetFont('Arial', 'B', 9);
+        $this->SetX(self::MARGIN_X);
+        $this->Cell(self::CONTENT_W, 6, $title, 0, 1, 'L', true);
+
+        $body = trim($text) !== '' ? $text : '—';
+        $this->SetFont('Arial', '', 10);
+        $this->SetX(self::MARGIN_X);
+        $this->MultiCell(self::CONTENT_W, 4, $this->pdfText($body), 0, 'L');
+    }
+
+    private function buildPrescriptionsText(int $appointmentId): string
+    {
+        $rows = Rx::where(['appointment_id' => $appointmentId])
+            ->orderBy('rx_id', 'asc')
+            ->get();
+
+        if ($rows->isEmpty()) {
+            return '';
+        }
+
+        $lines = [];
+        foreach ($rows as $key => $value) {
+            if ((int) ($value->medicine_id ?? 0) === 0) {
+                $name = trim(strtoupper((string) ($value->generic_name ?? '')));
+                $med = trim(strtoupper((string) ($value->medicine ?? '')));
+                $line = $name !== '' && $med !== ''
+                    ? $name . ' (' . $med . ')'
+                    : ($name !== '' ? $name : $med);
+            } else {
+                $line = strtoupper((string) ($value->medicine ?? ''));
+            }
+
+            $extras = [];
+            $qty = trim((string) ($value->qty ?? ''));
+            $remarks = trim((string) ($value->remarks ?? ''));
+            if ($qty !== '') {
+                $extras[] = 'Qty: ' . $qty;
+            }
+            if ($remarks !== '') {
+                $extras[] = $remarks;
+            }
+            if ($extras) {
+                $line .= ' — ' . implode('; ', $extras);
+            }
+
+            $lines[] = ($key + 1) . '.) ' . $line;
+        }
+
+        return implode("\n", $lines);
+    }
+
+    private function buildDiagnosticsText(int $appointmentId): string
+    {
+        $rows = Ancillary::where(['appointment_id' => $appointmentId])->get();
+        if ($rows->isEmpty()) {
+            return '';
+        }
+
+        $lines = [];
+        foreach ($rows as $key => $value) {
+            $lines[] = ($key + 1) . '.) ' . strtoupper((string) ($value->ancillary ?? ''));
+        }
+
+        return implode("\n", $lines);
+    }
+
+    private function plainText(?string $html): string
+    {
+        if ($html === null || trim($html) === '') {
+            return '';
+        }
+
+        $withBreaks = preg_replace('/<(br|\/p|\/div|\/li|\/tr)\s*\/?>/i', "\n", $html) ?? $html;
+        $text = html_entity_decode(strip_tags($withBreaks), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace("/[ \t\x{00A0}]+/u", ' ', $text) ?? $text;
+        $text = preg_replace("/\n{3,}/", "\n\n", $text) ?? $text;
+
+        return trim($text);
+    }
+
+    private function displayValue($value): string
+    {
+        $v = trim((string) ($value ?? ''));
+
+        return $v !== '' ? $v : '—';
+    }
+
+    /**
+     * Convert UTF-8 text for core FPDF fonts (ISO-8859-1).
+     */
+    private function pdfText(string $text): string
+    {
+        if ($text === '') {
+            return '';
+        }
+
+        if (function_exists('iconv')) {
+            $converted = @iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $text);
+            if ($converted !== false) {
+                return $converted;
+            }
+        }
+
+        return utf8_decode($text);
+    }
+
+    function SetWidths($w)
+    {
+        $this->widths = $w;
+    }
+
+    function SetAligns($a)
+    {
+        $this->aligns = $a;
+    }
+
+    function CheckPageBreak($h)
+    {
+        if ($this->GetY() + $h > $this->PageBreakTrigger) {
+            $this->AddPage($this->CurOrientation);
+        }
+    }
+
+    function NbLines($w, $txt)
+    {
+        $cw = &$this->CurrentFont['cw'];
+        if ($w == 0) {
+            $w = $this->w - $this->rMargin - $this->x;
+        }
+        $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
+        $s = str_replace("\r", '', $txt);
+        $nb = strlen($s);
+        if ($nb > 0 and $s[$nb - 1] == "\n") {
+            $nb--;
+        }
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $nl = 1;
+        while ($i < $nb) {
+            $c = $s[$i];
+            if ($c == "\n") {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+                continue;
+            }
+            if ($c == ' ') {
+                $sep = $i;
+            }
+            $l += $cw[$c] ?? 0;
+            if ($l > $wmax) {
+                if ($sep == -1) {
+                    if ($i == $j) {
+                        $i++;
+                    }
+                } else {
+                    $i = $sep + 1;
+                }
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+            } else {
+                $i++;
+            }
+        }
+
+        return $nl;
+    }
 }
